@@ -1,38 +1,72 @@
 "use client";
 
-import { HomeIcon } from "lucide-react";
+import { HomeIcon, SettingsIcon } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
   label: string;
-  onClick: () => void;
+  link: string;
+  isActive?: boolean;
 }
 
-const SidebarButton = ({ icon, label, onClick }: SidebarButtonProps) => {
+const SidebarButton = ({ icon, label, link, isActive }: SidebarButtonProps) => {
+  const router = useRouter();
+
   return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center justify-center font-sans text-sm text-foreground hover:text-accent-foreground bg-input w-full aspect-square rounded-md cursor-pointer active:bg-muted"
+    <motion.button
+      onClick={() => {
+        router.push(link);
+      }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={`flex flex-col items-center justify-center font-sans text-sm bg-transparent w-full aspect-square rounded-md cursor-pointer transition-all duration-200 ${
+        isActive
+          ? "text-primary bg-primary/10 border border-primary/20"
+          : "text-foreground hover:text-accent-foreground hover:bg-accent/50"
+      }`}
     >
-      {icon}
-    </button>
+      <motion.div
+        animate={{ scale: isActive ? 1.1 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        {icon}
+      </motion.div>
+    </motion.button>
   );
 };
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
   const buttons = [
     {
       icon: <HomeIcon />,
       label: "Home",
-      onClick: () => {},
+      link: "/dashboard",
+    },
+    {
+      icon: <SettingsIcon />,
+      label: "Settings",
+      link: "/dashboard/settings",
     },
   ];
 
   return (
-    <div className="w-16 bg-muted flex flex-col items-center p-2">
+    <motion.div
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm"
+    >
       {buttons.map((button) => (
-        <SidebarButton key={button.label} {...button} />
+        <SidebarButton
+          key={button.label}
+          {...button}
+          isActive={pathname === button.link}
+        />
       ))}
-    </div>
+    </motion.div>
   );
 }
