@@ -16,7 +16,7 @@ impl AppSaveService {
     pub fn new(save_dir: AppSavePath) -> Self {
         let save_path = AppSaveService::get_save_path(save_dir);
         if !save_path.exists() {
-            fs::create_dir_all(constants::APP_NAME).expect("could not create App directory");
+            fs::create_dir_all(save_path.clone()).expect("could not create App directory");
         }
         Self {
             save_dir: save_path,
