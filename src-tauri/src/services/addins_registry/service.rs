@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 
 pub enum RegistryLocation {
-    Local(String),
+    Local,
     Other,
 }
 
@@ -18,9 +18,9 @@ impl AddinsRegistryService {
         Self { location }
     }
 
-    pub fn get_addins(&self) -> Vec<AddinModel> {
+    pub fn get_addins(&self, path: &str) -> Vec<AddinModel> {
         match &self.location {
-            RegistryLocation::Local(dir_path) => Self::find_addins_recursively(dir_path),
+            RegistryLocation::Local => Self::find_addins_recursively(path),
             RegistryLocation::Other => {
                 panic!("Not implemented");
             }

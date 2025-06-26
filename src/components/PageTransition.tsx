@@ -77,15 +77,14 @@ export function PageTransition({
   const variants = getVariants(transitionType);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="sync" initial={true}>
       <motion.div
         key={pathname}
         initial="initial"
         animate="in"
-        exit="out"
         variants={variants}
         transition={pageTransition}
-        className="h-full w-full"
+        className="w-full h-full"
       >
         {children}
       </motion.div>

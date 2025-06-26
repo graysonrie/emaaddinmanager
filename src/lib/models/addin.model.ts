@@ -13,4 +13,6 @@ export interface AddinModel {
   email: string;
   // The type of the addin. Application, Command, etc.
   addinType: string;
+  // The description of the addin
+  vendorDescription: string;
 }

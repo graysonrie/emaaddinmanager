@@ -14,8 +14,7 @@ pub fn initialize_app(handle: &AppHandle) {
         let app_save_service = initialize_app_save_service(AppSavePath::AppData);
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
 
-        let registry_location = RegistryLocation::Local("C:\\Users\\grays\\OneDrive\\Desktop\\TestRegistryLocation".to_string());
-        let addins_registry_service = initialize_addins_registry_service(registry_location);
+        let addins_registry_service = initialize_addins_registry_service(RegistryLocation::Local);
 
         handle.manage(Arc::clone(&local_db_service));
         handle.manage(Arc::clone(&app_save_service));

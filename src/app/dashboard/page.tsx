@@ -10,14 +10,17 @@ import { Settings } from "lucide-react";
 import { EMA_DOMAIN } from "@/types/constants";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useSidebarStore } from "./sidebar/store";
 
 export default function Home() {
   const [showEmailSetup, setShowEmailSetup] = useState<boolean | null>(null);
+  const { setIsOpen } = useSidebarStore();
   const { data: userEmail, loading, error } = useConfigValue("userEmail");
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && userEmail === undefined) {
+      setIsOpen(false);
       setShowEmailSetup(true);
     } else if (!loading && userEmail) {
       setShowEmailSetup(false);

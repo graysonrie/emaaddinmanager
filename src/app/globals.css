@@ -179,3 +179,11 @@ body {
   transform: translateX(-20px);
   transition: opacity 300ms, transform 300ms;
 }
+
+html,
+body,
+#__next {
+  height: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}

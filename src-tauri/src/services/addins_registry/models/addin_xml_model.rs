@@ -7,23 +7,23 @@ use std::path::Path;
 #[serde(rename_all = "PascalCase")]
 pub struct AddIn {
     /// The name of the addin
-    pub name: String,
+    pub name: Option<String>,
     /// The assembly path relative to the addin folder
-    pub assembly: String,
+    pub assembly: Option<String>,
     /// The unique identifier for the addin
     #[serde(rename = "AddInId")]
-    pub addin_id: String,
+    pub addin_id: Option<String>,
     /// The full class name of the addin
-    pub full_class_name: String,
+    pub full_class_name: Option<String>,
     /// The vendor ID
-    pub vendor_id: String,
+    pub vendor_id: Option<String>,
     /// The vendor description
-    pub vendor_description: String,
+    pub vendor_description: Option<String>,
     /// The vendor email
-    pub vendor_email: String,
+    pub vendor_email: Option<String>,
     /// The type of addin (Application, Command, etc.)
     #[serde(rename = "@Type")]
-    pub addin_type: String,
+    pub addin_type: Option<String>,
 }
 
 /// Represents the root RevitAddIns element containing all addins
@@ -67,35 +67,42 @@ impl RevitAddIns {
     pub fn get_addins_by_type(&self, addin_type: &str) -> Vec<&AddIn> {
         self.add_in
             .iter()
-            .filter(|addin| addin.addin_type == addin_type)
+            .filter(|addin| addin.addin_type == Some(addin_type.to_string()))
             .collect()
     }
 
     /// Get an addin by its ID
     pub fn get_addin_by_id(&self, addin_id: &str) -> Option<&AddIn> {
-        self.add_in.iter().find(|addin| addin.addin_id == addin_id)
+        self.add_in
+            .iter()
+            .find(|addin| addin.addin_id == Some(addin_id.to_string()))
     }
 
     /// Get an addin by its name
     pub fn get_addin_by_name(&self, name: &str) -> Option<&AddIn> {
-        self.add_in.iter().find(|addin| addin.name == name)
+        self.add_in
+            .iter()
+            .find(|addin| addin.name == Some(name.to_string()))
     }
 }
 
 impl AddIn {
     /// Get the assembly path as a Path
     pub fn assembly_path(&self) -> std::path::PathBuf {
-        std::path::PathBuf::from(&self.assembly)
+        self.assembly.as_ref().map_or_else(
+            || std::path::PathBuf::new(),
+            |s| std::path::PathBuf::from(s),
+        )
     }
 
     /// Check if this is an Application type addin
     pub fn is_application(&self) -> bool {
-        self.addin_type == "Application"
+        self.addin_type == Some("Application".to_string())
     }
 
     /// Check if this is a Command type addin
     pub fn is_command(&self) -> bool {
-        self.addin_type == "Command"
+        self.addin_type == Some("Command".to_string())
     }
 }
 
@@ -128,27 +135,27 @@ mod tests {
         assert_eq!(addins.add_in.len(), 1);
 
         let addin = &addins.add_in[0];
-        assert_eq!(addin.name, "revitnextjs");
-        assert_eq!(addin.assembly, "RevitNextJs\\RevitNextJs.dll");
-        assert_eq!(addin.addin_id, "86f6bbab-c9af-4e53-86d6-0ea571d3bebe");
-        assert_eq!(addin.full_class_name, "RevitNextJs.App");
-        assert_eq!(addin.vendor_id, "Development");
-        assert_eq!(addin.vendor_description, "Adds Nextjs support");
-        assert_eq!(addin.vendor_email, "graysonr12@icloud.com");
-        assert_eq!(addin.addin_type, "Application");
+        assert_eq!(addin.name, Some("revitnextjs".to_string()));
+        assert_eq!(addin.assembly, Some("RevitNextJs\\RevitNextJs.dll".to_string()));
+        assert_eq!(addin.addin_id, Some("86f6bbab-c9af-4e53-86d6-0ea571d3bebe".to_string()));
+        assert_eq!(addin.full_class_name, Some("RevitNextJs.App".to_string()));
+        assert_eq!(addin.vendor_id, Some("Development".to_string()));
+        assert_eq!(addin.vendor_description, Some("Adds Nextjs support".to_string()));
+        assert_eq!(addin.vendor_email, Some("graysonr12@icloud.com".to_string()));
+        assert_eq!(addin.addin_type, Some("Application".to_string()));
     }
 
     #[test]
     fn test_serialize_xml() {
         let addin = AddIn {
-            name: "test_addin".to_string(),
-            assembly: "Test\\Test.dll".to_string(),
-            addin_id: "test-id".to_string(),
-            full_class_name: "Test.App".to_string(),
-            vendor_id: "TestVendor".to_string(),
-            vendor_description: "Test Description".to_string(),
-            vendor_email: "test@example.com".to_string(),
-            addin_type: "Application".to_string(),
+            name: Some("test_addin".to_string()),
+            assembly: Some("Test\\Test.dll".to_string()),
+            addin_id: Some("test-id".to_string()),
+            full_class_name: Some("Test.App".to_string()),
+            vendor_id: Some("TestVendor".to_string()),
+            vendor_description: Some("Test Description".to_string()),
+            vendor_email: Some("test@example.com".to_string()),
+            addin_type: Some("Application".to_string()),
         };
 
         let addins = RevitAddIns {

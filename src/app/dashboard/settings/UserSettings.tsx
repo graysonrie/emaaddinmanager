@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Settings, Mail } from "lucide-react";
+import { Settings, Mail, User, Shield, Bell } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { EmailInputForm } from "@/components/EmailInputForm";
@@ -28,46 +21,122 @@ export function UserSettings() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <div className="flex items-center space-x-2">
-          <Settings className="h-5 w-5" />
-          <CardTitle>User Settings</CardTitle>
-        </div>
-        <CardDescription>Manage your account settings</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <Mail className="h-4 w-4" />
-            <span>Email Address</span>
-          </Label>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="space-y-2 ">
+        <h2 className="text-3xl font-bold tracking-tight">Account Settings</h2>
+        <p className="text-muted-foreground">
+          Manage your account preferences and personal information
+        </p>
+      </div>
 
-          {isEditing ? (
-            <EmailInputForm
-              initialEmail={currentEmail || ""}
-              onSubmit={handleUpdateEmail}
-              submitLabel="Save"
-              disabled={isSubmitting}
-              showLabel={false}
-              mustUseDomain={EMA_DOMAIN}
-            />
-          ) : (
+      {/* Settings Sections */}
+      <div className="space-y-8 ">
+        {/* Profile Section */}
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <User className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Profile Information</h3>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6 space-y-6">
+            {/* Email Setting */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-base font-medium">Email Address</Label>
+              </div>
+
+              <div className="pl-6">
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Update your email address for notifications and account
+                      recovery
+                    </p>
+                    <EmailInputForm
+                      initialEmail={currentEmail || ""}
+                      onSubmit={handleUpdateEmail}
+                      submitLabel="Save Changes"
+                      disabled={isSubmitting}
+                      showLabel={false}
+                      mustUseDomain={EMA_DOMAIN}
+                    />
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsEditing(false)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        {currentEmail || "No email address set"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Used for notifications and account recovery
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Coming Soon Sections */}
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <Shield className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Security & Privacy</h3>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {currentEmail || "No email set"}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
+              <div className="space-y-1">
+                <p className="font-medium">Password Management</p>
+                <p className="text-sm text-muted-foreground">
+                  Change your password and manage security settings
+                </p>
+              </div>
+              <Button variant="outline" size="sm" disabled>
+                Coming Soon
               </Button>
             </div>
-          )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <Bell className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Notifications</h3>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="font-medium">Notification Preferences</p>
+                <p className="text-sm text-muted-foreground">
+                  Configure how and when you receive notifications
+                </p>
+              </div>
+              <Button variant="outline" size="sm" disabled>
+                Coming Soon
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

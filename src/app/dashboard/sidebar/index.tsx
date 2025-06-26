@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeIcon, SettingsIcon } from "lucide-react";
+import { HomeIcon, LibraryIcon, PackageIcon, SettingsIcon } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -46,6 +46,16 @@ export default function Sidebar() {
       label: "Home",
       link: "/dashboard",
     },
+    {
+      icon: <LibraryIcon />,
+      label: "Library",
+      link: "/dashboard/library",
+    },
+    {
+      icon: <PackageIcon />,
+      label: "Installed",
+      link: "/dashboard/installed",
+    },  
     {
       icon: <SettingsIcon />,
       label: "Settings",

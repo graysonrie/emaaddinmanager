@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { KvSubscriptionModel } from "../models/kv-subscription-model";
-import { AddinModel } from "@/types/addin.model";
+import { AddinModel } from "@/lib/models/addin.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
   kvStoreGet: <T>(key: string) => Promise<T | undefined>;
   kvStoreSubscribeToKey<T>(key: string): Promise<KvSubscriptionModel<T>>;
-  getAddins: () => Promise<AddinModel[]>;
+  getAddins: (path: string) => Promise<AddinModel[]>;
 }
 
 export default function useTauriCommands(): TauriCommands {
@@ -41,8 +41,8 @@ export default function useTauriCommands(): TauriCommands {
     []
   );
 
-  const getAddins = useCallback(async () => {
-    return await invoke<AddinModel[]>("get_addins");
+  const getAddins = useCallback(async (path: string) => {
+    return await invoke<AddinModel[]>("get_addins", { path });
   }, []);
 
   return {
