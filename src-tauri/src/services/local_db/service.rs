@@ -34,5 +34,4 @@ impl LocalDbService {
     pub fn kv_store_table(&self) -> &AppKvStoreTable {
         &self.kv_store_table
     }
-
 }

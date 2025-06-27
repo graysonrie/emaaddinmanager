@@ -26,7 +26,9 @@ fn initialize_app_save_service(save_dir: AppSavePath) -> Arc<AppSaveService> {
     Arc::new(AppSaveService::new(save_dir))
 }
 
-fn initialize_addins_registry_service(registry_location: RegistryLocation) -> Arc<AddinsRegistryService> {
+fn initialize_addins_registry_service(
+    registry_location: RegistryLocation,
+) -> Arc<AddinsRegistryService> {
     Arc::new(AddinsRegistryService::new(registry_location))
 }
 

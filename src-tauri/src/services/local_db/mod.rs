@@ -2,15 +2,15 @@ pub mod service;
 mod table_creator;
 pub mod tables {
 
-    pub mod app_kv_store{
+    pub mod app_kv_store {
         pub mod api;
-        mod models{
+        mod models {
             pub mod frontend_subscription;
         }
-        pub mod entities{
+        pub mod entities {
             pub mod kv_pair;
         }
-        mod subscription{
+        mod subscription {
             pub mod backend;
             pub mod tauri_subscription_list;
         }

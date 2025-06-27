@@ -1,1 +1,1 @@
-pub const APP_NAME:&str = "EmaAddinManager";
+pub const APP_NAME: &str = "EmaAddinManager";

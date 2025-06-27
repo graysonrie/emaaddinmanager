@@ -1,18 +1,21 @@
 use serde::{Deserialize, Serialize};
 
-
 /// Where `T` is the main item you are emitting to the frontend
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct EmitMetadataModel<T>{
-    pub data:T,
-    pub metadata:String,
-    pub metadata_array:Vec<String>
+pub struct EmitMetadataModel<T> {
+    pub data: T,
+    pub metadata: String,
+    pub metadata_array: Vec<String>,
 }
 
-impl<T> EmitMetadataModel<T>{
-    pub fn new(data:T,metadata:&str)->Self{
-        Self { data, metadata:metadata.to_string(), metadata_array: Vec::new() }
+impl<T> EmitMetadataModel<T> {
+    pub fn new(data: T, metadata: &str) -> Self {
+        Self {
+            data,
+            metadata: metadata.to_string(),
+            metadata_array: Vec::new(),
+        }
     }
 
     // Create a new EmitMetadataModel with the 'metadata_array' property

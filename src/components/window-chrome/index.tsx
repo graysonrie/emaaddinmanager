@@ -19,7 +19,7 @@ export function WindowChrome() {
   };
 
   const handleClose = () => {
-    window.close();
+    getCurrentWindow().close();
   };
 
   return (

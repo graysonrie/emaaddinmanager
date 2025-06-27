@@ -42,7 +42,12 @@ export default function useTauriCommands(): TauriCommands {
   );
 
   const getAddins = useCallback(async (path: string) => {
-    return await invoke<AddinModel[]>("get_addins", { path });
+    try {
+      return await invoke<AddinModel[]>("get_addins", { path });
+    } catch (err) {
+      console.error("Failed to get addins:", err);
+      return [];
+    }
   }, []);
 
   return {

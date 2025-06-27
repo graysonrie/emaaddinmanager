@@ -136,12 +136,24 @@ mod tests {
 
         let addin = &addins.add_in[0];
         assert_eq!(addin.name, Some("revitnextjs".to_string()));
-        assert_eq!(addin.assembly, Some("RevitNextJs\\RevitNextJs.dll".to_string()));
-        assert_eq!(addin.addin_id, Some("86f6bbab-c9af-4e53-86d6-0ea571d3bebe".to_string()));
+        assert_eq!(
+            addin.assembly,
+            Some("RevitNextJs\\RevitNextJs.dll".to_string())
+        );
+        assert_eq!(
+            addin.addin_id,
+            Some("86f6bbab-c9af-4e53-86d6-0ea571d3bebe".to_string())
+        );
         assert_eq!(addin.full_class_name, Some("RevitNextJs.App".to_string()));
         assert_eq!(addin.vendor_id, Some("Development".to_string()));
-        assert_eq!(addin.vendor_description, Some("Adds Nextjs support".to_string()));
-        assert_eq!(addin.vendor_email, Some("graysonr12@icloud.com".to_string()));
+        assert_eq!(
+            addin.vendor_description,
+            Some("Adds Nextjs support".to_string())
+        );
+        assert_eq!(
+            addin.vendor_email,
+            Some("graysonr12@icloud.com".to_string())
+        );
         assert_eq!(addin.addin_type, Some("Application".to_string()));
     }
 

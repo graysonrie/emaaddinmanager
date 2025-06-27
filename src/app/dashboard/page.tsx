@@ -105,29 +105,7 @@ export default function Home() {
       transition={{ duration: 0.5 }}
       className="relative grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
     >
-      <motion.div
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="flex flex-col items-center justify-center space-y-4"
-      >
-        <motion.h1
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-2xl font-bold"
-        >
-          EMA Addin Manager
-        </motion.h1>
-        <motion.p
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-sm text-muted-foreground"
-        >
-          Welcome back, {userEmail}
-        </motion.p>
-      </motion.div>
+
     </motion.div>
   );
 }

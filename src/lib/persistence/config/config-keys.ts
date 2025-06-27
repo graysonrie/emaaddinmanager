@@ -7,4 +7,5 @@ export interface ConfigKeys{
   /** `true` if it is the user's first time opening the app */
   isFirstUse: boolean;
   userEmail: string;
+  localAddinRegistryPath:string;
 }

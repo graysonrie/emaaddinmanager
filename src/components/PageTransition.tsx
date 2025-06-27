@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -65,8 +65,8 @@ const getVariants = (type: string) => {
 
 const pageTransition = {
   type: "tween" as const,
-  ease: "anticipate" as const,
-  duration: 0.3,
+  ease: [0.4, 0.0, 0.2, 1] as const,
+  duration: 0.15, // Even faster for instant feel
 };
 
 export function PageTransition({
@@ -74,20 +74,37 @@ export function PageTransition({
   transitionType = "fade",
 }: PageTransitionProps) {
   const pathname = usePathname();
-  const variants = getVariants(transitionType);
+  const variants = useMemo(() => getVariants(transitionType), [transitionType]);
 
   return (
-    <AnimatePresence mode="sync" initial={true}>
-      <motion.div
-        key={pathname}
-        initial="initial"
-        animate="in"
-        variants={variants}
-        transition={pageTransition}
-        className="w-full h-full"
+    <div className="page-transition-container w-full h-full">
+      <AnimatePresence
+        mode="wait"
+        initial={false}
+        onExitComplete={() => {
+          window.scrollTo(0, 0);
+        }}
       >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+        <motion.div
+          key={pathname}
+          initial="initial"
+          animate="in"
+          exit="out"
+          variants={variants}
+          transition={pageTransition}
+          className="w-full h-full"
+          style={{
+            willChange: "transform, opacity",
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "translateZ(0)",
+          }}
+          layout
+          layoutId="page-content"
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }

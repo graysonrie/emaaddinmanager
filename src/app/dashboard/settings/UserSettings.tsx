@@ -1,24 +1,39 @@
 "use client";
 
+import { open } from '@tauri-apps/plugin-dialog';
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Settings, Mail, User, Shield, Bell } from "lucide-react";
+import { Settings, Mail, User, Shield, Bell, Folder } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { EmailInputForm } from "@/components/EmailInputForm";
 import { EMA_DOMAIN } from "@/types/constants";
+import { Input } from "@/components/ui/input";
+import useAddinRegistry from '@/lib/addin-registry/useAddinRegistry';
 
 export function UserSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
   const { data: currentEmail } = useConfigValue("userEmail");
+  const { localRegistryPath, changeRegistryPath } = useAddinRegistry();
 
   const handleUpdateEmail = async (email: string) => {
     await update("userEmail", email);
     setIsEditing(false);
   };
+
+  const handleRegistryInputClicked = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Select a directory",
+    });
+    if (selected) {
+      changeRegistryPath(selected as string);
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -118,23 +133,22 @@ export function UserSettings() {
 
         <div className="space-y-6">
           <div className="flex items-center space-x-3">
-            <Bell className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Notifications</h3>
+            <Folder className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Local Addin Registry</h3>
           </div>
 
           <div className="bg-card border rounded-lg p-6">
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="font-medium">Notification Preferences</p>
+              <div className="space-y-1 w-full">
+                <p className="font-medium">Registry Path</p>
                 <p className="text-sm text-muted-foreground">
-                  Configure how and when you receive notifications
+                  Configure the local addin registry path
                 </p>
+                <Input value={localRegistryPath} className="w-full mt-4" readOnly={true} onClick={handleRegistryInputClicked} />
               </div>
-              <Button variant="outline" size="sm" disabled>
-                Coming Soon
-              </Button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

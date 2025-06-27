@@ -55,7 +55,7 @@ export default function Sidebar() {
       icon: <PackageIcon />,
       label: "Installed",
       link: "/dashboard/installed",
-    },  
+    },
     {
       icon: <SettingsIcon />,
       label: "Settings",
@@ -64,12 +64,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <motion.div
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm"
-    >
+    <div className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
       {buttons.map((button) => (
         <SidebarButton
           key={button.label}
@@ -77,6 +72,6 @@ export default function Sidebar() {
           isActive={pathname === button.link}
         />
       ))}
-    </motion.div>
+    </div>
   );
 }

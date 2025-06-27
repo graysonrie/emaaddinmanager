@@ -25,8 +25,8 @@ impl TauriSubscriptionList {
     }
 
     /// Returns the name of the event that the backend will emit to the frontend
-    /// 
-    /// Event name format: 
+    ///
+    /// Event name format:
     /// ```rust
     /// "kv_subscription:{uuid}"
     /// ```
@@ -34,7 +34,7 @@ impl TauriSubscriptionList {
         let mut events_lock = self.events.write().await;
 
         let uuid = Uuid::new_v4().to_string();
-        let event_name = format!("kv_subscription:{}",uuid);
+        let event_name = format!("kv_subscription:{}", uuid);
         let event_name_clone = event_name.clone();
 
         events_lock.push(EmitSubscription {
@@ -44,13 +44,14 @@ impl TauriSubscriptionList {
         event_name_clone
     }
 
-    /// Event name format: 
+    /// Event name format:
     /// ```rust
     /// "kv_subscription:{uuid}"
     /// ```
     pub async fn emit_to_subscribers(&self, key: &str, value: &serde_json::Value) {
         for event in self.events.read().await.iter() {
             if event.key == key {
+                println!("AppKVStore - TauriSubscriptionList: Emitting to Tauri subscribers: {}", event.event_name);
                 if let Err(err) = self.app_handle.emit(&event.event_name, value) {
                     println!("AppKVStore - TauriSubscriptionList: Error emitting to Tauri subscribers: {}",err);
                 }
