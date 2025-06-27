@@ -1,9 +1,30 @@
 export function findCommonRoot(paths: string[]): string {
   if (paths.length === 0) return "";
-  const splitPaths = paths.map((p) => p.split("\\"));
-  let i = 0;
-  while (splitPaths.every((parts) => parts[i] === splitPaths[0][i])) {
-    i++;
+
+  // For single path, find the parent directory (remove the last part)
+  if (paths.length === 1) {
+    const pathParts = paths[0].split("\\");
+    // Return everything except the last part (the addin folder itself)
+    return pathParts.slice(0, -1).join("\\");
   }
-  return splitPaths[0].slice(0, i).join("\\");
+
+  // Split the first path to get the structure
+  const firstPathParts = paths[0].split("\\");
+  let commonLength = firstPathParts.length;
+
+  // Compare with other paths to find common prefix
+  for (let i = 1; i < paths.length; i++) {
+    const currentParts = paths[i].split("\\");
+    const minLength = Math.min(commonLength, currentParts.length);
+
+    let j = 0;
+    while (j < minLength && firstPathParts[j] === currentParts[j]) {
+      j++;
+    }
+
+    commonLength = j;
+    if (commonLength === 0) break; // No common prefix
+  }
+
+  return firstPathParts.slice(0, commonLength).join("\\");
 }
