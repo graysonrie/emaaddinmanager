@@ -5,7 +5,7 @@ import { useConfigValueOrDefault } from "../persistence/config/useConfigValue";
 import { AddinModel } from "../models/addin.model";
 
 export default function useAddinRegistry() {
-  const { getAddins } = useTauriCommands();
+  const { getAddins, installAddin } = useTauriCommands();
   const { update } = useConfig();
   const {
     data: localRegistryPath,
@@ -64,6 +64,7 @@ export default function useAddinRegistry() {
 
   return {
     addins,
+    installAddin,
     changeRegistryPath,
     canChangeRegistryPath,
     setCanChangeRegistryPath,

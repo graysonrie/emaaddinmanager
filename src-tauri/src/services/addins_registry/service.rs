@@ -1,5 +1,6 @@
 use crate::services::addins_registry::models::addin_model::AddinModel;
 use crate::services::addins_registry::models::addin_xml_model::RevitAddIns;
+use crate::services::local_addins::service::LocalAddinsService;
 use log::{error, info, warn};
 use std::fs;
 use std::path::Path;
@@ -116,14 +117,37 @@ impl AddinsRegistryService {
 
         // Convert each addin in the XML to our AddinModel
         for xml_addin in &revit_addins.add_in {
-            let addin_model = AddinModel::from_xml_data(
+            if let Some(mut addin_model) = AddinModel::from_xml_data(
                 xml_file_path.to_string_lossy().to_string(),
                 dll_folder_path.to_string_lossy().to_string(),
                 xml_addin,
-            );
-            addins.push(addin_model);
+            ) {
+                let is_installed = LocalAddinsService::is_addin_installed_locally(
+                    &addin_model.name,
+                    &addin_model.vendor,
+                    &addin_model.addin_type,
+                )?;
+                addin_model.is_installed_locally = is_installed;
+                // Set the flag or wrap the model as needed
+                addins.push(addin_model);
+            }
         }
 
+        Ok(())
+    }
+
+    pub fn install_addin(&self, addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+        match &self.location {
+            RegistryLocation::Local => Self::install_addin_locally(addin, for_revit_versions),
+            RegistryLocation::Other => {
+                panic!("Not implemented");
+            }
+        }
+    }
+
+    /// Install an addin locally, pulling from the local registry
+    fn install_addin_locally(addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+        LocalAddinsService::install_addin(&addin, &for_revit_versions)?;
         Ok(())
     }
 }

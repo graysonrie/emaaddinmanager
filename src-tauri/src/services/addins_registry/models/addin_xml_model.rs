@@ -55,56 +55,8 @@ impl RevitAddIns {
             xml
         ))
     }
-
-    /// Save the RevitAddIns struct to an XML file
-    pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
-        let xml_content = self.to_xml()?;
-        fs::write(path, xml_content)?;
-        Ok(())
-    }
-
-    /// Get all addins of a specific type
-    pub fn get_addins_by_type(&self, addin_type: &str) -> Vec<&AddIn> {
-        self.add_in
-            .iter()
-            .filter(|addin| addin.addin_type == Some(addin_type.to_string()))
-            .collect()
-    }
-
-    /// Get an addin by its ID
-    pub fn get_addin_by_id(&self, addin_id: &str) -> Option<&AddIn> {
-        self.add_in
-            .iter()
-            .find(|addin| addin.addin_id == Some(addin_id.to_string()))
-    }
-
-    /// Get an addin by its name
-    pub fn get_addin_by_name(&self, name: &str) -> Option<&AddIn> {
-        self.add_in
-            .iter()
-            .find(|addin| addin.name == Some(name.to_string()))
-    }
 }
 
-impl AddIn {
-    /// Get the assembly path as a Path
-    pub fn assembly_path(&self) -> std::path::PathBuf {
-        self.assembly.as_ref().map_or_else(
-            || std::path::PathBuf::new(),
-            |s| std::path::PathBuf::from(s),
-        )
-    }
-
-    /// Check if this is an Application type addin
-    pub fn is_application(&self) -> bool {
-        self.addin_type == Some("Application".to_string())
-    }
-
-    /// Check if this is a Command type addin
-    pub fn is_command(&self) -> bool {
-        self.addin_type == Some("Command".to_string())
-    }
-}
 
 #[cfg(test)]
 mod tests {

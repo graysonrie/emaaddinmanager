@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { useSidebarStore } from "./sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { isOpen } = useSidebarStore();
+  const router = useRouter();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -21,6 +23,11 @@ export default function DashboardLayout({
       }
     };
     window.addEventListener("keydown", handler);
+
+    router.prefetch("/dashboard/library");
+    router.prefetch("/dashboard/installed");
+    router.prefetch("/dashboard/settings");
+
     return () => window.removeEventListener("keydown", handler);
   }, []);
 

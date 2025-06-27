@@ -5,6 +5,8 @@ export interface AddinModel {
   pathToAddinDllFolder: string;
   // The name of the addin
   name: string;
+  // The ID of the addin
+  addinId: string;
   // The version of the addin
   version: string;
   // The vendor of the addin
@@ -15,4 +17,8 @@ export interface AddinModel {
   addinType: string;
   // The description of the addin
   vendorDescription: string;
+  // The Revit version that the addin is installed in. Will only be present if the addin is installed locally
+  revitVersion: string | null;
+  // Whether the addin is installed locally
+  isInstalledLocally: boolean;
 }

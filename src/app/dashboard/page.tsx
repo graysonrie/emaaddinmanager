@@ -15,49 +15,22 @@ import { useSidebarStore } from "./sidebar/store";
 export default function Home() {
   const [showEmailSetup, setShowEmailSetup] = useState<boolean | null>(null);
   const { setIsOpen } = useSidebarStore();
-  const { data: userEmail, loading, error } = useConfigValue("userEmail");
+  const { data: userEmail, loading: emailLoading } =
+    useConfigValue("userEmail");
+  const { data: userName, loading: nameLoading } = useConfigValue("userName");
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && userEmail === undefined) {
+    if (!emailLoading && !nameLoading && (!userEmail || !userName)) {
       setIsOpen(false);
-      setShowEmailSetup(true);
-    } else if (!loading && userEmail) {
-      setShowEmailSetup(false);
+      router.replace("/dashboard/setup");
+    }else{
+      setIsOpen(true);
     }
-  }, [userEmail, loading]);
-
-  const handleEmailSetupComplete = () => {
-    setShowEmailSetup(false);
-  };
-
-  // Show loading state while checking config
-  if (loading || showEmailSetup === null) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex min-h-screen items-center justify-center p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]"
-      >
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center justify-center space-y-4"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="rounded-full h-8 w-8 border-b-2 border-primary"
-          />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </motion.div>
-      </motion.div>
-    );
-  }
+  }, [userEmail, userName, emailLoading, nameLoading, router]);
 
   // Show error state
-  if (error) {
+  if (emailLoading || nameLoading) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -81,21 +54,6 @@ export default function Home() {
     );
   }
 
-  // Show email setup if no email is found
-  if (showEmailSetup) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex h-full items-center justify-center p-8 pb-20 sm:p-20"
-      >
-        <EmailSetup
-          onComplete={handleEmailSetupComplete}
-          mustUseDomain={EMA_DOMAIN}
-        />
-      </motion.div>
-    );
-  }
 
   // Show main app content
   return (
@@ -104,8 +62,6 @@ export default function Home() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="relative grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
-    >
-
-    </motion.div>
+    ></motion.div>
   );
 }

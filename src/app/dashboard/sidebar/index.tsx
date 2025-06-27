@@ -1,8 +1,9 @@
 "use client";
 
-import { HomeIcon, LibraryIcon, PackageIcon, SettingsIcon } from "lucide-react";
+import { HomeIcon, LibraryIcon, PackageIcon, SettingsIcon, Upload } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { label } from "framer-motion/client";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -26,6 +27,7 @@ const SidebarButton = ({ icon, label, link, isActive }: SidebarButtonProps) => {
           ? "text-primary bg-primary/10 border border-primary/20"
           : "text-foreground hover:text-accent-foreground hover:bg-accent/50"
       }`}
+      title={label}
     >
       <motion.div
         animate={{ scale: isActive ? 1.1 : 1 }}
@@ -55,6 +57,11 @@ export default function Sidebar() {
       icon: <PackageIcon />,
       label: "Installed",
       link: "/dashboard/installed",
+    },
+    {
+      icon: <Upload/>,
+      label: "Publish",
+      link: "/dashboard/publish",
     },
     {
       icon: <SettingsIcon />,

@@ -1,4 +1,5 @@
 use services::addins_registry::tauri_exports::*;
+use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
 
 mod app_service_container;
@@ -17,6 +18,9 @@ pub fn run() {
             kv_store_subscribe_to_key,
             // Addins Registry
             get_addins,
+            // Local Addins
+            get_local_addins,
+            get_revit_versions,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

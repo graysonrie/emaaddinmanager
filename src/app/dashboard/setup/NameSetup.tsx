@@ -8,23 +8,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { SUCCESS_DELAY } from "./page";
 import { CheckCircle, Blocks } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { EmailInputForm } from "@/components/EmailInputForm";
-import { SUCCESS_DELAY } from "./page";
+import { NameInputForm } from "@/components/NameInputForm";
 
-interface EmailSetupProps {
+interface NameSetupProps {
   onComplete: () => void;
-  mustUseDomain?: string;
 }
 
-export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
+export function NameSetup({ onComplete }: NameSetupProps) {
   const [isComplete, setIsComplete] = useState(false);
   const { update } = useConfig();
 
-  const handleEmailSubmit = async (email: string) => {
-    await update("userEmail", email);
+  const handleNameSubmit = async (name: string) => {
+    await update("userName", name);
     setIsComplete(true);
     setTimeout(() => {
       onComplete();
@@ -38,7 +37,7 @@ export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
           <div className="flex flex-col items-center space-y-4">
             <CheckCircle className="h-12 w-12 text-green-500" />
             <div className="text-center">
-              <h3 className="text-lg font-semibold">Email Saved!</h3>
+              <h3 className="text-lg font-semibold">Name Saved!</h3>
             </div>
           </div>
         </CardContent>
@@ -52,18 +51,18 @@ export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
           <Blocks className="h-6 w-6 text-primary" />
         </div>
-        <CardTitle>Welcome to the EMA Revit Addin Manager</CardTitle>
+        <CardTitle>Almost done</CardTitle>
         <CardDescription>
-          Please enter your work email address
+          Please enter your first and last name 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <EmailInputForm
-          mustUseDomain={mustUseDomain}
-          onSubmit={handleEmailSubmit}
+        <NameInputForm
+          onSubmit={handleNameSubmit}
           submitLabel="Next"
         />
       </CardContent>
     </Card>
   );
 }
+
