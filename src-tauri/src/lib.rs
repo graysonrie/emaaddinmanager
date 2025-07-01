@@ -1,3 +1,4 @@
+use services::addin_exporter::tauri_exports::*;
 use services::addins_registry::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
@@ -6,6 +7,7 @@ mod app_service_container;
 mod constants;
 mod models;
 mod services;
+mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -18,9 +20,18 @@ pub fn run() {
             kv_store_subscribe_to_key,
             // Addins Registry
             get_addins,
+            install_addins,
+            get_categories,
             // Local Addins
             get_local_addins,
             get_revit_versions,
+            install_addin,
+            uninstall_addin,
+            // Addin Exporter
+            export_addin,
+            get_addin_file_info,
+            get_all_project_dlls,
+            build_addin,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

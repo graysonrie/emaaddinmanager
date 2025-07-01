@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use crate::services::addins_registry::{
-    models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
-    service::AddinsRegistryService,
+use crate::services::{
+    addin_exporter::models::category_model::CategoryModel,
+    addins_registry::{
+        models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
+        service::AddinsRegistryService,
+    },
 };
 use tauri::{AppHandle, Emitter, State};
 
@@ -32,4 +35,9 @@ pub async fn install_addins(
             .map_err(|e| e.to_string())?;
     }
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_categories(path: String) -> Result<Vec<CategoryModel>, String> {
+    AddinsRegistryService::get_categories_locally(&path).map_err(|e| e.to_string())
 }

@@ -3,6 +3,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { KvSubscriptionModel } from "../models/kv-subscription-model";
 import { AddinModel } from "@/lib/models/addin.model";
 import { InstallAddinRequestModel } from "../models/install-addin-request.model";
+import { SimplifiedAddinInfoModel } from "../models/simplified-addin-info.model";
+import { DllModel } from "../models/dll.model";
+import { CategoryModel } from "../models/category.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -12,6 +15,17 @@ interface TauriCommands {
   getLocalAddins: () => Promise<AddinModel[]>;
   getRevitVersions: () => Promise<string[]>;
   installAddin: (installRequest: InstallAddinRequestModel) => Promise<void>;
+  getCategories: (path: string) => Promise<CategoryModel[]>;
+  uninstallAddin: (installRequest: InstallAddinRequestModel) => Promise<void>;
+  exportAddin: (
+    projectDir: string,
+    addinFileInfo: SimplifiedAddinInfoModel,
+    extraDlls: string[],
+    destinationDir: string
+  ) => Promise<void>;
+  getAddinFileInfo: (projectDir: string) => Promise<SimplifiedAddinInfoModel>;
+  getAllProjectDlls: (projectDir: string) => Promise<DllModel[]>;
+  buildAddin: (projectDir: string) => Promise<string>;
 }
 
 export default function useTauriCommands(): TauriCommands {
@@ -72,13 +86,70 @@ export default function useTauriCommands(): TauriCommands {
     }
   }, []);
 
-  const installAddin = useCallback(async (installRequest: InstallAddinRequestModel) => {
+  // Installs the addin for the given Revit versions locally
+  const installAddin = useCallback(
+    async (installRequest: InstallAddinRequestModel) => {
+      try {
+        return await invoke<void>("install_addin", { installRequest });
+      } catch (err) {
+        console.error("Failed to install addin:", err);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const getCategories = useCallback(async (path: string) => {
     try {
-      return await invoke<void>("install_addin", { installRequest });
+      return await invoke<CategoryModel[]>("get_categories", { path });
     } catch (err) {
-      console.error("Failed to install addin:", err);
+      console.error("Failed to get categories:", err);
       throw err;
     }
+  }, []);
+
+  // Uninstalls the addin for the given Revit versions locally
+  const uninstallAddin = useCallback(
+    async (installRequest: InstallAddinRequestModel) => {
+      try {
+        return await invoke<void>("uninstall_addin", { installRequest });
+      } catch (err) {
+        console.error("Failed to uninstall addin:", err);
+        throw err;
+      }
+    },
+    []
+  );
+
+  const exportAddin = useCallback(
+    async (
+      projectDir: string,
+      addinFileInfo: SimplifiedAddinInfoModel,
+      extraDlls: string[],
+      destinationDir: string
+    ) => {
+      return await invoke<void>("export_addin", {
+        projectDir,
+        addinFileInfo,
+        extraDlls,
+        destinationDir,
+      });
+    },
+    []
+  );
+
+  const getAddinFileInfo = useCallback(async (projectDir: string) => {
+    return await invoke<SimplifiedAddinInfoModel>("get_addin_file_info", {
+      projectDir,
+    });
+  }, []);
+
+  const getAllProjectDlls = useCallback(async (projectDir: string) => {
+    return await invoke<DllModel[]>("get_all_project_dlls", { projectDir });
+  }, []);
+
+  const buildAddin = useCallback(async (projectDir: string) => {
+    return await invoke<string>("build_addin", { projectDir });
   }, []);
 
   return {
@@ -89,5 +160,11 @@ export default function useTauriCommands(): TauriCommands {
     getLocalAddins,
     getRevitVersions,
     installAddin,
+    getCategories,
+    uninstallAddin,
+    exportAddin,
+    getAddinFileInfo,
+    getAllProjectDlls,
+    buildAddin,
   };
 }

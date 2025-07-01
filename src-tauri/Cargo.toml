@@ -36,3 +36,5 @@ sqlx = { version = "0.8.2", features = ["sqlite"] }
 uuid = { version = "1", features = ["v4"] }
 print_err = { path = "./print_err" }
 tauri-plugin-dialog = "2"
+
+rev = { path = "C:\\Users\\grieger.EMA\\Desktop\\Rust\\revitcli" }

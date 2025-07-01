@@ -1,3 +1,4 @@
+use crate::services::addin_exporter::models::category_model::CategoryModel;
 use crate::services::addins_registry::models::addin_model::AddinModel;
 use crate::services::addins_registry::models::addin_xml_model::RevitAddIns;
 use crate::services::local_addins::service::LocalAddinsService;
@@ -11,7 +12,7 @@ pub enum RegistryLocation {
 }
 
 pub struct AddinsRegistryService {
-    location: RegistryLocation,
+    pub location: RegistryLocation,
 }
 
 impl AddinsRegistryService {
@@ -136,7 +137,11 @@ impl AddinsRegistryService {
         Ok(())
     }
 
-    pub fn install_addin(&self, addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn install_addin(
+        &self,
+        addin: AddinModel,
+        for_revit_versions: Vec<String>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         match &self.location {
             RegistryLocation::Local => Self::install_addin_locally(addin, for_revit_versions),
             RegistryLocation::Other => {
@@ -146,8 +151,50 @@ impl AddinsRegistryService {
     }
 
     /// Install an addin locally, pulling from the local registry
-    fn install_addin_locally(addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
+    fn install_addin_locally(
+        addin: AddinModel,
+        for_revit_versions: Vec<String>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         LocalAddinsService::install_addin(&addin, &for_revit_versions)?;
+        Ok(())
+    }
+
+    /// Get all categories (directories) in the local registry recursively
+    ///
+    /// This finds all directories in the registry at any depth.
+    pub fn get_categories_locally(
+        registry_path: &str,
+    ) -> Result<Vec<CategoryModel>, Box<dyn std::error::Error>> {
+        let mut categories = Vec::new();
+        Self::scan_categories_recursively(Path::new(registry_path), &mut categories)?;
+        Ok(categories)
+    }
+
+    /// Recursively scan for categories (directories)
+    fn scan_categories_recursively(
+        path: &Path,
+        categories: &mut Vec<CategoryModel>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let entries = fs::read_dir(path)?;
+        for entry in entries {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            if entry_path.is_dir() {
+                // Add this directory as a category
+                categories.push(CategoryModel {
+                    name: entry_path
+                        .file_name()
+                        .unwrap()
+                        .to_string_lossy()
+                        .to_string(),
+                    full_path: entry_path.to_string_lossy().to_string(),
+                });
+
+                // Recursively scan subdirectories
+                Self::scan_categories_recursively(&entry_path, categories)?;
+            }
+        }
         Ok(())
     }
 }

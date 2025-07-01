@@ -1,5 +1,6 @@
 use crate::services::addins_registry::models::addin_model::AddinModel;
 use crate::services::addins_registry::models::addin_xml_model::RevitAddIns;
+use crate::utils;
 use std::fs;
 use std::path::Path;
 
@@ -173,7 +174,7 @@ impl LocalAddinsService {
         }))
     }
 
-        pub fn install_addin(
+    pub fn install_addin(
         addin: &AddinModel,
         for_revit_versions: &[String],
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -188,36 +189,51 @@ impl LocalAddinsService {
             // Copy the .addin file
             let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
             let addin_xml_dst = version_path.join(
-                addin_xml_src.file_name().ok_or("Invalid addin XML file name")?
+                addin_xml_src
+                    .file_name()
+                    .ok_or("Invalid addin XML file name")?,
             );
-            fs::copy(&addin_xml_src, &addin_xml_dst)?;
+            fs::copy(addin_xml_src, &addin_xml_dst)?;
 
             // Copy the DLL folder (recursively)
             let dll_src = Path::new(&addin.path_to_addin_dll_folder);
-            let dll_dst = version_path.join(
-                dll_src.file_name().ok_or("Invalid DLL folder name")?
-            );
+            let dll_dst = version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
             if dll_src.exists() && dll_src.is_dir() {
-                copy_dir_all(dll_src, &dll_dst)?;
+                utils::copy_dir_all(dll_src, &dll_dst)?;
             }
         }
-
         Ok(())
     }
-}
 
-fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
-    fs::create_dir_all(dst)?;
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let file_type = entry.file_type()?;
-        let src_path = entry.path();
-        let dst_path = dst.join(entry.file_name());
-        if file_type.is_dir() {
-            copy_dir_all(&src_path, &dst_path)?;
-        } else {
-            fs::copy(&src_path, &dst_path)?;
+    pub fn uninstall_addin(
+        addin: &AddinModel,
+        for_revit_versions: &[String],
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let base_path = Self::path_to_local_addins_folder()?;
+
+        for version in for_revit_versions {
+            let version_path = Path::new(&base_path).join(version);
+
+            // Get the file names from the source paths
+            let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
+            let dll_src = Path::new(&addin.path_to_addin_dll_folder);
+
+            // Remove the .addin file
+            if let Some(file_name) = addin_xml_src.file_name() {
+                let addin_xml_dst = version_path.join(file_name);
+                if addin_xml_dst.exists() {
+                    fs::remove_file(&addin_xml_dst)?;
+                }
+            }
+
+            // Remove the DLL folder (recursively)
+            if let Some(folder_name) = dll_src.file_name() {
+                let dll_dst = version_path.join(folder_name);
+                if dll_dst.exists() && dll_dst.is_dir() {
+                    fs::remove_dir_all(&dll_dst)?;
+                }
+            }
         }
+        Ok(())
     }
-    Ok(())
 }
