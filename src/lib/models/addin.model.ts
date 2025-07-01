@@ -3,6 +3,7 @@ export interface AddinModel {
   pathToAddinXmlFile: string;
   // Full path to the file with the DLLs for the addin
   pathToAddinDllFolder: string;
+
   // The name of the addin
   name: string;
   // The ID of the addin

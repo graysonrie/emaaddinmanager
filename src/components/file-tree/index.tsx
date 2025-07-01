@@ -2,15 +2,18 @@ import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useState } from "react";
 
-type Props<T extends {}> = {
+type Props<T extends { fileTreePath: string }> = {
   nodes: TreeNode<T>[];
-  onSelect: (addin: AddinModel) => void;
+  onSelect?: (addin: T) => void;
+  onSelectFolder?: (folder: T) => void;
+  nodeName: string;
+  onlyFolders?: boolean;
 };
 
-function findNodeByPath(
-  nodes: AddinTreeNode[],
+function findNodeByPath<T extends { fileTreePath: string }>(
+  nodes: TreeNode<T>[],
   path: string[]
-): AddinTreeNode[] {
+): TreeNode<T>[] {
   let current = nodes;
   for (const part of path) {
     const next = current.find((n) => n.name === part);
@@ -20,7 +23,11 @@ function findNodeByPath(
   return current;
 }
 
-export default function AddinTreeView({ nodes, onSelect }: Props) {
+export default function FileTreeView<T extends { fileTreePath: string }>({
+  nodes,
+  onSelect,
+  nodeName,
+}: Props<T>) {
   const [path, setPath] = useState<string[]>([]);
 
   const currentNodes = findNodeByPath(nodes, path);
@@ -35,7 +42,7 @@ export default function AddinTreeView({ nodes, onSelect }: Props) {
   ];
 
   return (
-    <div>
+    <div className="w-full overflow-y-auto">
       {/* Breadcrumbs */}
       <nav className="mb-4 flex items-center text-sm text-muted-foreground">
         {breadcrumbs.map((crumb, idx) => (
@@ -58,8 +65,13 @@ export default function AddinTreeView({ nodes, onSelect }: Props) {
 
       {/* Folder/Addin List */}
       <ul className="space-y-2">
-        {currentNodes.map((node) =>
-          node.children && node.children.length > 0 ? (
+        {currentNodes.map((node) => {
+          // Check if it's a folder: either has children OR has no file extension
+          const isFolder =
+            (node.children && node.children.length > 0) ||
+            !node.name.includes(".");
+
+          return isFolder ? (
             <li key={node.name}>
               <button
                 className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-accent transition"
@@ -75,16 +87,16 @@ export default function AddinTreeView({ nodes, onSelect }: Props) {
             <li key={node.name}>
               <button
                 className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition"
-                onClick={() => node.addin && onSelect(node.addin)}
+                onClick={() => node.data && onSelect?.(node.data)}
               >
                 <span className="font-medium">{node.name}</span>
                 <span className="ml-2 text-xs text-muted-foreground">
-                  (Addin)
+                  ({nodeName})
                 </span>
               </button>
             </li>
-          )
-        )}
+          );
+        })}
         {currentNodes.length === 0 && (
           <li className="text-muted-foreground px-4 py-3">
             No items in this folder.

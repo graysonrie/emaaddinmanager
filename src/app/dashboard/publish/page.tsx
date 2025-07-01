@@ -6,6 +6,7 @@ import AddinInfoForm from "./AddinInfoForm";
 import { usePublishStore } from "./store";
 import { useEffect } from "react";
 import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import SelectDestinationForm from "./SelectDestinationForm";
 
 export default function PublishPage() {
   const { categories } = useAddinRegistry();
@@ -68,6 +69,7 @@ export default function PublishPage() {
           <h1 className="text-2xl font-bold">Publish Addin</h1>
 
           <AddinInfoForm />
+          <SelectDestinationForm />
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full gap-4">

@@ -11,10 +11,12 @@ interface PublishStore {
   addinFileInfo: SimplifiedAddinInfoModel;
   dlls: DllModel[];
   categories: CategoryModel[];
+  destinationCategory: CategoryModel | null;
   setProjectDir: (projectDir: string) => void;
   setAddinFileInfo: (info: SimplifiedAddinInfoModel) => void;
   setDlls: (dlls: DllModel[]) => void;
   setCategories: (categories: CategoryModel[]) => void;
+  setDestinationCategory: (category: CategoryModel | null) => void;
 }
 
 export const usePublishStore = create<PublishStore>((set) => ({
@@ -22,9 +24,12 @@ export const usePublishStore = create<PublishStore>((set) => ({
   addinFileInfo: getEmptySimplifiedAddinInfo(),
   dlls: [],
   categories: [],
+  destinationCategory: null,
   setProjectDir: (projectDir: string) => set({ projectDir }),
   setAddinFileInfo: (addinFileInfo: SimplifiedAddinInfoModel) =>
     set({ addinFileInfo }),
   setDlls: (dlls: DllModel[]) => set({ dlls }),
   setCategories: (categories: CategoryModel[]) => set({ categories }),
+  setDestinationCategory: (category: CategoryModel | null) =>
+    set({ destinationCategory: category }),
 }));
