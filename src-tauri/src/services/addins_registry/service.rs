@@ -181,21 +181,43 @@ impl AddinsRegistryService {
             let entry_path = entry.path();
 
             if entry_path.is_dir() {
-                // Add this directory as a category
-                categories.push(CategoryModel {
-                    name: entry_path
-                        .file_name()
-                        .unwrap()
-                        .to_string_lossy()
-                        .to_string(),
-                    full_path: entry_path.to_string_lossy().to_string(),
-                });
+                // Check if this directory contains any DLL files
+                if !Self::contains_dll_files(&entry_path)? {
+                    // Only add directories that don't contain DLL files
+                    categories.push(CategoryModel {
+                        name: entry_path
+                            .file_name()
+                            .unwrap()
+                            .to_string_lossy()
+                            .to_string(),
+                        full_path: entry_path.to_string_lossy().to_string(),
+                    });
+                }
 
                 // Recursively scan subdirectories
                 Self::scan_categories_recursively(&entry_path, categories)?;
             }
         }
         Ok(())
+    }
+
+    /// Check if a directory contains any DLL files (recursively)
+    fn contains_dll_files(path: &Path) -> Result<bool, Box<dyn std::error::Error>> {
+        let entries = fs::read_dir(path)?;
+        for entry in entries {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            if entry_path.is_file() {
+                // Check if the file has a .dll extension
+                if let Some(extension) = entry_path.extension() {
+                    if extension.to_string_lossy().to_lowercase() == "dll" {
+                        return Ok(true);
+                    }
+                }
+            }
+        }
+        Ok(false)
     }
 }
 

@@ -26,7 +26,7 @@ export default function AddinInfoForm() {
   const { data: userEmail } = useConfigValue("userEmail");
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full">
       <CardHeader>
         <CardTitle>Addin Information</CardTitle>
       </CardHeader>

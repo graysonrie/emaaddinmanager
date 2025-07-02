@@ -5,6 +5,8 @@ import { usePublishStore } from "./store";
 import { buildTree } from "@/components/file-tree/builder/tree-builder";
 import { CategoryModel } from "@/lib/models/category.model";
 import FileTreeView from "@/components/file-tree";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 
 interface CategoryWithTreePath extends CategoryModel {
   fileTreePath: string;
@@ -28,15 +30,22 @@ export default function SelectDestinationForm() {
   }, [categories, root]);
 
   return (
-    <div className="flex flex-1 min-h-0 px-8 gap-8 h-full w-full overflow-y-auto">
-      <FileTreeView
-        nodes={tree}
-        onSelectFolder={(category) => {
-          setDestinationCategory(category);
-        }}
-        nodeName="Category"
-        onlyFolders={true}
-      />
-    </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Select Destination</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 overflow-y-auto">
+          <FileTreeView
+            nodes={tree}
+            onSelectFolder={(category) => {
+              setDestinationCategory(category);
+            }}
+            nodeName="Category"
+            onlyFolders={true}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

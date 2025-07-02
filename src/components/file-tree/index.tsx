@@ -26,9 +26,12 @@ function findNodeByPath<T extends { fileTreePath: string }>(
 export default function FileTreeView<T extends { fileTreePath: string }>({
   nodes,
   onSelect,
+  onSelectFolder,
+  onlyFolders,
   nodeName,
 }: Props<T>) {
   const [path, setPath] = useState<string[]>([]);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const currentNodes = findNodeByPath(nodes, path);
 
@@ -40,6 +43,15 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
       path: path.slice(0, idx + 1),
     })),
   ];
+
+  const isFolder = (node: TreeNode<T>) => {
+    if (onlyFolders) {
+      return (
+        (node.children && node.children.length > 0) || !node.name.includes(".")
+      );
+    }
+    return node.children && node.children.length > 0;
+  };
 
   return (
     <div className="w-full overflow-y-auto">
@@ -54,7 +66,10 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
                   ? "font-semibold text-primary"
                   : ""
               }`}
-              onClick={() => setPath(crumb.path)}
+              onClick={() => {
+                setPath(crumb.path);
+                setSelectedNode(null); // Clear selection when navigating
+              }}
               disabled={idx === breadcrumbs.length - 1}
             >
               {crumb.name}
@@ -66,27 +81,44 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
       {/* Folder/Addin List */}
       <ul className="space-y-2">
         {currentNodes.map((node) => {
-          // Check if it's a folder: either has children OR has no file extension
-          const isFolder =
-            (node.children && node.children.length > 0) ||
-            !node.name.includes(".");
-
-          return isFolder ? (
+          return isFolder(node) ? (
             <li key={node.name}>
               <button
-                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-accent transition"
-                onClick={() => setPath([...path, node.name])}
+                className={`w-full text-left px-4 py-3 rounded-lg border transition cursor-pointer ${
+                  selectedNode === node.name
+                    ? "border-primary bg-primary/10"
+                    : "bg-card hover:bg-accent"
+                }`}
+                onClick={() => {
+                  if (onlyFolders && onSelectFolder && node.data) {
+                    // Single click: select the folder
+                    setSelectedNode(node.name);
+                    onSelectFolder(node.data);
+                  } else {
+                    // Single click: navigate into folder
+                    setPath([...path, node.name]);
+                  }
+                }}
+                onDoubleClick={() => {
+                  if (onlyFolders) {
+                    // Double click: navigate into folder
+                    setPath([...path, node.name]);
+                    setSelectedNode(null); // Clear selection when navigating
+                  }
+                }}
               >
                 <span className="font-medium">{node.name}</span>
-                <span className="ml-2 text-xs text-muted-foreground">
-                  (Folder)
-                </span>
+                {!onlyFolders && (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    (Folder)
+                  </span>
+                )}
               </button>
             </li>
           ) : (
             <li key={node.name}>
               <button
-                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition"
+                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition cursor-pointer"
                 onClick={() => node.data && onSelect?.(node.data)}
               >
                 <span className="font-medium">{node.name}</span>
