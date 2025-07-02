@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePublishStore } from "./store";
 import { buildTree } from "@/components/file-tree/builder/tree-builder";
 import { CategoryModel } from "@/lib/models/category.model";
 import FileTreeView from "@/components/file-tree";
@@ -12,9 +11,15 @@ interface CategoryWithTreePath extends CategoryModel {
   fileTreePath: string;
 }
 
-export default function SelectDestinationForm() {
-  const { categories, setDestinationCategory } = usePublishStore();
+interface Props {
+  categories: CategoryModel[];
+  setDestinationCategory: (category: CategoryModel | null) => void;
+}
 
+export default function SelectDestinationForm({
+  categories,
+  setDestinationCategory,
+}: Props) {
   const root = useMemo(() => {
     return categories.find((c) => c.name === c.fullPath)?.fullPath;
   }, [categories]);

@@ -1,6 +1,6 @@
 export interface SimplifiedAddinInfoModel {
   name: string;
-  vendor_id: string;
+  vendorId: string;
   email: string;
   description: string;
 }
@@ -8,7 +8,7 @@ export interface SimplifiedAddinInfoModel {
 export function getEmptySimplifiedAddinInfo(): SimplifiedAddinInfoModel {
   return {
     name: "",
-    vendor_id: "",
+    vendorId: "",
     email: "",
     description: "",
   };

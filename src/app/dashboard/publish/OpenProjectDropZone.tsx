@@ -5,14 +5,12 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FolderOpen } from "lucide-react";
-import { usePublishStore } from "./store";
 
 interface Props {
   onProjectSelected?: (projectDir: string) => void;
 }
 
 export default function OpenProjectDropZone({ onProjectSelected }: Props) {
-  const { projectDir, setProjectDir } = usePublishStore();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileSelect = useCallback(async () => {
@@ -31,7 +29,6 @@ export default function OpenProjectDropZone({ onProjectSelected }: Props) {
       if (selected && typeof selected === "string") {
         // Get the parent directory of the selected .csproj file
         const projectDir = selected.substring(0, selected.lastIndexOf("\\"));
-        setProjectDir(projectDir);
         onProjectSelected?.(projectDir);
       }
     } catch (error) {
@@ -39,7 +36,7 @@ export default function OpenProjectDropZone({ onProjectSelected }: Props) {
     } finally {
       setIsProcessing(false);
     }
-  }, [setProjectDir]);
+  }, [onProjectSelected]);
 
   return (
     <Card

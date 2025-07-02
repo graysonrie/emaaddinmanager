@@ -10,6 +10,7 @@ export default function useLocalAddinExporter() {
   const { exportAddin, getAddinFileInfo, getAllProjectDlls, buildAddin } =
     useTauriCommands();
 
+  // The directory of the C# project
   const [projectDir, setProjectDir] = useState<string | null>(null);
   const [addinFileInfo, setAddinFileInfo] =
     useState<SimplifiedAddinInfoModel | null>(null);

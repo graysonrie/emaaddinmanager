@@ -3,16 +3,19 @@
 import useLocalAddinExporter from "@/lib/local-addins/useLocalAddinExporter";
 import OpenProjectDropZone from "./OpenProjectDropZone";
 import AddinInfoForm from "./AddinInfoForm";
-import { usePublishStore } from "./store";
-import { useEffect } from "react";
+import { useState } from "react";
 import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
 import SelectDestinationForm from "./SelectDestinationForm";
 import { Button } from "@/components/ui/button";
+import { CategoryModel } from "@/lib/models/category.model";
 
 export default function PublishPage() {
   const { categories } = useAddinRegistry();
+  const [destinationCategory, setDestinationCategory] =
+    useState<CategoryModel | null>(null);
   const {
     projectDir,
+    setProjectDir,
     exportAddin,
     refresh,
     buildAddin,
@@ -23,59 +26,65 @@ export default function PublishPage() {
     error,
   } = useLocalAddinExporter();
 
-  const {
-    projectDir: publishProjectDir,
-    setProjectDir: setPublishProjectDir,
-    addinFileInfo: publishAddinFileInfo,
-    setAddinFileInfo: setPublishAddinFileInfo,
-    setDlls: setPublishDlls,
-    categories: publishCategories,
-    setCategories: setPublishCategories,
-    destinationCategory: publishDestinationCategory,
-  } = usePublishStore();
-
   const handleInitialProjectSelected = (projectDir: string) => {
     refresh(projectDir);
+    setProjectDir(projectDir);
   };
 
-  useEffect(() => {
-    if (projectDir) {
-      setPublishProjectDir(projectDir);
+  const handlePublish = () => {
+    if (!addinFileInfo || !destinationCategory || !projectDir) {
+      return;
     }
-  }, [projectDir, setPublishProjectDir]);
+    // buildAddin(projectDir);
+    // exportAddin(
+    //   projectDir,
+    //   addinFileInfo,
+    //   dlls.map((dll) => dll.fullPath),
+    //   destinationCategory.fullPath
+    // );
+  };
 
-  // Update store when addin file info changes
-  useEffect(() => {
-    if (addinFileInfo) {
-      setPublishAddinFileInfo(addinFileInfo);
+  const isAllAddinInfoFilled = ()=>{
+    if(!addinFileInfo){
+      return false;
     }
-  }, [addinFileInfo, setPublishAddinFileInfo]);
+    return (
+      addinFileInfo.name &&
+      addinFileInfo.description &&
+      addinFileInfo.vendorId &&
+      addinFileInfo.email
+    );
+  };
 
-  // Update store when DLLs change
-  useEffect(() => {
-    if (dlls && dlls.length > 0) {
-      setPublishDlls(dlls);
-    }
-  }, [dlls, setPublishDlls]);
-
-  useEffect(() => {
-    if (categories && categories.length > 0) {
-      setPublishCategories(categories);
-    }
-  }, [categories, setPublishCategories]);
-
-  const isPublishButtonDisabled =
-    !publishDestinationCategory || !publishAddinFileInfo;
+  const isPublishButtonDisabled = !addinFileInfo || !destinationCategory || !isAllAddinInfoFilled();
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      {publishProjectDir ? (
+      {projectDir ? (
         <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
           <h1 className="text-2xl font-bold">Publish Addin</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-y-auto">
-            <AddinInfoForm />
-            <SelectDestinationForm />
+            {addinFileInfo && (
+              <AddinInfoForm
+                addinFileInfo={addinFileInfo}
+                onAddinFileInfoChange={setAddinFileInfo}
+              />
+            )}
+            <SelectDestinationForm
+              categories={categories}
+              setDestinationCategory={setDestinationCategory}
+            />
           </div>
+          <label className="text-sm text-muted-foreground">
+            {destinationCategory ? (
+              <>
+                Publishing to{" "}
+                <span className="font-bold">{destinationCategory.name}</span>
+              </>
+            ) : (
+              "Select a destination category"
+            )}
+          </label>
           <div className=" flex justify-center w-full pb-3">
             <Button
               className="w-1/2"
