@@ -9,35 +9,28 @@ import { EMA_DOMAIN } from "@/types/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { NameSetup } from "./NameSetup";
 import { useSidebarStore } from "../sidebar/store";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 
 export const SUCCESS_DELAY = 1800; // ms
 
 export default function SetupPage() {
-  const {
-    data: userEmail,
-    loading: emailLoading,
-    error: emailError,
-  } = useConfigValue("userEmail");
-  const {
-    data: userName,
-    loading: nameLoading,
-    error: nameError,
-  } = useConfigValue("userName");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userName = useKeyValueSubscription<string>("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
   const [step, setStep] = useState<"email" | "name" | "done">("email");
   const router = useRouter();
 
   useEffect(() => {
-    if (!emailLoading && !userEmail) {
+    if (!userEmail) {
       setIsOpen(false);
       setStep("email");
-    } else if (!nameLoading && !userName) {
+    } else if (!userName) {
       setIsOpen(false);
       setStep("name");
     } else if (userEmail && userName) {
       setStep("done");
     }
-  }, [userEmail, userName, emailLoading, nameLoading]);
+  }, [userEmail, userName]);
 
   useEffect(() => {
     if (step === "done") {
@@ -50,18 +43,10 @@ export default function SetupPage() {
     }
   }, [step, router]);
 
-  if (emailLoading || nameLoading) {
+  if (!userEmail || !userName) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span>Loading...</span>
-      </div>
-    );
-  }
-
-  if (emailError || nameError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span>Error loading setup. Please restart the app.</span>
       </div>
     );
   }

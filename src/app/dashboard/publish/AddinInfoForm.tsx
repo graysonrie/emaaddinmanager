@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 
 interface Props {
   addinFileInfo: SimplifiedAddinInfoModel;
@@ -29,7 +30,7 @@ export default function AddinInfoForm({
     });
   };
 
-  const { data: userEmail } = useConfigValue("userEmail");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
 
   return (
     <Card className="w-full h-full">

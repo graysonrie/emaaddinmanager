@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useTauriCommands from "../commands/useTauriCommands";
+import useTauriCommands from "../commands/getTauriCommands";
 import useConfig from "../persistence/config/useConfig";
 import { useConfigValueOrDefault } from "../persistence/config/useConfigValue";
 import { AddinModel } from "../models/addin.model";
@@ -10,8 +10,6 @@ export default function useAddinRegistry() {
   const { update } = useConfig();
   const {
     data: localRegistryPath,
-    loading: configLoading,
-    error: configError,
   } = useConfigValueOrDefault(
     "localAddinRegistryPath",
     "S:\\BasesRevitAddinsRegistry"
@@ -72,10 +70,8 @@ export default function useAddinRegistry() {
 
   // Update loading state when config is ready
   useEffect(() => {
-    if (!configLoading) {
-      setIsLoading(false);
-    }
-  }, [configLoading]);
+    setIsLoading(false);
+  }, []);
 
   const changeRegistryPath = async (path: string) => {
     if (canChangeRegistryPath) {
@@ -94,8 +90,7 @@ export default function useAddinRegistry() {
     canChangeRegistryPath,
     setCanChangeRegistryPath,
     localRegistryPath,
-    isLoading: isLoading || configLoading || isLoadingAddins,
-    configError,
+    isLoading: isLoading || isLoadingAddins,
     addinsError,
     categories,
     categoriesError,

@@ -1,6 +1,6 @@
 "use client";
 
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,14 @@ import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { EmailInputForm } from "@/components/EmailInputForm";
 import { EMA_DOMAIN } from "@/types/constants";
 import { Input } from "@/components/ui/input";
-import useAddinRegistry from '@/lib/addin-registry/useAddinRegistry';
+import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 
 export function UserSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
-  const { data: currentEmail } = useConfigValue("userEmail");
+  const currentEmail = useKeyValueSubscription<string>("userEmail");
   const { localRegistryPath, changeRegistryPath } = useAddinRegistry();
 
   const handleUpdateEmail = async (email: string) => {
@@ -33,7 +34,7 @@ export function UserSettings() {
     if (selected) {
       changeRegistryPath(selected as string);
     }
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -144,11 +145,15 @@ export function UserSettings() {
                 <p className="text-sm text-muted-foreground">
                   Configure the local addin registry path
                 </p>
-                <Input value={localRegistryPath} className="w-full mt-4" readOnly={true} onClick={handleRegistryInputClicked} />
+                <Input
+                  value={localRegistryPath}
+                  className="w-full mt-4"
+                  readOnly={true}
+                  onClick={handleRegistryInputClicked}
+                />
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

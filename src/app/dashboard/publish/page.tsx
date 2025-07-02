@@ -1,6 +1,5 @@
 "use client";
 
-import useLocalAddinExporter from "@/lib/local-addins/useLocalAddinExporter";
 import OpenProjectDropZone from "./OpenProjectDropZone";
 import AddinInfoForm from "./AddinInfoForm";
 import { useState } from "react";
@@ -8,9 +7,12 @@ import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
 import SelectDestinationForm from "./SelectDestinationForm";
 import { Button } from "@/components/ui/button";
 import { CategoryModel } from "@/lib/models/category.model";
+import { useLocalAddinExporterStore } from "@/lib/local-addins/store/useLocalAddinExporterStore";
+import Processing from "./load-pages/Processing";
 
 export default function PublishPage() {
   const { categories } = useAddinRegistry();
+  const [isProcessing, setIsProcessing] = useState(false);
   const [destinationCategory, setDestinationCategory] =
     useState<CategoryModel | null>(null);
   const {
@@ -24,7 +26,7 @@ export default function PublishPage() {
     dlls,
     loading,
     error,
-  } = useLocalAddinExporter();
+  } = useLocalAddinExporterStore();
 
   const handleInitialProjectSelected = (projectDir: string) => {
     refresh(projectDir);
@@ -35,6 +37,7 @@ export default function PublishPage() {
     if (!addinFileInfo || !destinationCategory || !projectDir) {
       return;
     }
+    setIsProcessing(true);
     // buildAddin(projectDir);
     // exportAddin(
     //   projectDir,
@@ -42,6 +45,7 @@ export default function PublishPage() {
     //   dlls.map((dll) => dll.fullPath),
     //   destinationCategory.fullPath
     // );
+    setIsProcessing(false); 
   };
 
   const isAllAddinInfoFilled = ()=>{
@@ -60,7 +64,9 @@ export default function PublishPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      {projectDir ? (
+      {isProcessing ? (
+        <Processing message="Building addin..." />
+      ) : projectDir ? (
         <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
           <h1 className="text-2xl font-bold">Publish Addin</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-y-auto">
@@ -90,6 +96,7 @@ export default function PublishPage() {
               className="w-1/2"
               variant={isPublishButtonDisabled ? "outline" : "default"}
               disabled={isPublishButtonDisabled}
+              onClick={handlePublish}
             >
               Publish
             </Button>

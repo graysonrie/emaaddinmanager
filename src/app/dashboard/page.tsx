@@ -11,26 +11,26 @@ import { EMA_DOMAIN } from "@/types/constants";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useSidebarStore } from "./sidebar/store";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 
 export default function Home() {
   const [showEmailSetup, setShowEmailSetup] = useState<boolean | null>(null);
   const { setIsOpen } = useSidebarStore();
-  const { data: userEmail, loading: emailLoading } =
-    useConfigValue("userEmail");
-  const { data: userName, loading: nameLoading } = useConfigValue("userName");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userName = useKeyValueSubscription<string>("userName");
   const router = useRouter();
 
   useEffect(() => {
-    if (!emailLoading && !nameLoading && (!userEmail || !userName)) {
+    if (!userEmail || !userName) {
       setIsOpen(false);
       router.replace("/dashboard/setup");
-    }else{
+    } else {
       setIsOpen(true);
     }
-  }, [userEmail, userName, emailLoading, nameLoading, router]);
+  }, [userEmail, userName, router]);
 
   // Show error state
-  if (emailLoading || nameLoading) {
+  if (!userEmail || !userName) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -53,7 +53,6 @@ export default function Home() {
       </motion.div>
     );
   }
-
 
   // Show main app content
   return (

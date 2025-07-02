@@ -28,129 +28,116 @@ interface TauriCommands {
   buildAddin: (projectDir: string) => Promise<string>;
 }
 
-export default function useTauriCommands(): TauriCommands {
-  const kvStoreSet = useCallback(async (key: string, value: any) => {
+export default function getTauriCommands(): TauriCommands {
+  const kvStoreSet = async (key: string, value: any) => {
     await invoke<void>("kv_store_set", {
       key,
       value,
     });
     console.log(`KV Store - Set key: ${key} value:`, value);
-  }, []);
+  };
 
-  const kvStoreGet = useCallback(
-    async <T,>(key: string): Promise<T | undefined> => {
-      try {
-        const data = await invoke<T>("kv_store_get", { key });
-        return data;
-      } catch (err) {
-        console.log(err);
-      }
-      return undefined;
-    },
-    []
-  );
+  const kvStoreGet = async <T,>(key: string): Promise<T | undefined> => {
+    try {
+      const data = await invoke<T>("kv_store_get", { key });
+      return data;
+    } catch (err) {
+      console.log(err);
+    }
+    return undefined;
+  };
 
-  const kvStoreSubscribeToKey = useCallback(
-    async <T,>(key: string): Promise<KvSubscriptionModel<T>> => {
-      return await invoke<KvSubscriptionModel<T>>("kv_store_subscribe_to_key", {
-        key,
-      });
-    },
-    []
-  );
+  const kvStoreSubscribeToKey = async <T,>(
+    key: string
+  ): Promise<KvSubscriptionModel<T>> => {
+    return await invoke<KvSubscriptionModel<T>>("kv_store_subscribe_to_key", {
+      key,
+    });
+  };
 
-  const getAddins = useCallback(async (path: string) => {
+  const getAddins = async (path: string) => {
     try {
       return await invoke<AddinModel[]>("get_addins", { path });
     } catch (err) {
       console.error("Failed to get addins:", err);
       return [];
     }
-  }, []);
+  };
 
-  const getLocalAddins = useCallback(async () => {
+  const getLocalAddins = async () => {
     try {
       return await invoke<AddinModel[]>("get_local_addins");
     } catch (err) {
       console.error("Failed to get local addins:", err);
       throw err;
     }
-  }, []);
+  };
 
-  const getRevitVersions = useCallback(async () => {
+  const getRevitVersions = async () => {
     try {
       return await invoke<string[]>("get_revit_versions");
     } catch (err) {
       console.error("Failed to get Revit versions:", err);
       throw err;
     }
-  }, []);
+  };
 
   // Installs the addin for the given Revit versions locally
-  const installAddin = useCallback(
-    async (installRequest: InstallAddinRequestModel) => {
-      try {
-        return await invoke<void>("install_addin", { installRequest });
-      } catch (err) {
-        console.error("Failed to install addin:", err);
-        throw err;
-      }
-    },
-    []
-  );
+  const installAddin = async (installRequest: InstallAddinRequestModel) => {
+    try {
+      return await invoke<void>("install_addin", { installRequest });
+    } catch (err) {
+      console.error("Failed to install addin:", err);
+      throw err;
+    }
+  };
 
-  const getCategories = useCallback(async (path: string) => {
+  const getCategories = async (path: string) => {
     try {
       return await invoke<CategoryModel[]>("get_categories", { path });
     } catch (err) {
       console.error("Failed to get categories:", err);
       throw err;
     }
-  }, []);
+  };
 
   // Uninstalls the addin for the given Revit versions locally
-  const uninstallAddin = useCallback(
-    async (installRequest: InstallAddinRequestModel) => {
-      try {
-        return await invoke<void>("uninstall_addin", { installRequest });
-      } catch (err) {
-        console.error("Failed to uninstall addin:", err);
-        throw err;
-      }
-    },
-    []
-  );
+  const uninstallAddin = async (installRequest: InstallAddinRequestModel) => {
+    try {
+      return await invoke<void>("uninstall_addin", { installRequest });
+    } catch (err) {
+      console.error("Failed to uninstall addin:", err);
+      throw err;
+    }
+  };
 
-  const exportAddin = useCallback(
-    async (
-      projectDir: string,
-      addinFileInfo: SimplifiedAddinInfoModel,
-      extraDlls: string[],
-      destinationDir: string
-    ) => {
-      return await invoke<void>("export_addin", {
-        projectDir,
-        addinFileInfo,
-        extraDlls,
-        destinationDir,
-      });
-    },
-    []
-  );
+  const exportAddin = async (
+    projectDir: string,
+    addinFileInfo: SimplifiedAddinInfoModel,
+    extraDlls: string[],
+    destinationDir: string
+  ) => {
+    return await invoke<void>("export_addin", {
+      projectDir,
+      addinFileInfo,
+      extraDlls,
+      destinationDir,
+    });
+  };
 
-  const getAddinFileInfo = useCallback(async (projectDir: string) => {
+  const getAddinFileInfo = async (projectDir: string) => {
     return await invoke<SimplifiedAddinInfoModel>("get_addin_file_info", {
       projectDir,
     });
-  }, []);
+  };
 
-  const getAllProjectDlls = useCallback(async (projectDir: string) => {
+  const getAllProjectDlls = async (projectDir: string) => {
     return await invoke<DllModel[]>("get_all_project_dlls", { projectDir });
-  }, []);
+  };
 
-  const buildAddin = useCallback(async (projectDir: string) => {
+  const buildAddin = async (projectDir: string) => {
     return await invoke<string>("build_addin", { projectDir });
-  }, []);
+  };
 
   return {
     kvStoreSet,

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
-import useKeyValueStore, { useKeyValueSubscription } from "../useKeyValueStore";
+import { useKeyValueSubscription } from "../useKeyValueSubscription";
 import { ConfigKeys } from "./config-keys";
+import { useKeyValueStore } from "../useKeyValueStore";
 
 export default function useConfig() {
   const { set, get } = useKeyValueStore();

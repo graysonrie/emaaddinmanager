@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useTauriCommands from "../commands/useTauriCommands";
+import useTauriCommands from "../commands/getTauriCommands";
 import { AddinModel } from "../models/addin.model";
 
 export default function useLocalAddins() {
