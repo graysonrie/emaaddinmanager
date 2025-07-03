@@ -1,9 +1,63 @@
 import { Button } from "@/components/ui/button";
 import { useLibraryStore } from "./store";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { determineRevitVersions } from "./helpers";
+import { AddinModel } from "@/lib/models/addin.model";
+import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 
-export default function AddinPreview() {
-  const { selectedAddin } = useLibraryStore();
+interface AddinPreviewProps {
+  onInstallClicked?: () => void;
+  onDelistClicked?: () => void;
+}
+
+export default function AddinPreview({
+  onInstallClicked,
+  onDelistClicked,
+}: AddinPreviewProps) {
+  const { selectedAddin, installingAddins } = useLibraryStore();
+  const userEmail = useConfigValue("userEmail");
+  const [revitVersions, setRevitVersions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (selectedAddin) {
+      setRevitVersions([]);
+      determineRevitVersions(selectedAddin).then(setRevitVersions);
+    }
+  }, [selectedAddin]);
+
+  const isInstalling = installingAddins.some(
+    (addin) => addin.addinId === selectedAddin?.addinId
+  );
+
+  const installButton = (selectedAddin: AddinModel) => (
+    <div className="flex">
+      {selectedAddin.isInstalledLocally ? (
+        <div className="w-full justify-center items-center flex gap-2">
+          <CheckCircle className="w-4 h-4" />
+          Installed
+        </div>
+      ) : (
+        <Button className="w-full cursor-pointer" onClick={onInstallClicked}>
+          Install
+        </Button>
+      )}
+    </div>
+  );
+
+  const delistButton = (selectedAddin: AddinModel) => (
+    <div className="flex">
+      {userEmail === selectedAddin.email ? (
+        <Button
+          className="w-full cursor-pointer"
+          variant="outline"
+          onClick={onDelistClicked}
+        >
+          Delist
+        </Button>
+      ) : null}
+    </div>
+  );
 
   return (
     <div className="flex flex-1 bg-card border-l p-6 min-w-[300px] max-w-xl shadow-sm h-full overflow-auto font-sans">
@@ -34,17 +88,24 @@ export default function AddinPreview() {
                 <span className="font-medium">Description:</span>{" "}
                 {selectedAddin.vendorDescription}
               </div>
+              {revitVersions.length > 0 && (
+                <div className="gap-2 text-sm text-muted-foreground">
+                  <span>Compatible with:</span> {revitVersions.join(", ")}
+                </div>
+              )}
             </div>
           </div>
-
-          <div className="flex">
-            {selectedAddin.isInstalledLocally ? (
+          <div className="flex gap-2 flex-col">
+            {isInstalling ? (
               <div className="w-full justify-center items-center flex gap-2">
-                <CheckCircle className="w-4 h-4" />
-                Installed
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Installing...
               </div>
             ) : (
-              <Button className="w-full cursor-pointer">Install</Button>
+              <>
+                {installButton(selectedAddin)}
+                {delistButton(selectedAddin)}
+              </>
             )}
           </div>
         </div>

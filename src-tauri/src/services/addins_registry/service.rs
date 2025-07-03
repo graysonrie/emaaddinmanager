@@ -159,6 +159,98 @@ impl AddinsRegistryService {
         Ok(())
     }
 
+    pub fn delist_addin(&self, addin: AddinModel, registry_path: &str) -> Result<(), String> {
+        match &self.location {
+            RegistryLocation::Local => Self::delist_addin_locally(addin, registry_path),
+            RegistryLocation::Other => {
+                panic!("Not implemented");
+            }
+        }
+    }
+
+    fn delist_addin_locally(addin: AddinModel, registry_path: &str) -> Result<(), String> {
+        fn recurse_dir(dir: &Path, addin: &AddinModel) -> Result<bool, String> {
+            let entries = fs::read_dir(dir).map_err(|e| e.to_string())?;
+            for entry in entries {
+                let entry = entry.map_err(|e| e.to_string())?;
+                let entry_path = entry.path();
+                if entry_path.is_dir() {
+                    // Recurse into subdirectory
+                    if recurse_dir(&entry_path, addin)? {
+                        return Ok(true);
+                    }
+                } else if entry_path.is_file() {
+                    if let Some(ext) = entry_path.extension() {
+                        if ext == "addin" {
+                            let addin_info =
+                                rev::get_addin_file_info_from_file(entry_path.to_str().unwrap())
+                                    .map_err(|e| e.to_string())?;
+                            if addin_info.addin_id == addin.addin_id {
+                                // Remove the .addin file
+                                fs::remove_file(&entry_path).map_err(|e| e.to_string())?;
+                                // Remove the DLL folder
+                                let dll_folder = entry_path.with_extension("");
+                                fs::remove_dir_all(&dll_folder).map_err(|e| e.to_string())?;
+                                return Ok(true);
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(false)
+        }
+        let registry_path = Path::new(registry_path);
+        recurse_dir(registry_path, &addin)?;
+        Ok(())
+    }
+
+    pub fn add_category_to_registry(
+        full_category_path: &str,
+        registry_path: &str,
+    ) -> Result<(), String> {
+        // Convert paths to Path objects for easier manipulation
+        let category_path = Path::new(full_category_path);
+        let registry_path_obj = Path::new(registry_path);
+
+        // Ensure the registry path exists and is a directory
+        if !registry_path_obj.exists() {
+            return Err(format!("Registry path does not exist: {}", registry_path));
+        }
+
+        if !registry_path_obj.is_dir() {
+            return Err(format!(
+                "Registry path is not a directory: {}",
+                registry_path
+            ));
+        }
+
+        // Check if the category path is inside the registry path (security check)
+        if !category_path.starts_with(registry_path_obj) {
+            return Err(format!(
+                "Category path '{}' is not inside registry path '{}'",
+                full_category_path, registry_path
+            ));
+        }
+
+        // Create the category directory if it doesn't exist
+        if !category_path.exists() {
+            fs::create_dir_all(category_path).map_err(|e| {
+                format!(
+                    "Failed to create category directory '{}': {}",
+                    full_category_path, e
+                )
+            })?;
+            info!("Created category directory: {}", full_category_path);
+        } else if !category_path.is_dir() {
+            return Err(format!(
+                "Category path exists but is not a directory: {}",
+                full_category_path
+            ));
+        }
+
+        Ok(())
+    }
+
     /// Get all categories (directories) in the local registry recursively
     ///
     /// This finds all directories in the registry at any depth.

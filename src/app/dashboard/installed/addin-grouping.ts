@@ -6,32 +6,40 @@ export interface AddinGroup {
 }
 
 export function groupAddinsByRevitVersions(addins: AddinModel[]): AddinGroup[] {
-  // Group by name, vendor, and addinType
-  const addinGroups = new Map<
+  // Step 1: Group by addin identity, collect all versions for each addin
+  const addinIdentityMap = new Map<
     string,
-    { addin: AddinModel; revitVersions: Set<string> }
+    { addin: AddinModel; versions: Set<string> }
   >();
 
   for (const addin of addins) {
     const key = `${addin.name}::${addin.vendor}::${addin.addinType}`;
-    if (addinGroups.has(key)) {
-      addinGroups.get(key)!.revitVersions.add(addin.revitVersion!);
-    } else {
-      addinGroups.set(key, {
-        addin,
-        revitVersions: new Set([addin.revitVersion!]),
+    if (!addinIdentityMap.has(key)) {
+      addinIdentityMap.set(key, { addin, versions: new Set() });
+    }
+    addinIdentityMap.get(key)!.versions.add(addin.revitVersion!);
+  }
+
+  // Step 2: Group addins by their set of versions
+  const versionSetMap = new Map<
+    string, // key: sorted, joined versions
+    { revitVersions: string[]; addins: AddinModel[] }
+  >();
+
+  for (const { addin, versions } of addinIdentityMap.values()) {
+    const sortedVersions = Array.from(versions).sort();
+    const versionKey = sortedVersions.join(",");
+    if (!versionSetMap.has(versionKey)) {
+      versionSetMap.set(versionKey, {
+        revitVersions: sortedVersions,
+        addins: [],
       });
     }
+    versionSetMap.get(versionKey)!.addins.push(addin);
   }
 
   // Convert to AddinGroup[]
-  const result: AddinGroup[] = [];
-  for (const { addin, revitVersions } of addinGroups.values()) {
-    result.push({
-      revitVersions: Array.from(revitVersions).sort(),
-      addins: [addin],
-    });
-  }
+  const result: AddinGroup[] = Array.from(versionSetMap.values());
 
   // Sort by first version
   result.sort((a, b) => {

@@ -1,4 +1,5 @@
 use crate::services::addins_registry::models::addin_model::AddinModel;
+use crate::services::local_addins::models::uninstall_request_model::UninstallAddinRequestModel;
 use crate::services::local_addins::service::LocalAddinsService;
 
 #[tauri::command]
@@ -12,11 +13,13 @@ pub fn get_revit_versions() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-pub fn install_addin(addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), String> {
-    LocalAddinsService::install_addin(&addin, &for_revit_versions).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn uninstall_addin(addin: AddinModel, for_revit_versions: Vec<String>) -> Result<(), String> {
-    LocalAddinsService::uninstall_addin(&addin, &for_revit_versions).map_err(|e| e.to_string())
+pub fn uninstall_addins(uninstall_requests: Vec<UninstallAddinRequestModel>) -> Result<(), String> {
+    for uninstall_request in uninstall_requests {
+        LocalAddinsService::uninstall_addin(
+            &uninstall_request.addin,
+            &uninstall_request.for_revit_versions,
+        )
+        .map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }

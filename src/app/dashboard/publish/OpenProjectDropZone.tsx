@@ -5,38 +5,14 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FolderOpen } from "lucide-react";
+import useFileSelect from "./hooks/useFileSelect";
 
 interface Props {
-  onProjectSelected?: (projectDir: string) => void;
+  onProjectSelected: (projectDir: string) => void;
 }
 
 export default function OpenProjectDropZone({ onProjectSelected }: Props) {
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleFileSelect = useCallback(async () => {
-    try {
-      setIsProcessing(true);
-      const selected = await open({
-        multiple: false,
-        filters: [
-          {
-            name: "C# Project Files",
-            extensions: ["csproj"],
-          },
-        ],
-      });
-
-      if (selected && typeof selected === "string") {
-        // Get the parent directory of the selected .csproj file
-        const projectDir = selected.substring(0, selected.lastIndexOf("\\"));
-        onProjectSelected?.(projectDir);
-      }
-    } catch (error) {
-      console.error("Error selecting file:", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [onProjectSelected]);
+  const { handleFileSelect, isProcessing } = useFileSelect(onProjectSelected);
 
   return (
     <Card

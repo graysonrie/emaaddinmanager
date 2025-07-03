@@ -22,11 +22,12 @@ pub fn run() {
             get_addins,
             install_addins,
             get_categories,
+            delist_addin,
+            add_category_to_registry,
             // Local Addins
             get_local_addins,
             get_revit_versions,
-            install_addin,
-            uninstall_addin,
+            uninstall_addins,
             // Addin Exporter
             export_addin,
             get_addin_file_info,
@@ -40,9 +41,9 @@ pub fn run() {
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
-
-                app_service_container::initialize_app(app.handle());
             }
+            // ! Initialize the app service container regardless of if debug mode:
+            app_service_container::initialize_app(app.handle());
             Ok(())
         })
         .run(tauri::generate_context!())

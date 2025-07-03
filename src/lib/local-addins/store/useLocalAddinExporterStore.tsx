@@ -3,6 +3,7 @@ import { DllModel } from "@/lib/models/dll.model";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
 import useTauriCommands from "@/lib/commands/getTauriCommands";
 import { getEmptySimplifiedAddinInfo } from "@/lib/models/simplified-addin-info.model";
+import { ErrorList } from "@/types/error-list";
 
 interface LocalAddinExporterState {
   projectDir: string | null;
@@ -15,14 +16,21 @@ interface LocalAddinExporterState {
   setDlls: (dlls: DllModel[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  refresh: (projectDir: string) => Promise<void>;
+  refresh: () => Promise<void>;
+  /**
+   * Exports the addin to the destination directory
+   * @param addinFileInfo - The addin file info
+   * @param extraDlls - The extra DLLs to include. Should not be full paths. Only the name of the DLL is needed without the .dll suffix. The command `getAllProjectDlls` should be used to get the names of the DLLs since it follows this restriction.
+   * @param destinationDir - The destination directory
+   * @returns The export result
+   */
   exportAddin: (
-    projectDir: string,
     addinFileInfo: SimplifiedAddinInfoModel,
     extraDlls: string[],
     destinationDir: string
-  ) => Promise<void>;
-  buildAddin: (projectDir: string) => Promise<string>;
+  ) => Promise<ErrorList>;
+  buildAddin: () => Promise<string>;
+  getAllProjectDlls: () => Promise<DllModel[]>;
 }
 
 const tauri = useTauriCommands();
@@ -39,17 +47,27 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
     setDlls: (dlls) => set({ dlls }),
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
-    refresh: async (projectDir: string) => {
+    refresh: async () => {
+      const projectDir = get().projectDir;
+      if (!projectDir) {
+        throw new Error("Project directory not set");
+      }
       set({ loading: true, error: null });
       try {
+        console.log(
+          "Refreshing local addin information for project:",
+          projectDir
+        );
         const addinFileInfo = await tauri.getAddinFileInfo(projectDir);
-        const dlls = await tauri.getAllProjectDlls(projectDir);
-        set({ addinFileInfo, dlls });
+        console.log("Addin file info found for project:", projectDir);
+        // const dlls = await tauri.getAllProjectDlls(projectDir);
+        set({ addinFileInfo });
       } catch (err) {
         if (
           typeof err === "string" &&
           err.includes("AddinFileError(FileNotFound)")
         ) {
+          console.warn("Addin file not found, setting empty addin info");
           set({ addinFileInfo: getEmptySimplifiedAddinInfo() });
           return;
         }
@@ -61,7 +79,36 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
         set({ loading: false });
       }
     },
-    exportAddin: tauri.exportAddin,
-    buildAddin: tauri.buildAddin,
+    exportAddin: async (addinFileInfo, extraDlls, destinationDir) => {
+      const projectDir = get().projectDir;
+      if (!projectDir) {
+        throw new Error("Project directory not set");
+      }
+      const exportResult = await tauri.exportAddin(
+        projectDir,
+        addinFileInfo,
+        extraDlls,
+        destinationDir
+      );
+      return exportResult;
+    },
+    buildAddin: async () => {
+      const projectDir = get().projectDir;
+      if (!projectDir) {
+        throw new Error("Project directory not set");
+      }
+      const buildResult = await tauri.buildAddin(projectDir);
+      return buildResult;
+    },
+    getAllProjectDlls: async () => {
+      const projectDir = get().projectDir;
+      if (!projectDir) {
+        throw new Error("Project directory not set");
+      }
+      console.log("Getting all project DLLs for project:", projectDir);
+      const dlls = await tauri.getAllProjectDlls(projectDir);
+      set({ dlls });
+      return dlls;
+    },
   })
 );

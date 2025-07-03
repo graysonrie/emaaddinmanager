@@ -6,7 +6,7 @@ import { AddinModel } from "../models/addin.model";
 import { CategoryModel } from "../models/category.model";
 
 export default function useAddinRegistry() {
-  const { getAddins, installAddin, getCategories } = useTauriCommands();
+  const { getAddins, installAddins, getCategories, delistAddin: delistAddinCommand } = useTauriCommands();
   const { update } = useConfig();
   const {
     data: localRegistryPath,
@@ -83,9 +83,18 @@ export default function useAddinRegistry() {
     }
   };
 
+  const delistAddin = async (addin: AddinModel) => {
+    if (!localRegistryPath) {
+      return;
+    }
+    await delistAddinCommand(addin, localRegistryPath);
+    await refreshRegistry();
+  };
+
   return {
     addins,
-    installAddin,
+    installAddins,
+    delistAddin,
     changeRegistryPath,
     canChangeRegistryPath,
     setCanChangeRegistryPath,

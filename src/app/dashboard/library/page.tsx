@@ -11,6 +11,9 @@ import {
   TreeNode,
 } from "@/components/file-tree/builder/tree-builder";
 import FileTreeView from "@/components/file-tree";
+import { determineRevitVersions } from "./helpers";
+import FailedToDelistAddinDialog from "@/app/shared/FailedToDelistAddinDialog";
+import PageWrapper from "@/components/PageWrapper";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -18,7 +21,8 @@ interface AddinWithTreePath extends AddinModel {
 }
 
 export default function LibraryPage() {
-  const { addins } = useAddinRegistry();
+  const { addins, installAddins, refreshRegistry, delistAddin } =
+    useAddinRegistry();
   const root = useMemo(
     () => findCommonRoot(addins.map((a) => a.pathToAddinDllFolder)),
     [addins]
@@ -32,30 +36,83 @@ export default function LibraryPage() {
     return buildTree(addinsWithTreePath, root);
   }, [addins, root]);
 
-  const { selectedAddin, setSelectedAddin } = useLibraryStore();
+  const {
+    selectedAddin,
+    setSelectedAddin,
+    installingAddins,
+    setInstallingAddins,
+  } = useLibraryStore();
+
+  const handleInstallAddin = async () => {
+    if (!selectedAddin) {
+      return;
+    }
+    // Add the addin to the installingAddins list
+    setInstallingAddins([...installingAddins, selectedAddin]);
+    const request = {
+      addin: selectedAddin,
+      forRevitVersions: await determineRevitVersions(selectedAddin),
+    };
+    const result = await installAddins([request]);
+    console.log(result);
+
+    await refreshRegistry();
+    // Remove the addin from the installingAddins list
+    setInstallingAddins(
+      installingAddins.filter(
+        (addin) => addin.addinId !== selectedAddin.addinId
+      )
+    );
+    setSelectedAddin({ ...selectedAddin, isInstalledLocally: true });
+  };
+
+  const [isFailedToDelistAddinOpen, setIsFailedToDelistAddinOpen] =
+    useState(false);
+  const handleDelistAddin = async () => {
+    if (!selectedAddin) {
+      return;
+    }
+    try {
+      await delistAddin(selectedAddin);
+      await refreshRegistry();
+      setSelectedAddin(null);
+    } catch (error) {
+      console.warn(error);
+      setIsFailedToDelistAddinOpen(true);
+    }
+  };
 
   return (
-    <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-      <div className="flex flex-col h-full w-full bg-background">
-        <div className="px-8 pt-8 pb-4">
-          <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
-          <p className="text-muted-foreground mb-4">
-            Browse and preview available addins. Click a folder to navigate, or
-            select an addin to see more details.
-          </p>
-        </div>
-        <div className="flex flex-1 min-h-0 px-8 pb-8 gap-8">
-          {/* Left: Tree View */}
-          <div className="w-full max-w-md flex-shrink-0">
-            <FileTreeView
-              nodes={tree}
-              onSelect={(addin) => setSelectedAddin(addin)}
-              nodeName="Addin"
-            />
+    <PageWrapper>
+      <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
+        <div className="flex flex-col h-full w-full bg-background">
+          <div className="px-8 pt-8 pb-4">
+            <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
+            <p className="text-muted-foreground mb-4">
+              Browse and preview available addins. Click a folder to navigate,
+              or select an addin to see more details.
+            </p>
+          </div>
+          <div className="flex flex-1 min-h-0 px-8 pb-8 gap-8">
+            {/* Left: Tree View */}
+            <div className="w-full max-w-md flex-shrink-0">
+              <FileTreeView
+                nodes={tree}
+                onSelect={(addin) => setSelectedAddin(addin)}
+                nodeName="Addin"
+              />
+            </div>
           </div>
         </div>
+        <AddinPreview
+          onInstallClicked={handleInstallAddin}
+          onDelistClicked={handleDelistAddin}
+        />
+        <FailedToDelistAddinDialog
+          isOpen={isFailedToDelistAddinOpen}
+          setIsOpen={setIsFailedToDelistAddinOpen}
+        />
       </div>
-      <AddinPreview />
-    </div>
+    </PageWrapper>
   );
 }

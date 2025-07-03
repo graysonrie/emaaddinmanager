@@ -12,7 +12,7 @@ import {
 import { CheckCircle, Blocks } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { EmailInputForm } from "@/components/EmailInputForm";
-import { SUCCESS_DELAY } from "./page";
+import { SUCCESS_DELAY } from "./constants";
 
 interface EmailSetupProps {
   onComplete: () => void;

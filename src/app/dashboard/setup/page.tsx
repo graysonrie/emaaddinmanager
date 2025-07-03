@@ -10,8 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NameSetup } from "./NameSetup";
 import { useSidebarStore } from "../sidebar/store";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import { SUCCESS_DELAY } from "./constants";
 
-export const SUCCESS_DELAY = 1800; // ms
 
 export default function SetupPage() {
   const userEmail = useKeyValueSubscription<string>("userEmail");
@@ -38,18 +38,10 @@ export default function SetupPage() {
         router.replace("/dashboard");
       }, SUCCESS_DELAY);
       return;
-
-      router.replace("/dashboard");
     }
   }, [step, router]);
 
-  if (!userEmail || !userName) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span>Loading...</span>
-      </div>
-    );
-  }
+
 
   return (
     <motion.div

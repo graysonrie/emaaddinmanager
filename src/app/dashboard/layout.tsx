@@ -27,6 +27,8 @@ export default function DashboardLayout({
     router.prefetch("/dashboard/library");
     router.prefetch("/dashboard/installed");
     router.prefetch("/dashboard/settings");
+    router.prefetch("/dashboard/notifications");
+    router.prefetch("/dashboard/publish");
 
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -41,9 +43,7 @@ export default function DashboardLayout({
       >
         <Sidebar />
       </motion.div>
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {children}
-      </main>
+      <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
     </div>
   );
 }

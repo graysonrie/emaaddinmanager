@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SUCCESS_DELAY } from "./page";
+import { SUCCESS_DELAY } from "./constants";
 import { CheckCircle, Blocks } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { EmailInputForm } from "@/components/EmailInputForm";

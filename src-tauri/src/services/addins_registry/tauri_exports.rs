@@ -20,7 +20,7 @@ pub async fn get_addins(
 /// Installs a list of addins, emitting an the addin's ID for each addin that is installed
 #[tauri::command]
 pub async fn install_addins(
-    app: State<'_, AppHandle>,
+    app: AppHandle,
     addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
     install_requests: Vec<InstallAddinRequestModel>,
 ) -> Result<(), String> {
@@ -38,6 +38,23 @@ pub async fn install_addins(
 }
 
 #[tauri::command]
+pub async fn delist_addin(
+    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addin: AddinModel,
+    registry_path: String,
+) -> Result<(), String> {
+    addins_registry_service.delist_addin(addin, &registry_path)
+}
+
+#[tauri::command]
 pub async fn get_categories(path: String) -> Result<Vec<CategoryModel>, String> {
     AddinsRegistryService::get_categories_locally(&path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn add_category_to_registry(
+    full_category_path: String,
+    registry_path: String,
+) -> Result<(), String> {
+    AddinsRegistryService::add_category_to_registry(&full_category_path, &registry_path)
 }

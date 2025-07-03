@@ -1,0 +1,1 @@
+export const SUCCESS_DELAY = 1800; // ms
