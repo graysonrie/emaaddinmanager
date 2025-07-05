@@ -14,6 +14,8 @@ import FileTreeView from "@/components/file-tree";
 import { determineRevitVersions } from "./helpers";
 import FailedToDelistAddinDialog from "@/app/shared/FailedToDelistAddinDialog";
 import PageWrapper from "@/components/PageWrapper";
+import MessageDialog from "@/components/dialogs/MessageDialog";
+import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -68,6 +70,11 @@ export default function LibraryPage() {
 
   const [isFailedToDelistAddinOpen, setIsFailedToDelistAddinOpen] =
     useState(false);
+  const [isConfirmDelistDialogOpen, setIsConfirmDelistDialogOpen] =
+    useState(false);
+  const handleDelistClicked = () => {
+    setIsConfirmDelistDialogOpen(true);
+  };
   const handleDelistAddin = async () => {
     if (!selectedAddin) {
       return;
@@ -85,7 +92,7 @@ export default function LibraryPage() {
   return (
     <PageWrapper>
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full bg-background">
+        <div className="flex flex-col h-full w-full min-w-70 bg-background">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
             <p className="text-muted-foreground mb-4">
@@ -106,13 +113,18 @@ export default function LibraryPage() {
         </div>
         <AddinPreview
           onInstallClicked={handleInstallAddin}
-          onDelistClicked={handleDelistAddin}
-        />
-        <FailedToDelistAddinDialog
-          isOpen={isFailedToDelistAddinOpen}
-          setIsOpen={setIsFailedToDelistAddinOpen}
+          onDelistClicked={handleDelistClicked}
         />
       </div>
+      <FailedToDelistAddinDialog
+        isOpen={isFailedToDelistAddinOpen}
+        setIsOpen={setIsFailedToDelistAddinOpen}
+      />
+      <ConfirmDelistAddinDialog
+        isOpen={isConfirmDelistDialogOpen}
+        setIsOpen={setIsConfirmDelistDialogOpen}
+        onOk={handleDelistAddin}
+      />
     </PageWrapper>
   );
 }

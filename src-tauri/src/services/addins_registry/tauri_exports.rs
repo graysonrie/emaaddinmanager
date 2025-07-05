@@ -5,6 +5,7 @@ use crate::services::{
     addins_registry::{
         models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
         service::AddinsRegistryService,
+        services::AddinsRegistry,
     },
 };
 use tauri::{AppHandle, Emitter, State};
@@ -12,9 +13,11 @@ use tauri::{AppHandle, Emitter, State};
 #[tauri::command]
 pub async fn get_addins(
     addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
-    path: String,
 ) -> Result<Vec<AddinModel>, String> {
-    Ok(addins_registry_service.get_addins(&path))
+    addins_registry_service
+        .get_addins()
+        .await
+        .map_err(|e| e.to_string())
 }
 
 /// Installs a list of addins, emitting an the addin's ID for each addin that is installed
@@ -30,6 +33,7 @@ pub async fn install_addins(
         let addin_id = addin.addin_id.clone();
         addins_registry_service
             .install_addin(addin, for_revit_versions)
+            .await
             .map_err(|e| e.to_string())?;
         app.emit("addin_installed", addin_id)
             .map_err(|e| e.to_string())?;
@@ -41,20 +45,31 @@ pub async fn install_addins(
 pub async fn delist_addin(
     addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
     addin: AddinModel,
-    registry_path: String,
 ) -> Result<(), String> {
-    addins_registry_service.delist_addin(addin, &registry_path)
+    addins_registry_service
+        .delist_addin(addin)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn get_categories(path: String) -> Result<Vec<CategoryModel>, String> {
-    AddinsRegistryService::get_categories_locally(&path).map_err(|e| e.to_string())
+pub async fn get_categories(
+    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+) -> Result<Vec<CategoryModel>, String> {
+    addins_registry_service
+        .get_categories()
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub async fn add_category_to_registry(
+    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
     full_category_path: String,
-    registry_path: String,
 ) -> Result<(), String> {
-    AddinsRegistryService::add_category_to_registry(&full_category_path, &registry_path)
+    addins_registry_service
+        .add_category(&full_category_path)
+        .await
+        .map_err(|e| e.to_string())
 }

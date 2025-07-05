@@ -1,5 +1,7 @@
 import { TreeNode } from "@/components/file-tree/builder/tree-builder";
+import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 type Props<T extends { fileTreePath: string }> = {
@@ -53,19 +55,29 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
     return node.children && node.children.length > 0;
   };
 
+  const breadcrumbsToDisplay = [breadcrumbs[breadcrumbs.length - 1]];
+
+  const showBackButton = breadcrumbs.length > 1;
+
+  const onNavigateBackClicked = () => {
+    setPath(breadcrumbs[breadcrumbs.length - 2].path);
+    setSelectedNode(null);
+  };
+
   return (
-    <div className="w-full overflow-y-auto">
+    <div className="w-full overflow-y-auto flex flex-col">
       {/* Breadcrumbs */}
-      <nav className="mb-4 flex items-center text-sm text-muted-foreground">
-        {breadcrumbs.map((crumb, idx) => (
+      <nav className="mb-4 flex items-center text-sm text-muted-foreground gap-2">
+        {showBackButton && (
+          <Button variant="ghost" size="icon" onClick={onNavigateBackClicked}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        )}
+        {breadcrumbsToDisplay.map((crumb, idx) => (
           <span key={crumb.name} className="flex items-center">
             {idx > 0 && <span className="mx-2">/</span>}
             <button
-              className={`hover:underline ${
-                idx === breadcrumbs.length - 1
-                  ? "font-semibold text-primary"
-                  : ""
-              }`}
+              className={`hover:underline font-semibold text-primary`}
               onClick={() => {
                 setPath(crumb.path);
                 setSelectedNode(null); // Clear selection when navigating

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 
+type ButtonVariant = "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined;
 interface Props {
   isOpen: boolean;
   setIsOpen?: (isOpen: boolean) => void;
@@ -15,6 +16,10 @@ interface Props {
   title: string;
   message: string;
   okButtonText?: string;
+  okButtonVariant?:ButtonVariant;
+  cancelButtonText?: string;
+  onOk?: () => void;
+  onCancel?: () => void;
 }
 
 export default function MessageDialog({
@@ -24,10 +29,22 @@ export default function MessageDialog({
   title,
   message,
   okButtonText,
+  okButtonVariant,
+  cancelButtonText,
+  onOk,
+  onCancel,
 }: Props) {
   const close = () => {
     setIsOpen?.(false);
     onClose?.();
+  };
+  const handleOk = () => {
+    onOk?.();
+    close();
+  };
+  const handleCancel = () => {
+    onCancel?.();
+    close();
   };
   return (
     <Dialog open={isOpen} onOpenChange={close}>
@@ -39,9 +56,16 @@ export default function MessageDialog({
           <DialogDescription>{message}</DialogDescription>
         </div>
         <DialogFooter>
-          <Button onClick={close} className="w-full" variant="outline">
-            {okButtonText ?? "Ok"}
-          </Button>
+          <div className="flex gap-2 flex-col w-full">
+            <Button onClick={handleOk} className="w-full" variant={okButtonVariant ?? "outline"}>
+              {okButtonText ?? "Ok"}
+            </Button>
+          {cancelButtonText && (
+            <Button onClick={handleCancel} className="w-full" variant="outline">
+              {cancelButtonText}
+            </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

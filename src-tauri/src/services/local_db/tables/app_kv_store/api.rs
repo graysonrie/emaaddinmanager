@@ -178,7 +178,7 @@ impl AppKvStoreTable {
         callers_value: &AutoSerializingValue<T>,
     ) -> Result<bool, String>
     where
-        T: Serialize + Clone + DeserializeOwned,
+        T: Serialize + Clone + DeserializeOwned + Default,
     {
         let caller_val_lock = callers_value.get_json().await;
         if self.has_value_changed(key, &caller_val_lock).await {

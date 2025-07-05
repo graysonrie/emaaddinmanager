@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { determineRevitVersions } from "./helpers";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
+import useLocalAddins from "@/lib/local-addins/useLocalAddins";
 
 interface AddinPreviewProps {
   onInstallClicked?: () => void;
@@ -15,7 +16,15 @@ export default function AddinPreview({
   onInstallClicked,
   onDelistClicked,
 }: AddinPreviewProps) {
-  const { selectedAddin, installingAddins } = useLibraryStore();
+  const {
+    selectedAddin,
+    setSelectedAddin,
+    installingAddins,
+    setFailedToUninstallAddin,
+  } = useLibraryStore();
+
+  const { uninstallAddins } = useLocalAddins();
+
   const userEmail = useConfigValue("userEmail");
   const [revitVersions, setRevitVersions] = useState<string[]>([]);
 
@@ -45,12 +54,42 @@ export default function AddinPreview({
     </div>
   );
 
+  const onUninstallClicked = async () => {
+    if (!selectedAddin) {
+      return;
+    }
+    try {
+      await uninstallAddins([
+        { addin: selectedAddin, forRevitVersions: revitVersions },
+      ]);
+    } catch (error) {
+      console.warn(error);
+      setFailedToUninstallAddin(true);
+    } finally {
+      setSelectedAddin({ ...selectedAddin, isInstalledLocally: false });
+    }
+  };
+
+  const uninstallButton = (selectedAddin: AddinModel) => (
+    <div>
+      {selectedAddin.isInstalledLocally ? (
+        <Button
+          className="w-full cursor-pointer"
+          variant="outline"
+          onClick={onUninstallClicked}
+        >
+          Uninstall
+        </Button>
+      ) : null}
+    </div>
+  );
+
   const delistButton = (selectedAddin: AddinModel) => (
     <div className="flex">
       {userEmail === selectedAddin.email ? (
         <Button
           className="w-full cursor-pointer"
-          variant="outline"
+          variant="destructive"
           onClick={onDelistClicked}
         >
           Delist
@@ -66,10 +105,11 @@ export default function AddinPreview({
           <div>
             <h3 className="text-xl font-semibold mb-2">{selectedAddin.name}</h3>
             <div className="space-y-2">
-              <div>
+              {/* TODO: Add version. Currently, the backend sets 1.0.0 for all addins. This is not correct. */}
+              {/* <div>
                 <span className="font-medium">Version:</span>{" "}
                 {selectedAddin.version}
-              </div>
+              </div> */}
               <div>
                 <span className="font-medium">Vendor:</span>{" "}
                 {selectedAddin.vendor}
@@ -104,6 +144,7 @@ export default function AddinPreview({
             ) : (
               <>
                 {installButton(selectedAddin)}
+                {uninstallButton(selectedAddin)}
                 {delistButton(selectedAddin)}
               </>
             )}

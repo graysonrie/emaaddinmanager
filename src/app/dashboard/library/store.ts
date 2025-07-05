@@ -7,6 +7,8 @@ interface LibraryState {
     setSelectedAddin: (addin: AddinModel | null) => void;
     installingAddins: AddinModel[];
     setInstallingAddins: (addins: AddinModel[]) => void;
+    failedToUninstallAddin: boolean;
+    setFailedToUninstallAddin: (failed: boolean) => void;
 }
 
 export const useLibraryStore = create<LibraryState>((set) => ({
@@ -14,4 +16,6 @@ export const useLibraryStore = create<LibraryState>((set) => ({
     setSelectedAddin: (addin: AddinModel | null) => set({ selectedAddin: addin }),
     installingAddins: [],
     setInstallingAddins: (addins: AddinModel[]) => set({ installingAddins: addins }),
+    failedToUninstallAddin: false,
+    setFailedToUninstallAddin: (failed: boolean) => set({ failedToUninstallAddin: failed }),
 }));
