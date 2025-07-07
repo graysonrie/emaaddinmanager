@@ -11,6 +11,7 @@ use crate::{
     services::{
         addin_exporter::models::category_model::CategoryModel,
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
+        config::keys::LOCAL_ADDIN_REGISTRY_PATH,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
     },
@@ -24,8 +25,8 @@ impl LocalAddinsRegistryService {
     pub fn new(local_db: Arc<LocalDbService>) -> Self {
         Self {
             registry_location: AutoSerializingValue::new_with_key_default(
-                "localAddinRegistryPath",
-                local_db,
+                LOCAL_ADDIN_REGISTRY_PATH,
+                local_db.clone(),
             ),
         }
     }

@@ -14,11 +14,13 @@ interface CategoryWithTreePath extends CategoryModel {
 interface Props {
   categories: CategoryModel[];
   setDestinationCategory: (category: CategoryModel | null) => void;
+  overrideDestinationPath?: string;
 }
 
 export default function SelectDestinationForm({
   categories,
   setDestinationCategory,
+  overrideDestinationPath,
 }: Props) {
   const root = useMemo(() => {
     return categories.find((c) => c.name === c.fullPath)?.fullPath;
@@ -36,21 +38,38 @@ export default function SelectDestinationForm({
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Select Destination</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 overflow-y-auto">
-          <FileTreeView
-            nodes={tree}
-            onSelectFolder={(category) => {
-              setDestinationCategory(category);
-            }}
-            nodeName="Category"
-            onlyFolders={true}
-          />
-        </div>
-      </CardContent>
+      {overrideDestinationPath ? (
+        <>
+          <CardHeader>
+            <CardTitle className="text-muted-foreground">
+              Destination
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {overrideDestinationPath}
+            </p>
+          </CardContent>
+        </>
+      ) : (
+        <>
+          <CardHeader>
+            <CardTitle>Select Destination</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 overflow-y-auto">
+              <FileTreeView
+                nodes={tree}
+                onSelectFolder={(category) => {
+                  setDestinationCategory(category);
+                }}
+                nodeName="Category"
+                onlyFolders={true}
+              />
+            </div>
+          </CardContent>
+        </>
+      )}
     </Card>
   );
 }

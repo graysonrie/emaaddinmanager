@@ -1,0 +1,1 @@
+pub const LOCAL_ADDIN_REGISTRY_PATH: &str = "localAddinRegistryPath";

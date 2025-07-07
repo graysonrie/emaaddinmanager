@@ -7,4 +7,5 @@ pub struct SimplifiedAddinInfoModel {
     pub email: String,
     pub vendor_id: String,
     pub description: String,
+    pub csharp_project_name: String,
 }

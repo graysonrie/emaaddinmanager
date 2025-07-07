@@ -1,3 +1,5 @@
+import { getFileNameFromPath, getParentDirectoryFromPath } from "../utils";
+
 export interface AddinModel {
   // Full path to the .addin file
   pathToAddinXmlFile: string;
@@ -22,4 +24,14 @@ export interface AddinModel {
   revitVersion: string | null;
   // Whether the addin is installed locally
   isInstalledLocally: boolean;
+}
+
+/**
+ * Get the name of the C# project that contains the addin.
+ * @param addin The addin to get the name of the C# project for.
+ * @returns The name of the C# project that contains the addin minus the .csproj extension.
+ */
+export function getAddinCsharpProjectName(addin: AddinModel) {
+  const name = getFileNameFromPath(addin.pathToAddinDllFolder);
+  return name;
 }

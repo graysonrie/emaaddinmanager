@@ -26,7 +26,8 @@ export default function useAddinRegistry() {
   const [canChangeRegistryPath, setCanChangeRegistryPath] = useState(true);
 
   // Function to load addins and categories
-  const loadRegistryData = async (path: string) => {
+  const loadRegistryData = async () => {
+    const path = localRegistryPath;
     setIsLoadingAddins(true);
     setAddinsError(null);
     setCategoriesError(null);
@@ -57,14 +58,14 @@ export default function useAddinRegistry() {
   const refreshRegistry = async () => {
     if (localRegistryPath) {
       console.log("Manually refreshing addin registry...");
-      await loadRegistryData(localRegistryPath);
+      await loadRegistryData();
     }
   };
 
   // Load addins when registry path changes
   useEffect(() => {
     if (localRegistryPath) {
-      loadRegistryData(localRegistryPath);
+      loadRegistryData();
     }
   }, [localRegistryPath]);
 

@@ -3,6 +3,7 @@ export interface SimplifiedAddinInfoModel {
   vendorId: string;
   email: string;
   description: string;
+  csharpProjectName: string;
 }
 
 export function getEmptySimplifiedAddinInfo(): SimplifiedAddinInfoModel {
@@ -11,5 +12,6 @@ export function getEmptySimplifiedAddinInfo(): SimplifiedAddinInfoModel {
     vendorId: "",
     email: "",
     description: "",
+    csharpProjectName: "",
   };
 }

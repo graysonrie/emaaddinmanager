@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useSidebarStore } from "./sidebar/store";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import useUserStats from "@/lib/user-stats/useUserStats";
 
 export default function Home() {
   const [showEmailSetup, setShowEmailSetup] = useState<boolean | null>(null);
@@ -29,30 +30,12 @@ export default function Home() {
     }
   }, [userEmail, userName, router]);
 
-  // Show error state
-  if (!userEmail || !userName) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex min-h-screen items-center justify-center p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]"
-      >
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center justify-center space-y-4"
-        >
-          <h1 className="text-xl font-semibold text-destructive">
-            Error Loading App
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Please restart the application
-          </p>
-        </motion.div>
-      </motion.div>
-    );
-  }
+  const userStats = useUserStats();
+
+  useEffect(() => {
+    const addinNames = userStats.addinNames;
+    console.log("addinNames", addinNames);
+  }, [userStats.addinNames]);
 
   // Show main app content
   return (
@@ -61,6 +44,8 @@ export default function Home() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="relative grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
-    ></motion.div>
+    >
+      <p>Home</p>
+    </motion.div>
   );
 }
