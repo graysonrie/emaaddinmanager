@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/store/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
 
 export default function useProjectSetup() {
   const { projectDir, setProjectDir, refresh, getAllProjectDlls, setDlls } =

@@ -7,7 +7,7 @@ import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
 import SelectDestinationForm from "./SelectDestinationForm";
 import { Button } from "@/components/ui/button";
 import { CategoryModel } from "@/lib/models/category.model";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/store/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
 import Processing from "./load-pages/Processing";
 import ResultsPopup from "./results-popup";
 import PageWrapper from "@/components/PageWrapper";

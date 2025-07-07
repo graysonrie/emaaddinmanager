@@ -5,7 +5,7 @@ use super::{
     },
 };
 use crate::{
-    models::auto_serializing_value::AutoSerializingValue,
+    models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
     services::local_db::table_creator::generate_table_lenient,
 };
 use print_err::print_err;
@@ -176,6 +176,31 @@ impl AppKvStoreTable {
         &self,
         key: &str,
         callers_value: &AutoSerializingValue<T>,
+    ) -> Result<bool, String>
+    where
+        T: Serialize + Clone + DeserializeOwned + Default,
+    {
+        let caller_val_lock = callers_value.get_json().await;
+        if self.has_value_changed(key, &caller_val_lock).await {
+            if let Some(value) = self.get(key).await? {
+                callers_value.set(value).await;
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    /// Where `key` is the key you want to check and `value` is the current JSON data that the caller has.
+    ///
+    /// Note if the caller's data was pulled from a different key, the results will be inaccurate.
+    ///
+    /// If the value in the KV store differs from what the caller's value is, then the caller's value will get updated.
+    ///
+    /// Returns `true` if the value was updated
+    pub async fn refresh_value_key<T>(
+        &self,
+        key: &str,
+        callers_value: &KvStoreValue<T>,
     ) -> Result<bool, String>
     where
         T: Serialize + Clone + DeserializeOwned + Default,

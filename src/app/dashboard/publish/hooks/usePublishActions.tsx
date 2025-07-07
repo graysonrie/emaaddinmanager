@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { CategoryModel } from "@/lib/models/category.model";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/store/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
 import { ErrorList } from "@/types/error-list";
 
 interface UsePublishActionsProps {

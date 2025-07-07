@@ -8,7 +8,6 @@ use sqlx::sqlite::SqlitePool;
 use tauri::AppHandle;
 
 pub struct LocalDbService {
-    connection: Arc<DatabaseConnection>,
     kv_store_table: AppKvStoreTable,
 }
 
@@ -25,10 +24,7 @@ impl LocalDbService {
         // initialize the tables
         let kv_store_table = AppKvStoreTable::new_async(db.clone(), app_handle).await;
 
-        Self {
-            connection: db,
-            kv_store_table,
-        }
+        Self { kv_store_table }
     }
 
     pub fn kv_store_table(&self) -> &AppKvStoreTable {

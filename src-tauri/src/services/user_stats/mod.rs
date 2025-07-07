@@ -8,9 +8,10 @@ pub use services::*;
 
 pub enum GetUserStatsError {
     DatabaseError(String),
+    UserNotFound,
     LocalAddinsError(String),
 }
 
 pub trait UserStats {
-    fn get_user_stats(&self) -> Fut<Result<UserStatsModel, GetUserStatsError>>;
+    fn get_user_stats(&self, user_email: String) -> Fut<Result<UserStatsModel, GetUserStatsError>>;
 }

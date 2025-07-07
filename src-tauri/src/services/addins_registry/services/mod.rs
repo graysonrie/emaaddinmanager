@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     constants::Fut,
     services::{
@@ -10,6 +12,7 @@ pub mod local_registry;
 pub mod web_registry;
 pub use enums::*;
 
+pub type AsyncAddinsRegistryServiceType = Arc<dyn AddinsRegistry + Send + Sync + 'static>;
 pub trait AddinsRegistry {
     fn get_addins(&self) -> Fut<Result<Vec<AddinModel>, GetAddinsError>>;
 

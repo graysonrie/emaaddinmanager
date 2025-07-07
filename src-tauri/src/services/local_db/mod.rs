@@ -1,5 +1,5 @@
 pub mod service;
-mod table_creator;
+pub mod table_creator;
 pub mod tables {
 
     pub mod app_kv_store {

@@ -7,7 +7,7 @@ use helpers::*;
 
 use crate::{
     constants::Fut,
-    models::auto_serializing_value::AutoSerializingValue,
+    models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
     services::{
         addin_exporter::models::category_model::CategoryModel,
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
@@ -18,17 +18,20 @@ use crate::{
 };
 
 pub struct LocalAddinsRegistryService {
-    registry_location: AutoSerializingValue<String>,
+    registry_location: KvStoreValue<String>,
 }
 
 impl LocalAddinsRegistryService {
     pub fn new(local_db: Arc<LocalDbService>) -> Self {
         Self {
-            registry_location: AutoSerializingValue::new_with_key_default(
+            registry_location: KvStoreValue::new_default(
                 LOCAL_ADDIN_REGISTRY_PATH,
                 local_db.clone(),
             ),
         }
+    }
+    pub async fn get_registry_location(&self) -> String {
+        self.registry_location.get_data_updated().await.unwrap()
     }
 }
 
