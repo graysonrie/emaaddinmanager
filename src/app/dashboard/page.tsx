@@ -1,41 +1,47 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { EmailSetup } from "@/app/dashboard/setup/EmailSetup";
-import { UserSettings } from "@/app/dashboard/settings/UserSettings";
-import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
-import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import { EMA_DOMAIN } from "@/types/constants";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useSidebarStore } from "./sidebar/store";
-import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import useUserStats from "@/lib/user-stats/useUserStats";
+import { useSidebarStore } from "./components/sidebar/store";
+import { useConfigInitialization } from "@/lib/persistence/useConfigInitialization";
+import StatsDisplay from "./components/stats-display";
+import ProfileSection from "../shared/UserAvatar";
+import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
-  const [showEmailSetup, setShowEmailSetup] = useState<boolean | null>(null);
   const { setIsOpen } = useSidebarStore();
-  const userEmail = useKeyValueSubscription<string>("userEmail");
-  const userName = useKeyValueSubscription<string>("userName");
+  const { isInitialized, isComplete, config } = useConfigInitialization();
   const router = useRouter();
 
   useEffect(() => {
-    if (!userEmail || !userName) {
+    if (!isInitialized) return; // Don't make routing decisions until initialized
+
+    if (!isComplete) {
       setIsOpen(false);
       router.replace("/dashboard/setup");
     } else {
       setIsOpen(true);
     }
-  }, [userEmail, userName, router]);
+  }, [isInitialized, isComplete, router, setIsOpen]);
 
-  const userStats = useUserStats();
+  // Show loading state while checking initialization
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    const addinNames = userStats.addinNames;
-    console.log("addinNames", addinNames);
-  }, [userStats.addinNames]);
+  // Don't render main content if setup is incomplete
+  if (!isComplete) {
+    return null;
+  }
 
   // Show main app content
   return (
@@ -43,9 +49,18 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"
+      className="flex flex-col gap-4 p-4"
     >
-      <p>Home</p>
+      <div className="flex flex-col gap-4 max-w-screen-md w-full mx-auto h-full">
+        <div className="flex flex-col gap-2">
+          <p className="text-2xl font-bold">Home</p>
+          <p className="text-sm text-muted-foreground">
+            Welcome back, {config.userName?.split(" ")[0]}
+          </p>
+        </div>
+        <Separator className="w-full" />
+        <StatsDisplay />
+      </div>
     </motion.div>
   );
 }

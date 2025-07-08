@@ -6,11 +6,14 @@ import { AddinModel } from "../models/addin.model";
 import { CategoryModel } from "../models/category.model";
 
 export default function useAddinRegistry() {
-  const { getAddins, installAddins, getCategories, delistAddin: delistAddinCommand } = useTauriCommands();
-  const { update } = useConfig();
   const {
-    data: localRegistryPath,
-  } = useConfigValueOrDefault(
+    getAddins,
+    installAddins,
+    getCategories,
+    delistAddin: delistAddinCommand,
+  } = useTauriCommands();
+  const { update } = useConfig();
+  const { data: localRegistryPath } = useConfigValueOrDefault(
     "localAddinRegistryPath",
     "S:\\BasesRevitAddinsRegistry"
   );

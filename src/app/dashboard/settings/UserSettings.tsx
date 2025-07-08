@@ -12,6 +12,7 @@ import { EMA_DOMAIN } from "@/types/constants";
 import { Input } from "@/components/ui/input";
 import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 export function UserSettings() {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,8 +20,10 @@ export function UserSettings() {
   const { update } = useConfig();
   const currentEmail = useKeyValueSubscription<string>("userEmail");
   const { localRegistryPath, changeRegistryPath } = useAddinRegistry();
+  const { changeUserStatsEmail } = getTauriCommands();
 
   const handleUpdateEmail = async (email: string) => {
+    await changeUserStatsEmail(email);
     await update("userEmail", email);
     setIsEditing(false);
   };
@@ -132,7 +135,7 @@ export function UserSettings() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <div className="flex items-center space-x-3">
             <Folder className="h-5 w-5 text-primary" />
             <h3 className="text-xl font-semibold">Local Addin Registry</h3>
@@ -154,7 +157,7 @@ export function UserSettings() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -9,24 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { CheckCircle, Blocks } from "lucide-react";
+import { CheckCircle, BriefcaseBusiness } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
-import { EmailInputForm } from "@/components/EmailInputForm";
 import { SUCCESS_DELAY } from "./constants";
-import getTauriCommands from "@/lib/commands/getTauriCommands";
+import DisciplinesSelectorForm from "@/components/DisciplinesSelectorForm";
 
-interface EmailSetupProps {
+interface DisciplineSetupProps {
   onComplete: () => void;
-  mustUseDomain?: string;
 }
 
-export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
+export function DisciplineSetup({ onComplete }: DisciplineSetupProps) {
   const [isComplete, setIsComplete] = useState(false);
   const { update } = useConfig();
-  const {changeUserStatsEmail} = getTauriCommands();
 
-  const handleEmailSubmit = async (email: string) => {
-    await update("userEmail", email);
+  const handleDisciplineSubmit = async (disciplines: string[]) => {
+    await update("userDisciplines", disciplines);
     setIsComplete(true);
     setTimeout(() => {
       onComplete();
@@ -40,7 +37,7 @@ export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
           <div className="flex flex-col items-center space-y-4">
             <CheckCircle className="h-12 w-12 text-green-500" />
             <div className="text-center">
-              <h3 className="text-lg font-semibold">Email Saved!</h3>
+              <h3 className="text-lg font-semibold">Disciplines Saved!</h3>
             </div>
           </div>
         </CardContent>
@@ -49,22 +46,18 @@ export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto h-full">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-          <Blocks className="h-6 w-6 text-primary" />
+          <BriefcaseBusiness className="h-6 w-6 text-primary" />
         </div>
-        <CardTitle>Welcome to the EMA Revit Addin Manager</CardTitle>
-        <CardDescription>
-          Please enter your work email address
-        </CardDescription>
+        <CardTitle>One more thing...</CardTitle>
       </CardHeader>
       <CardContent>
-        <EmailInputForm
-          mustUseDomain={mustUseDomain}
-          onSubmit={handleEmailSubmit}
-          submitLabel="Next"
-        />
+          <DisciplinesSelectorForm
+            onSubmit={handleDisciplineSubmit}
+            submitLabel="Next"
+          />
       </CardContent>
     </Card>
   );

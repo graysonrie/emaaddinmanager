@@ -1,6 +1,6 @@
 use std::{fs, path::Path, sync::Arc};
 
-use sea_orm::{ConnectionTrait, DatabaseConnection};
+use sea_orm::DatabaseConnection;
 use sqlx::sqlite::SqlitePool;
 pub mod api;
 pub mod entities;
@@ -8,7 +8,7 @@ use api::UserStatsTable;
 pub use entities::*;
 
 pub struct LocalStatsDbHandler {
-    pub user_stats_table: UserStatsTable,
+    user_stats_table: UserStatsTable,
 }
 
 impl LocalStatsDbHandler {
@@ -28,5 +28,9 @@ impl LocalStatsDbHandler {
             Arc::new(SqlitePool::connect(&db_url).await.unwrap().into());
         let user_stats_table = UserStatsTable::new_async(db).await;
         Self { user_stats_table }
+    }
+
+    pub fn user_stats_table(&self) -> &UserStatsTable {
+        &self.user_stats_table
     }
 }

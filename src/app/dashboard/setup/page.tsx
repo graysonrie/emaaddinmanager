@@ -8,16 +8,17 @@ import { UserSettings } from "../settings/UserSettings";
 import { EMA_DOMAIN } from "@/types/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { NameSetup } from "./NameSetup";
-import { useSidebarStore } from "../sidebar/store";
+import { useSidebarStore } from "../components/sidebar/store";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { SUCCESS_DELAY } from "./constants";
-
+import { DisciplineSetup } from "./DisciplineSetup";
 
 export default function SetupPage() {
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
+  const userDisciplines = useKeyValueSubscription<string[]>("userDisciplines");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "done">("email");
+  const [step, setStep] = useState<"email" | "name" | "disciplines" | "done">("email");
   const router = useRouter();
 
   useEffect(() => {
@@ -27,10 +28,13 @@ export default function SetupPage() {
     } else if (!userName) {
       setIsOpen(false);
       setStep("name");
-    } else if (userEmail && userName) {
+    } else if (!userDisciplines) {
+      setIsOpen(false);
+      setStep("disciplines");
+    } else if (userEmail && userName && userDisciplines) {
       setStep("done");
     }
-  }, [userEmail, userName]);
+  }, [userEmail, userName, userDisciplines]);
 
   useEffect(() => {
     if (step === "done") {
@@ -40,8 +44,6 @@ export default function SetupPage() {
       return;
     }
   }, [step, router]);
-
-
 
   return (
     <motion.div
@@ -75,6 +77,18 @@ export default function SetupPage() {
             className="w-full"
           >
             <NameSetup onComplete={() => setStep("done")} />
+          </motion.div>
+        )}
+        {step === "disciplines" && (
+          <motion.div
+            key="disciplines"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }} 
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="w-full"
+          >
+            <DisciplineSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
       </AnimatePresence>

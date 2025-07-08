@@ -44,11 +44,13 @@ impl AddinsRegistry for LocalAddinsRegistryService {
                 .await
                 .map_err(GetAddinsError::LocalDbError)?;
 
+            assert!(!dir_path.is_empty(), "Registry path is empty");
+
             let mut addins = Vec::new();
             let path = Path::new(&dir_path);
 
             if !path.exists() {
-                return Err(GetAddinsError::RegistryNotFound);
+                return Err(GetAddinsError::RegistryNotFound(dir_path));
             }
 
             if !path.is_dir() {
@@ -146,7 +148,7 @@ impl AddinsRegistry for LocalAddinsRegistryService {
 
             // Ensure the registry path exists and is a directory
             if !registry_path_obj.exists() || !registry_path_obj.is_dir() {
-                return Err(AddCategoryError::RegistryNotFound);
+                return Err(AddCategoryError::RegistryNotFound(registry_path));
             }
 
             // Check if the category path is inside the registry path (security check)

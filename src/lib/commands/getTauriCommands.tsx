@@ -8,6 +8,7 @@ import { DllModel } from "../models/dll.model";
 import { CategoryModel } from "../models/category.model";
 import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
+import { UserStatsModel } from "../models/user-stats.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -31,6 +32,12 @@ interface TauriCommands {
   getAddinFileInfo: (projectDir: string) => Promise<SimplifiedAddinInfoModel>;
   getAllProjectDlls: (projectDir: string) => Promise<DllModel[]>;
   buildAddin: (projectDir: string) => Promise<string>;
+  createUserStats: () => Promise<UserStatsModel>;
+  updateUserStats: () => Promise<UserStatsModel | undefined>;
+  getAllUserStats: () => Promise<UserStatsModel[]>;
+  doesUserExist: (userEmail: string) => Promise<boolean>;
+  changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
+  changeUserStatsName: (newUserName: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -155,6 +162,30 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<string>("build_addin", { projectDir });
   };
 
+  const createUserStats = async () => {
+    return await invoke<UserStatsModel>("create_user_stats");
+  };
+
+  const updateUserStats = async () => {
+    return await invoke<UserStatsModel | undefined>("update_user_stats");
+  };
+
+  const doesUserExist = async (userEmail: string) => {
+    return await invoke<boolean>("does_user_exist", { userEmail });
+  };
+
+  const getAllUserStats = async () => {
+    return await invoke<UserStatsModel[]>("get_all_user_stats");
+  }
+
+  const changeUserStatsEmail = async (newUserEmail: string) => {
+    return await invoke<void>("change_user_stats_email", { newUserEmail });
+  };
+
+  const changeUserStatsName = async (newUserName: string) => {
+    return await invoke<void>("change_user_stats_name", { newUserName });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -170,5 +201,11 @@ export default function getTauriCommands(): TauriCommands {
     getAddinFileInfo,
     getAllProjectDlls,
     buildAddin,
+    createUserStats,
+    doesUserExist,
+    updateUserStats,
+    getAllUserStats,
+    changeUserStatsEmail,
+    changeUserStatsName,
   };
 }

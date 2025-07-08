@@ -226,3 +226,8 @@ body,
 .animate-fade-in {
   animation: fade-in 0.15s ease;
 }
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--background);
+}

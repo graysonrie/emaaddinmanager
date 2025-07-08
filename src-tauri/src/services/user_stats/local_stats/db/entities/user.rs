@@ -12,6 +12,8 @@ pub struct Model {
     pub published_addins: serde_json::Value,
     /// Type: Vec<InstalledAddinModel>
     pub installed_addins: serde_json::Value,
+    /// Type: Vec<String>
+    pub disciplines: serde_json::Value,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter)]

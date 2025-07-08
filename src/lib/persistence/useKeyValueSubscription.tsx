@@ -30,3 +30,11 @@ export function useKeyValueSubscription<T>(key: string) {
 
   return value as T | undefined;
 }
+
+export function useKeyValueSubscriptionWithLoading<T>(key: string) {
+  const value = useKeyValueSubscription<T>(key);
+  const loading = useKeyValueStore(
+    (state) => state.loadingStates[key] ?? false
+  );
+  return { value, loading };
+}

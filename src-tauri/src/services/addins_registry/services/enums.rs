@@ -3,7 +3,7 @@ use std::fmt::Display;
 #[derive(Debug)]
 pub enum GetAddinsError {
     LocalDbError(String),
-    RegistryNotFound,
+    RegistryNotFound(String),
     InvalidPath,
 }
 impl Display for GetAddinsError {
@@ -36,7 +36,7 @@ impl Display for DelistAddinError {
 #[derive(Debug)]
 pub enum AddCategoryError {
     LocalDbError(String),
-    RegistryNotFound,
+    RegistryNotFound(String),
     InvalidPath,
     CategoryNotInsideRegistry,
     FileError(std::io::Error),

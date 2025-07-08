@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::services::app_save::service::AppSaveService;
 
 use super::tables::app_kv_store::api::AppKvStoreTable;
-use sea_orm::{ConnectionTrait, DatabaseConnection, Statement};
+use sea_orm::DatabaseConnection;
 use sqlx::sqlite::SqlitePool;
 use tauri::AppHandle;
 

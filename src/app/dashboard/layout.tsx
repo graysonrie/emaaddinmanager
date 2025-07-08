@@ -1,8 +1,8 @@
 "use client";
 
-import Sidebar from "@/app/dashboard/sidebar";
+import Sidebar from "@/app/dashboard/components/sidebar";
 import { PageTransition } from "@/components/PageTransition";
-import { useSidebarStore } from "./sidebar/store";
+import { useSidebarStore } from "./components/sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";

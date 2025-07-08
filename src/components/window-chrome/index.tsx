@@ -3,8 +3,24 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Button } from "../ui/button";
 import { Minus, X, Square } from "lucide-react";
 import { AppLogo } from "./AppLogo";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import { useMemo } from "react";
+import UserAvatar from "@/app/shared/UserAvatar";
 
 export function WindowChrome() {
+  const userName = useKeyValueSubscription<string>("userName");
+
+  const userFirstName = useMemo(() => {
+    return userName?.split(" ")[0];
+  }, [userName]);
+
+  const userNameInitials = useMemo(() => {
+    return userName
+      ?.split(" ")
+      .map((name) => name[0])
+      .join("");
+  }, [userName]);
+
   const handleMinimize = () => {
     getCurrentWindow().minimize();
   };
@@ -27,6 +43,8 @@ export function WindowChrome() {
       <div className="flex-1">
         <AppLogo />
       </div>
+
+      <UserAvatar userName={userName} />
 
       <div className="flex items-center space-x-1">
         <Button

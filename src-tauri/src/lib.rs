@@ -2,6 +2,7 @@ use services::addin_exporter::tauri_exports::*;
 use services::addins_registry::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
+use services::user_stats::tauri_exports::*;
 
 mod app_service_container;
 mod constants;
@@ -33,6 +34,13 @@ pub fn run() {
             get_addin_file_info,
             get_all_project_dlls,
             build_addin,
+            // User Stats
+            create_user_stats,
+            does_user_exist,
+            change_user_stats_email,
+            change_user_stats_name,
+            update_user_stats,
+            get_all_user_stats,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

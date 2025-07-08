@@ -4,10 +4,12 @@ import useTauriCommands from "../commands/getTauriCommands";
 
 type KeyValueState = {
   values: Record<string, any>;
+  loadingStates: Record<string, boolean>;
   subscribeToKey: <T>(key: string) => void;
   unsubscribeFromKey: (key: string) => void;
   set: (key: string, value: any) => void;
   get: <T>(key: string) => Promise<T | undefined>;
+  setLoading: (key: string, loading: boolean) => void;
 };
 
 const subscriptions = new Map<
@@ -17,11 +19,22 @@ const subscriptions = new Map<
 
 export const useKeyValueStore = create<KeyValueState>((set, get) => ({
   values: {},
+  loadingStates: {},
+  setLoading: (key: string, loading: boolean) => {
+    set((state) => ({
+      loadingStates: { ...state.loadingStates, [key]: loading },
+    }));
+  },
   subscribeToKey: async <T>(key: string) => {
     if (subscriptions.has(key)) {
       subscriptions.get(key)!.count++;
       return;
     }
+
+    // Set loading to true when starting subscription
+    set((state) => ({
+      loadingStates: { ...state.loadingStates, [key]: true },
+    }));
 
     const { kvStoreSubscribeToKey } = useTauriCommands();
     const model = await kvStoreSubscribeToKey<T>(key);
@@ -30,6 +43,7 @@ export const useKeyValueStore = create<KeyValueState>((set, get) => ({
 
     set((state) => ({
       values: { ...state.values, [key]: lastData },
+      loadingStates: { ...state.loadingStates, [key]: false },
     }));
 
     const unlisten = await listen<T>(eventName, (event) => {

@@ -4,15 +4,14 @@ use crate::services::{
     addin_exporter::models::category_model::CategoryModel,
     addins_registry::{
         models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
-        service::AddinsRegistryService,
-        services::AddinsRegistry,
+        services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
 };
 use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
 pub async fn get_addins(
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
 ) -> Result<Vec<AddinModel>, String> {
     addins_registry_service
         .get_addins()
@@ -24,7 +23,7 @@ pub async fn get_addins(
 #[tauri::command]
 pub async fn install_addins(
     app: AppHandle,
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
     install_requests: Vec<InstallAddinRequestModel>,
 ) -> Result<(), String> {
     for install_request in install_requests {
@@ -43,7 +42,7 @@ pub async fn install_addins(
 
 #[tauri::command]
 pub async fn delist_addin(
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
     addin: AddinModel,
 ) -> Result<(), String> {
     addins_registry_service
@@ -55,7 +54,7 @@ pub async fn delist_addin(
 
 #[tauri::command]
 pub async fn get_categories(
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
 ) -> Result<Vec<CategoryModel>, String> {
     addins_registry_service
         .get_categories()
@@ -65,7 +64,7 @@ pub async fn get_categories(
 
 #[tauri::command]
 pub async fn add_category_to_registry(
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
     full_category_path: String,
 ) -> Result<(), String> {
     addins_registry_service

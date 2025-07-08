@@ -6,7 +6,7 @@ use crate::services::{
     addins_registry::services::local_registry::LocalAddinsRegistryService,
     app_save::service::{AppSavePath, AppSaveService},
     local_db::service::LocalDbService,
-    user_stats::UserStatsService,
+    user_stats::LocalUserStatsService,
 };
 
 pub fn initialize_app(handle: &AppHandle) {
@@ -54,6 +54,6 @@ async fn initialize_user_stats_service_local(
     db: Arc<LocalDbService>,
     addins_registry: Arc<LocalAddinsRegistryService>,
     path_to_stats_db: &Path,
-) -> Arc<UserStatsService> {
-    Arc::new(UserStatsService::new_local_async(db, addins_registry, path_to_stats_db).await)
+) -> Arc<LocalUserStatsService> {
+    Arc::new(LocalUserStatsService::new_async(db, addins_registry, path_to_stats_db).await)
 }

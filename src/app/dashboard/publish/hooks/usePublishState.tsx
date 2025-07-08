@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ErrorList } from "@/types/error-list";
-import { useSidebarStore } from "../../sidebar/store";
+import { useSidebarStore } from "../../components/sidebar/store";
 
 export default function usePublishState() {
   const [isProcessing, setIsProcessing] = useState(false);
