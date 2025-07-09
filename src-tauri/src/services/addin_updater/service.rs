@@ -46,10 +46,10 @@ impl AddinUpdaterService {
 
         // For each local addin, check if their DLL file has been modified earlier than the registry addin's DLL file
         for current_local_addin in current_local_addins.iter() {
+            let current_local_addin_dll_name = Self::get_addin_dll_folder_name(current_local_addin);
             if let Some(corresponding_registry_addin) = addins.iter().find(|addin| {
-                addin.name == current_local_addin.name
-                    && addin.vendor == current_local_addin.vendor
-                    && addin.addin_type == current_local_addin.addin_type
+                let registry_addin_dll_name = Self::get_addin_dll_folder_name(addin);
+                registry_addin_dll_name == current_local_addin_dll_name
             }) {
                 let registry_addin_dll_modification_time =
                     Self::get_addin_dll_modification_time(corresponding_registry_addin)?;

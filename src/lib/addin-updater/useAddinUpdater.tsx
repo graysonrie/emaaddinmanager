@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { UpdateNotificationModel } from "../models/update-notification.model";
 import getTauriCommands from "../commands/getTauriCommands";
-import { useKeyValueSubscription } from "../persistence/useKeyValueSubscription";
-import { useConfigValue } from "../persistence/config/useConfigValue";
+import { eventBus, EVENTS } from "../events/eventBus";
 
 interface AddinUpdaterState {
   updateNotifications: UpdateNotificationModel[];
@@ -46,6 +45,10 @@ export const useAddinUpdaterStore = create<AddinUpdaterStore>((set, get) => ({
     try {
       const notifications = await getTauriCommands().checkForUpdates();
       console.log("Update Notifications:", notifications);
+
+      // Emit event for other parts of the app to listen to
+      eventBus.emit(EVENTS.ADDIN_UPDATES_AVAILABLE, notifications);
+
       set({
         updateNotifications: notifications,
         lastCheckTime: new Date(),

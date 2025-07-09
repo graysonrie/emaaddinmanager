@@ -77,7 +77,7 @@ export default function InstalledPage() {
               Your locally installed Revit addins, grouped by Revit versions.
             </p>
           </div>
-          <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto">
+          <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar">
             {groupedAddins.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-muted-foreground">

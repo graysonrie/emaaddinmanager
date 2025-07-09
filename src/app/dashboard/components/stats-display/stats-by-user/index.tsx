@@ -47,7 +47,7 @@ export default function StatsByUser() {
             <Card className="p-1 pt-2">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
                     <UserAvatar
                       userName={userStats.userName}
                       showFullname={true}
