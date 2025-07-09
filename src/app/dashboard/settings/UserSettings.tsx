@@ -20,11 +20,22 @@ export function UserSettings() {
   const { update } = useConfig();
   const currentEmail = useKeyValueSubscription<string>("userEmail");
   const { localRegistryPath, changeRegistryPath } = useAddinRegistry();
-  const { changeUserStatsEmail } = getTauriCommands();
+  const { changeUserStatsEmail, changeUserStatsName } = getTauriCommands();
 
   const handleUpdateEmail = async (email: string) => {
     await changeUserStatsEmail(email);
     await update("userEmail", email);
+    setIsEditing(false);
+  };
+
+  const handleUpdateName = async (name: string) => {
+    await changeUserStatsName(name);
+    await update("userName", name);
+    setIsEditing(false);
+  };
+
+  const handleUpdateDisciplines = async (disciplines: string[]) => {
+    await update("userDisciplines", disciplines);
     setIsEditing(false);
   };
 
