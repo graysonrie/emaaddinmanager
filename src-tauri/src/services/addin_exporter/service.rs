@@ -53,13 +53,13 @@ impl AddinExporterService {
     /// Exports the addin to the destination directory
     ///
     /// If the .addin file is not found, an error is returned
-    pub fn export_locally(
+    pub async fn export_locally(
         project_dir: &str,
         extra_dlls: &[&str],
         destination_dir: &str,
     ) -> ErrorList {
         let destination_dir_path = Path::new(destination_dir);
-        rev::export_addin(project_dir, extra_dlls, destination_dir_path)
+        rev::export_addin(project_dir, extra_dlls, destination_dir_path).await
     }
 
     /// Returns all the DLLs in the project directory
@@ -99,8 +99,8 @@ impl AddinExporterService {
     /// An error is returned if the addin fails to build
     ///
     /// Otherwise, returns the output of the build command
-    pub fn build_addin(project_dir: &str) -> Result<String, String> {
-        rev::build_project(project_dir)
+    pub async fn build_addin(project_dir: &str) -> Result<String, String> {
+        rev::build_project(project_dir).await
     }
 }
 

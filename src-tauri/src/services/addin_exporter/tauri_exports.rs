@@ -6,25 +6,26 @@ use crate::services::addin_exporter::service::AddinExporterService;
 
 /// Will return an empty error list if the addin is exported successfully
 #[tauri::command]
-pub fn export_addin(
+pub async fn export_addin(
     project_dir: &str,
     addin_file_info: SimplifiedAddinInfoModel,
     extra_dlls: Vec<String>,
     destination_dir: &str,
-) -> ErrorList {
+) -> Result<ErrorList, String> {
     println!("Exporting addin from project directory: {}", project_dir);
     match AddinExporterService::create_addin_file_for_project(project_dir, addin_file_info)
         .map_err(|e| ErrorList::new_with_error(&e))
     {
         Ok(path) => {
             println!("Addin file created at: {}", path);
-            AddinExporterService::export_locally(
+            Ok(AddinExporterService::export_locally(
                 project_dir,
                 &extra_dlls.iter().map(|x| x.as_str()).collect::<Vec<&str>>(),
                 destination_dir,
             )
+            .await)
         }
-        Err(e) => e,
+        Err(e) => Ok(e),
     }
 }
 
@@ -39,6 +40,6 @@ pub fn get_all_project_dlls(project_dir: &str) -> Result<Vec<DllModel>, String> 
 }
 
 #[tauri::command]
-pub fn build_addin(project_dir: &str) -> Result<String, String> {
-    AddinExporterService::build_addin(project_dir)
+pub async fn build_addin(project_dir: &str) -> Result<String, String> {
+    AddinExporterService::build_addin(project_dir).await
 }
