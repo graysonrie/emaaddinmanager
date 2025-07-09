@@ -8,36 +8,33 @@ import { UserSettings } from "../settings/UserSettings";
 import { EMA_DOMAIN } from "@/types/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { NameSetup } from "./NameSetup";
-import { useSidebarStore } from "../sidebar/store";
-
-export const SUCCESS_DELAY = 1800; // ms
+import { useSidebarStore } from "../components/sidebar/store";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import { SUCCESS_DELAY } from "./constants";
+import { DisciplineSetup } from "./DisciplineSetup";
 
 export default function SetupPage() {
-  const {
-    data: userEmail,
-    loading: emailLoading,
-    error: emailError,
-  } = useConfigValue("userEmail");
-  const {
-    data: userName,
-    loading: nameLoading,
-    error: nameError,
-  } = useConfigValue("userName");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userName = useKeyValueSubscription<string>("userName");
+  const userDisciplines = useKeyValueSubscription<string[]>("userDisciplines");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "done">("email");
+  const [step, setStep] = useState<"email" | "name" | "disciplines" | "done">("email");
   const router = useRouter();
 
   useEffect(() => {
-    if (!emailLoading && !userEmail) {
+    if (!userEmail) {
       setIsOpen(false);
       setStep("email");
-    } else if (!nameLoading && !userName) {
+    } else if (!userName) {
       setIsOpen(false);
       setStep("name");
-    } else if (userEmail && userName) {
+    } else if (!userDisciplines) {
+      setIsOpen(false);
+      setStep("disciplines");
+    } else if (userEmail && userName && userDisciplines) {
       setStep("done");
     }
-  }, [userEmail, userName, emailLoading, nameLoading]);
+  }, [userEmail, userName, userDisciplines]);
 
   useEffect(() => {
     if (step === "done") {
@@ -45,26 +42,8 @@ export default function SetupPage() {
         router.replace("/dashboard");
       }, SUCCESS_DELAY);
       return;
-
-      router.replace("/dashboard");
     }
   }, [step, router]);
-
-  if (emailLoading || nameLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span>Loading...</span>
-      </div>
-    );
-  }
-
-  if (emailError || nameError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span>Error loading setup. Please restart the app.</span>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -98,6 +77,18 @@ export default function SetupPage() {
             className="w-full"
           >
             <NameSetup onComplete={() => setStep("done")} />
+          </motion.div>
+        )}
+        {step === "disciplines" && (
+          <motion.div
+            key="disciplines"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }} 
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="w-full"
+          >
+            <DisciplineSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
       </AnimatePresence>

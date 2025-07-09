@@ -26,9 +26,11 @@ export function NameInputForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function validateName(name: string): string | null {
-    const nameRegex = /^[a-zA-Z0-9]+$/;
-    if (!nameRegex.test(name)) {
+    if (name.length < 2) {
       return "Please enter a valid name.";
+    }
+    if (name.split(" ").length < 2) {
+      return "Please enter a valid name with at least two words.";
     }
     return null;
   }

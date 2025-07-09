@@ -1,6 +1,6 @@
 "use client";
 
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,17 +10,32 @@ import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { EmailInputForm } from "@/components/EmailInputForm";
 import { EMA_DOMAIN } from "@/types/constants";
 import { Input } from "@/components/ui/input";
-import useAddinRegistry from '@/lib/addin-registry/useAddinRegistry';
+import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 export function UserSettings() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
-  const { data: currentEmail } = useConfigValue("userEmail");
+  const currentEmail = useKeyValueSubscription<string>("userEmail");
   const { localRegistryPath, changeRegistryPath } = useAddinRegistry();
+  const { changeUserStatsEmail, changeUserStatsName } = getTauriCommands();
 
   const handleUpdateEmail = async (email: string) => {
+    await changeUserStatsEmail(email);
     await update("userEmail", email);
+    setIsEditing(false);
+  };
+
+  const handleUpdateName = async (name: string) => {
+    await changeUserStatsName(name);
+    await update("userName", name);
+    setIsEditing(false);
+  };
+
+  const handleUpdateDisciplines = async (disciplines: string[]) => {
+    await update("userDisciplines", disciplines);
     setIsEditing(false);
   };
 
@@ -33,7 +48,7 @@ export function UserSettings() {
     if (selected) {
       changeRegistryPath(selected as string);
     }
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -131,7 +146,7 @@ export function UserSettings() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <div className="flex items-center space-x-3">
             <Folder className="h-5 w-5 text-primary" />
             <h3 className="text-xl font-semibold">Local Addin Registry</h3>
@@ -144,12 +159,16 @@ export function UserSettings() {
                 <p className="text-sm text-muted-foreground">
                   Configure the local addin registry path
                 </p>
-                <Input value={localRegistryPath} className="w-full mt-4" readOnly={true} onClick={handleRegistryInputClicked} />
+                <Input
+                  value={localRegistryPath}
+                  className="w-full mt-4"
+                  readOnly={true}
+                  onClick={handleRegistryInputClicked}
+                />
               </div>
             </div>
           </div>
-
-        </div>
+        </div> */}
       </div>
     </div>
   );

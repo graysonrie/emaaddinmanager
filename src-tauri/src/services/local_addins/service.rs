@@ -218,19 +218,20 @@ impl LocalAddinsService {
             let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
             let dll_src = Path::new(&addin.path_to_addin_dll_folder);
 
+            // Remove the DLL folder first (recursively)
+            if let Some(folder_name) = dll_src.file_name() {
+                let dll_dst = version_path.join(folder_name);
+                if dll_dst.exists() && dll_dst.is_dir() {
+                    fs::remove_dir_all(&dll_dst)?;
+                }
+            }
+            // If the DLL folder can't be deleted due to file locking, then don't try to remove the .addin file
+
             // Remove the .addin file
             if let Some(file_name) = addin_xml_src.file_name() {
                 let addin_xml_dst = version_path.join(file_name);
                 if addin_xml_dst.exists() {
                     fs::remove_file(&addin_xml_dst)?;
-                }
-            }
-
-            // Remove the DLL folder (recursively)
-            if let Some(folder_name) = dll_src.file_name() {
-                let dll_dst = version_path.join(folder_name);
-                if dll_dst.exists() && dll_dst.is_dir() {
-                    fs::remove_dir_all(&dll_dst)?;
                 }
             }
         }

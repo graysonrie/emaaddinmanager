@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import useTauriCommands from "../commands/useTauriCommands";
+import useTauriCommands from "../commands/getTauriCommands";
 import { AddinModel } from "../models/addin.model";
 
 export default function useLocalAddins() {
   const {
     getLocalAddins,
     getRevitVersions,
-    installAddin,
-    uninstallAddin,
+    uninstallAddins,
     getCategories,
+    
   } = useTauriCommands();
   const [addins, setAddins] = useState<AddinModel[]>([]);
   const [revitVersions, setRevitVersions] = useState<string[]>([]);
@@ -55,7 +55,6 @@ export default function useLocalAddins() {
     error,
     refreshAddins,
     refreshRevitVersions,
-    installAddin,
-    uninstallAddin,
+    uninstallAddins,
   };
 }

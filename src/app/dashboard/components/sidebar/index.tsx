@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeIcon, LibraryIcon, PackageIcon, SettingsIcon, Upload } from "lucide-react";
+import { BellIcon, HomeIcon, LibraryIcon, PackageIcon, SettingsIcon, Upload } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { label } from "framer-motion/client";
@@ -62,6 +62,11 @@ export default function Sidebar() {
       icon: <Upload/>,
       label: "Publish",
       link: "/dashboard/publish",
+    },
+    {
+      icon: <BellIcon />,
+      label: "Notifications",
+      link: "/dashboard/notifications",
     },
     {
       icon: <SettingsIcon />,

@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import useTauriCommands from "../commands/useTauriCommands";
+import useTauriCommands from "../commands/getTauriCommands";
 import useConfig from "../persistence/config/useConfig";
 import { useConfigValueOrDefault } from "../persistence/config/useConfigValue";
 import { AddinModel } from "../models/addin.model";
 import { CategoryModel } from "../models/category.model";
 
 export default function useAddinRegistry() {
-  const { getAddins, installAddin, getCategories } = useTauriCommands();
-  const { update } = useConfig();
   const {
-    data: localRegistryPath,
-    loading: configLoading,
-    error: configError,
-  } = useConfigValueOrDefault(
+    getAddins,
+    installAddins,
+    getCategories,
+    delistAddin: delistAddinCommand,
+  } = useTauriCommands();
+  const { update } = useConfig();
+  const { data: localRegistryPath } = useConfigValueOrDefault(
     "localAddinRegistryPath",
     "S:\\BasesRevitAddinsRegistry"
   );
@@ -28,7 +29,8 @@ export default function useAddinRegistry() {
   const [canChangeRegistryPath, setCanChangeRegistryPath] = useState(true);
 
   // Function to load addins and categories
-  const loadRegistryData = async (path: string) => {
+  const loadRegistryData = async () => {
+    const path = localRegistryPath;
     setIsLoadingAddins(true);
     setAddinsError(null);
     setCategoriesError(null);
@@ -59,23 +61,21 @@ export default function useAddinRegistry() {
   const refreshRegistry = async () => {
     if (localRegistryPath) {
       console.log("Manually refreshing addin registry...");
-      await loadRegistryData(localRegistryPath);
+      await loadRegistryData();
     }
   };
 
   // Load addins when registry path changes
   useEffect(() => {
     if (localRegistryPath) {
-      loadRegistryData(localRegistryPath);
+      loadRegistryData();
     }
   }, [localRegistryPath]);
 
   // Update loading state when config is ready
   useEffect(() => {
-    if (!configLoading) {
-      setIsLoading(false);
-    }
-  }, [configLoading]);
+    setIsLoading(false);
+  }, []);
 
   const changeRegistryPath = async (path: string) => {
     if (canChangeRegistryPath) {
@@ -87,15 +87,23 @@ export default function useAddinRegistry() {
     }
   };
 
+  const delistAddin = async (addin: AddinModel) => {
+    if (!localRegistryPath) {
+      return;
+    }
+    await delistAddinCommand(addin, localRegistryPath);
+    await refreshRegistry();
+  };
+
   return {
     addins,
-    installAddin,
+    installAddins,
+    delistAddin,
     changeRegistryPath,
     canChangeRegistryPath,
     setCanChangeRegistryPath,
     localRegistryPath,
-    isLoading: isLoading || configLoading || isLoadingAddins,
-    configError,
+    isLoading: isLoading || isLoadingAddins,
     addinsError,
     categories,
     categoriesError,

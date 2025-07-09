@@ -3,30 +3,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
-import { usePublishStore } from "./store";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
+import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 
 interface Props {
   addinFileInfo: SimplifiedAddinInfoModel;
   onAddinFileInfoChange: (info: SimplifiedAddinInfoModel) => void;
 }
 
-export default function AddinInfoForm() {
-  const { addinFileInfo, setAddinFileInfo } = usePublishStore();
+export default function AddinInfoForm({
+  addinFileInfo,
+  onAddinFileInfoChange,
+}: Props) {
   const handleChange = (
     field: keyof SimplifiedAddinInfoModel,
     value: string
   ) => {
-    setAddinFileInfo({
+    if (!userEmail) {
+      console.warn("User email is not set, cannot update addin info");
+      return;
+    }
+    onAddinFileInfoChange({
       ...addinFileInfo,
       [field]: value,
+      email: userEmail,
     });
   };
 
-  const { data: userEmail } = useConfigValue("userEmail");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full">
       <CardHeader>
         <CardTitle>Addin Information</CardTitle>
       </CardHeader>
@@ -46,8 +53,8 @@ export default function AddinInfoForm() {
           <Input
             id="vendor_id"
             placeholder="Enter your vendor ID"
-            value={addinFileInfo.vendor_id}
-            onChange={(e) => handleChange("vendor_id", e.target.value)}
+            value={addinFileInfo.vendorId}
+            onChange={(e) => handleChange("vendorId", e.target.value)}
           />
         </div>
 

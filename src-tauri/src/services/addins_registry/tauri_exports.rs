@@ -4,24 +4,26 @@ use crate::services::{
     addin_exporter::models::category_model::CategoryModel,
     addins_registry::{
         models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
-        service::AddinsRegistryService,
+        services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
 };
 use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
 pub async fn get_addins(
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
-    path: String,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
 ) -> Result<Vec<AddinModel>, String> {
-    Ok(addins_registry_service.get_addins(&path))
+    addins_registry_service
+        .get_addins()
+        .await
+        .map_err(|e| e.to_string())
 }
 
 /// Installs a list of addins, emitting an the addin's ID for each addin that is installed
 #[tauri::command]
 pub async fn install_addins(
-    app: State<'_, AppHandle>,
-    addins_registry_service: State<'_, Arc<AddinsRegistryService>>,
+    app: AppHandle,
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
     install_requests: Vec<InstallAddinRequestModel>,
 ) -> Result<(), String> {
     for install_request in install_requests {
@@ -30,6 +32,7 @@ pub async fn install_addins(
         let addin_id = addin.addin_id.clone();
         addins_registry_service
             .install_addin(addin, for_revit_versions)
+            .await
             .map_err(|e| e.to_string())?;
         app.emit("addin_installed", addin_id)
             .map_err(|e| e.to_string())?;
@@ -38,6 +41,34 @@ pub async fn install_addins(
 }
 
 #[tauri::command]
-pub async fn get_categories(path: String) -> Result<Vec<CategoryModel>, String> {
-    AddinsRegistryService::get_categories_locally(&path).map_err(|e| e.to_string())
+pub async fn delist_addin(
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
+    addin: AddinModel,
+) -> Result<(), String> {
+    addins_registry_service
+        .delist_addin(addin)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_categories(
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
+) -> Result<Vec<CategoryModel>, String> {
+    addins_registry_service
+        .get_categories()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn add_category_to_registry(
+    addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
+    full_category_path: String,
+) -> Result<(), String> {
+    addins_registry_service
+        .add_category(&full_category_path)
+        .await
+        .map_err(|e| e.to_string())
 }

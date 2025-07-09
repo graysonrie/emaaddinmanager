@@ -5,13 +5,13 @@ use super::{
     },
 };
 use crate::{
-    models::auto_serializing_value::AutoSerializingValue,
+    models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
     services::local_db::table_creator::generate_table_lenient,
 };
 use print_err::print_err;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{de::DeserializeOwned, Serialize};
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 use tauri::AppHandle;
 
 #[derive(Clone)]
@@ -39,8 +39,9 @@ impl AppKvStoreTable {
     /// Set a value in the key-value store
     pub async fn set<T>(&self, key: String, value: T) -> Result<(), String>
     where
-        T: Serialize,
+        T: Serialize + Debug,
     {
+        println!("Setting key: {} with value: {:?}", key, value);
         let value = serde_json::to_value(value).map_err(|err| err.to_string())?;
 
         // Emit the data to Tauri subscribers, if any:
@@ -121,7 +122,7 @@ impl AppKvStoreTable {
     /// Not necessarily an expensive operation, as results just get cached for future requests. Though, the underlying JSON has to be deserialized every time.
     pub async fn get_or_create_default<T>(&self, key: &str) -> Result<T, String>
     where
-        T: DeserializeOwned + Serialize + Clone + Default,
+        T: DeserializeOwned + Serialize + Clone + Default + Debug,
     {
         return self.get_or_create(key, T::default()).await;
     }
@@ -131,7 +132,7 @@ impl AppKvStoreTable {
     /// Not necessarily an expensive operation, as results just get cached for future requests. Though, the underlying JSON has to be deserialized every time.
     pub async fn get_or_create<T>(&self, key: &str, default: T) -> Result<T, String>
     where
-        T: DeserializeOwned + Serialize + Clone,
+        T: DeserializeOwned + Serialize + Clone + Debug,
     {
         // First, check and see if the subscription storage has the key:
         let val = match self.subscriptions.get_key_status(key).await {
@@ -178,7 +179,7 @@ impl AppKvStoreTable {
         callers_value: &AutoSerializingValue<T>,
     ) -> Result<bool, String>
     where
-        T: Serialize + Clone + DeserializeOwned,
+        T: Serialize + Clone + DeserializeOwned + Default,
     {
         let caller_val_lock = callers_value.get_json().await;
         if self.has_value_changed(key, &caller_val_lock).await {
@@ -187,6 +188,37 @@ impl AppKvStoreTable {
                 return Ok(true);
             }
         }
+        Ok(false)
+    }
+
+    /// Where `key` is the key you want to check and `value` is the current JSON data that the caller has.
+    ///
+    /// Note if the caller's data was pulled from a different key, the results will be inaccurate.
+    ///
+    /// If the value in the KV store differs from what the caller's value is, then the caller's value will get updated.
+    ///
+    /// Returns `true` if the value was updated
+    pub async fn refresh_value_key<T>(
+        &self,
+        key: &str,
+        callers_value: &KvStoreValue<T>,
+    ) -> Result<bool, String>
+    where
+        T: Serialize + Clone + DeserializeOwned + Default,
+    {
+        let caller_val_lock = callers_value.get_json().await;
+
+        // Always check the database, not just the subscription cache
+        if let Some(db_value) = self.get_db(key).await? {
+            if caller_val_lock != db_value {
+                // Value in database differs from caller's value, update it
+                let deserialized_value =
+                    serde_json::from_value(db_value).map_err(|err| err.to_string())?;
+                callers_value.set(deserialized_value).await;
+                return Ok(true);
+            }
+        }
+
         Ok(false)
     }
 

@@ -1,83 +1,154 @@
 "use client";
 
-import useLocalAddinExporter from "@/lib/local-addins/useLocalAddinExporter";
 import OpenProjectDropZone from "./OpenProjectDropZone";
 import AddinInfoForm from "./AddinInfoForm";
-import { usePublishStore } from "./store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import SelectDestinationForm from "./SelectDestinationForm";
+import { Button } from "@/components/ui/button";
+import { CategoryModel } from "@/lib/models/category.model";
+import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
+import Processing from "./load-pages/Processing";
+import ResultsPopup from "./results-popup";
+import PageWrapper from "@/components/PageWrapper";
+import {
+  useFileSelect,
+  usePublishState,
+  useAddinValidation,
+  useProjectSetup,
+  usePublishActions,
+} from "./hooks";
+import { getFileNameFromPath } from "@/lib/utils";
 
 export default function PublishPage() {
+  const [pageTitle, setPageTitle] = useState("Publish Addin");
   const { categories } = useAddinRegistry();
-  const {
-    projectDir,
-    exportAddin,
-    refresh,
-    buildAddin,
-    addinFileInfo,
-    setAddinFileInfo,
-    dlls,
-    loading,
-    error,
-  } = useLocalAddinExporter();
+  const [destinationCategory, setDestinationCategory] =
+    useState<CategoryModel | null>(null);
 
-  const {
-    projectDir: publishProjectDir,
-    setProjectDir: setPublishProjectDir,
-    addinFileInfo: publishAddinFileInfo,
-    setAddinFileInfo: setPublishAddinFileInfo,
-    setDlls: setPublishDlls,
-    categories: publishCategories,
-    setCategories: setPublishCategories,
-  } = usePublishStore();
+  // Custom hooks
+  const publishState = usePublishState();
+  const { addinFileInfo, setAddinFileInfo } = useLocalAddinExporterStore();
+  const addinValidation = useAddinValidation(addinFileInfo);
+  const projectSetup = useProjectSetup();
+  const { handleFileSelect, isProcessing: isFileSelectProcessing } =
+    useFileSelect(projectSetup.handleInitialProjectSelected);
 
-  const handleInitialProjectSelected = (projectDir: string) => {
-    refresh(projectDir);
+  const publishActions = usePublishActions({
+    onStartProcessing: publishState.startProcessing,
+    onStopProcessing: publishState.stopProcessing,
+    onShowResults: publishState.showResults,
+    onResetStore: () => {
+      projectSetup.resetProject();
+      setAddinFileInfo(null);
+    },
+  });
+
+  const handlePublish = () => {
+    publishActions.handlePublish(destinationCategory);
   };
 
-  useEffect(() => {
-    if (projectDir) {
-      setPublishProjectDir(projectDir);
-    }
-  }, [projectDir, setPublishProjectDir]);
-
-  // Update store when addin file info changes
-  useEffect(() => {
-    if (addinFileInfo) {
-      setPublishAddinFileInfo(addinFileInfo);
-    }
-  }, [addinFileInfo, setPublishAddinFileInfo]);
-
-  // Update store when DLLs change
-  useEffect(() => {
-    if (dlls && dlls.length > 0) {
-      setPublishDlls(dlls);
-    }
-  }, [dlls, setPublishDlls]);
+  const isPublishButtonDisabled =
+    !addinFileInfo ||
+    !destinationCategory ||
+    !addinValidation.isAllAddinInfoFilled();
 
   useEffect(() => {
-    if (categories && categories.length > 0) {
-      setPublishCategories(categories);
+    const addinExistsInRegistry = addinValidation.existingAddinsInRegistry();
+    if (addinExistsInRegistry) {
+      setPageTitle("Update Addin");
+    } else {
+      setPageTitle("Publish Addin");
     }
-  }, [categories, setPublishCategories]);
+  }, [addinFileInfo, addinValidation.existingAddinsInRegistry]);
+
+  useEffect(() => {
+    const overrideDestinationPath = addinValidation.overrideDestinationPath;
+    if (overrideDestinationPath) {
+      const name = getFileNameFromPath(overrideDestinationPath);
+      if (!name) {
+        console.warn("Could not get name from path", overrideDestinationPath);
+        return;
+      }
+      setDestinationCategory({
+        name,
+        fullPath: overrideDestinationPath,
+      });
+    }
+  }, [addinValidation.overrideDestinationPath]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      {publishProjectDir ? (
-        <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-2xl p-2">
-          <h1 className="text-2xl font-bold">Publish Addin</h1>
+    <PageWrapper>
+      <div className="flex flex-col items-center justify-center h-full">
+        {publishState.isProcessing ? (
+          <Processing message={publishState.processingMessage} />
+        ) : projectSetup.projectDir ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
+            <h1 className="text-2xl font-bold">{pageTitle}</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-y-auto">
+              {addinFileInfo && (
+                <AddinInfoForm
+                  addinFileInfo={addinFileInfo}
+                  onAddinFileInfoChange={setAddinFileInfo}
+                />
+              )}
+              <SelectDestinationForm
+                categories={categories}
+                setDestinationCategory={setDestinationCategory}
+                overrideDestinationPath={
+                  addinValidation.overrideDestinationPath
+                }
+              />
+            </div>
+            <label className="text-sm text-muted-foreground">
+              {destinationCategory ? (
+                <>
+                  Publishing to{" "}
+                  <span className="font-bold">{destinationCategory.name}</span>
+                </>
+              ) : (
+                ""
+              )}
+            </label>
+            <div className=" flex justify-center w-1/2 pb-3 gap-4 flex-col">
+              <Button
+                className="w-full"
+                variant={isPublishButtonDisabled ? "outline" : "default"}
+                disabled={isPublishButtonDisabled}
+                onClick={handlePublish}
+              >
+                {addinValidation.existingAddinsInRegistry()
+                  ? "Update"
+                  : "Publish"}
+              </Button>
+              <Button
+                className="w-full p-0 m-0 text-xs text-muted-foreground"
+                variant="link"
+                disabled={isFileSelectProcessing}
+                onClick={handleFileSelect}
+              >
+                Select a different project
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <h1 className="text-2xl font-bold">{pageTitle}</h1>
 
-          <AddinInfoForm />
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full gap-4">
-          <h1 className="text-2xl font-bold">Publish Addin</h1>
-
-          <OpenProjectDropZone
-            onProjectSelected={handleInitialProjectSelected}
-          />
-        </div>
-      )}
-    </div>
+            <OpenProjectDropZone
+              onProjectSelected={projectSetup.handleInitialProjectSelected}
+            />
+          </div>
+        )}
+        <ResultsPopup
+          isOpen={publishState.isResultsPopupOpen}
+          setIsOpen={publishState.closeResults}
+          title={publishState.resultsPopupTitle}
+          message={publishState.resultsPopupMessage}
+          buildResult={publishState.buildResult}
+          errorsList={publishState.errorsList}
+        />
+      </div>
+    </PageWrapper>
   );
 }

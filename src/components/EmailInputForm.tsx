@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
+import useUserStats from "@/lib/user-stats/useUserStats";
 
 interface EmailInputFormProps {
   initialEmail?: string;
@@ -25,8 +26,9 @@ export function EmailInputForm({
   const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { doesUserExist } = useUserStats(); // Extra validation logic to check if the user already exists
 
-  function validateEmail(email: string): string | null {
+  async function validateEmail(email: string): Promise<string | null> {
     const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     if (!emailRegex.test(email)) {
       return "Please enter a valid email address.";
@@ -34,17 +36,20 @@ export function EmailInputForm({
     if (mustUseDomain && !email.endsWith(`@${mustUseDomain}`)) {
       return `Email must end with @${mustUseDomain}`;
     }
+    if (await doesUserExist(email)) {
+      return "User already exists.";
+    }
     return null;
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    setError(validateEmail(e.target.value));
+    setError(await validateEmail(e.target.value));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validationError = validateEmail(email.trim());
+    const validationError = await validateEmail(email.trim());
     setError(validationError);
     if (validationError) return;
 

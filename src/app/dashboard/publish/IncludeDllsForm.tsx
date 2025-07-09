@@ -1,7 +1,9 @@
-import { usePublishStore } from "./store";
+import { DllModel } from "@/lib/models/dll.model";
 
-export default function IncludeDllsForm() {
-  const { dlls, setDlls } = usePublishStore();
-
+interface Props {
+  dlls: DllModel[];
+  onDllsChange: (dlls: DllModel[]) => void;
+}
+export default function IncludeDllsForm({ dlls, onDllsChange }: Props) {
   return <div>IncludeDllsForm</div>;
 }

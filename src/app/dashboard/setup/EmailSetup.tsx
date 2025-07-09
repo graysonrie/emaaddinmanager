@@ -12,7 +12,8 @@ import {
 import { CheckCircle, Blocks } from "lucide-react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { EmailInputForm } from "@/components/EmailInputForm";
-import { SUCCESS_DELAY } from "./page";
+import { SUCCESS_DELAY } from "./constants";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 interface EmailSetupProps {
   onComplete: () => void;
@@ -22,6 +23,7 @@ interface EmailSetupProps {
 export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
   const [isComplete, setIsComplete] = useState(false);
   const { update } = useConfig();
+  const {changeUserStatsEmail} = getTauriCommands();
 
   const handleEmailSubmit = async (email: string) => {
     await update("userEmail", email);
