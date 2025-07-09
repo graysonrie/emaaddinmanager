@@ -49,9 +49,9 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col gap-4 p-4"
+      className="flex flex-col gap-4 p-4 h-full overflow-auto thin-scrollbar"
     >
-      <div className="flex flex-col gap-4 max-w-screen-md w-full mx-auto h-full">
+      <div className="flex flex-col gap-4 max-w-screen-md w-full mx-auto">
         <div className="flex flex-col gap-2">
           <p className="text-2xl font-bold">Home</p>
           <p className="text-sm text-muted-foreground">
@@ -59,6 +59,7 @@ export default function Home() {
           </p>
         </div>
         <Separator className="w-full" />
+
         <StatsDisplay />
       </div>
     </motion.div>

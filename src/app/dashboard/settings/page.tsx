@@ -21,7 +21,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col  overflow-y-auto px-6 py-8">
+        <div className="flex flex-col thin-scrollbar  overflow-y-auto px-6 py-8">
           <div className="max-w-4xl w-full mx-auto">
             <UserSettings />
           </div>

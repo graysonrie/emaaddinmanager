@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import UserAvatar from "@/app/shared/UserAvatar";
 import { Loader2 } from "lucide-react";
+import { deduplicateInstalledAddins } from "./helpers";
+import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 
 interface UserFacingStats {
   userEmail: string;
@@ -26,11 +28,14 @@ export default function BasicUserStatsTable() {
 
   const userFacingStats = useMemo(() => {
     return userStats?.map((stats) => {
+      const deduplicatedInstalledAddins = deduplicateInstalledAddins(
+        stats.installedAddins
+      );
       const userFacingStats: UserFacingStats = {
         userEmail: stats.userEmail,
         userName: stats.userName,
         publishedAddins: stats.publishedAddins.length,
-        installedAddins: stats.installedAddins.length,
+        installedAddins: deduplicatedInstalledAddins.length,
         disciplines: stats.disciplines,
       };
       return userFacingStats;

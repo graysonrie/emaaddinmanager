@@ -33,6 +33,7 @@ export default function UserAvatar({ userName, size = "md", showFullname = false
   const userNameInitials = useMemo(() => {
     return userName
       ?.split(" ")
+      .filter((_, i, arr) => i === 0 || i === arr.length - 1) // Only keep first and last name
       .map((name) => name[0])
       .join("");
   }, [userName]);

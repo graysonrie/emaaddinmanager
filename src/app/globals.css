@@ -83,6 +83,14 @@
   --sidebar-ring: oklch(0.708 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+
+  --muted-red: #b32939;
+  --muted-orange: #ab5e12;
+  --muted-yellow: #cda000;
+  --muted-green: #18b332;
+  --muted-blue: #1873b3;
+  --muted-indigo: #7318b3;
+  --muted-violet: #b31873;
 }
 
 .dark {
@@ -230,4 +238,43 @@ body,
 .thin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--muted) var(--background);
+}
+
+.rainbow-border {
+  position: relative;
+  border-radius: 0.5rem;
+  background: hsl(var(--background));
+  border: px solid hsl(var(--primary));
+}
+
+.rainbow-border::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.3rem;
+  padding: 1px;
+  background: linear-gradient(
+    to right,
+    var(--muted-red),
+    var(--muted-orange),
+    var(--muted-yellow),
+    var(--muted-green),
+    var(--muted-blue),
+    var(--muted-indigo),
+    var(--muted-violet)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.rainbow-border:hover::before {
+  opacity: 1;
 }

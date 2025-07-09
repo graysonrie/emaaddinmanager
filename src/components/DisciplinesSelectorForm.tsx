@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 interface DisciplinesSelectorFormProps {
   onSubmit: (disciplines: string[]) => void;
   submitLabel: string;
+  showLabel?: boolean;
+  initialDisciplines?: string[];
 }
 
 // Common engineering disciplines
@@ -37,8 +39,10 @@ const DISCIPLINES = [
 export default function DisciplinesSelectorForm({
   onSubmit,
   submitLabel,
+  showLabel = true,
+  initialDisciplines = [],
 }: DisciplinesSelectorFormProps) {
-  const [selectedDisciplines, setSelectedDisciplines] = useState<string[]>([]);
+  const [selectedDisciplines, setSelectedDisciplines] = useState<string[]>(initialDisciplines);
 
   const handleDisciplineToggle = (discipline: string, checked: boolean) => {
     if (checked) {
@@ -55,12 +59,14 @@ export default function DisciplinesSelectorForm({
   return (
     <div className="flex flex-col h-full max-h-[400px]">
       {/* Header - Fixed at top */}
+      {showLabel && (
       <div className="space-y-2 mb-4 flex-shrink-0">
         <h3 className="text-lg font-medium">Select Your Disciplines</h3>
         <p className="text-sm text-muted-foreground">
           Choose all the engineering disciplines that apply to your work.
         </p>
       </div>
+      )}
 
       {/* Scrollable content area */}
       <div className="flex-1 min-h-0 overflow-y-auto">

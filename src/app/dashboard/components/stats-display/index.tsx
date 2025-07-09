@@ -13,17 +13,10 @@ import {
 import UserAvatar from "@/app/shared/UserAvatar";
 import { Loader2 } from "lucide-react";
 import BasicUserStatsTable from "./BasicUserStatsTable";
-
-interface UserFacingStats {
-  userName: string;
-  publishedAddins: number;
-  installedAddins: number;
-  disciplines: string[];
-}
+import StatsByUser from "./stats-by-user";
+import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 
 export default function StatsDisplay() {
-  const { userStats, loading, error, refresh } = useUserStats();
-  const userEmail = useKeyValueSubscription<string>("userEmail");
 
   //   const publishedAddins = useMemo(() => {
   //     if (!userStats || !userEmail) return [];
@@ -38,7 +31,7 @@ export default function StatsDisplay() {
   //   }, [userStats, userEmail]);
 
   //   const installedAddins = useMemo(() => {
-  //     if (!userStats || !userEmail) return [];
+  //     if (!userStats || !userEmail) return [] b;
 
   //     // Find the user stats for the current user
   //     const currentUserStats = userStats.find(
@@ -50,10 +43,16 @@ export default function StatsDisplay() {
   //   }, [userStats, userEmail]);
 
   return (
-    <div className="flex flex-row gap-4 w-full items-center h-full justify-center">
-      <div className="flex flex-col w-full">
-        <p className="text-2xl font-bold">Overview</p>
-        <BasicUserStatsTable />
+    <div className="flex flex-row gap-4 w-full items-center h-full justify-center overflow-auto">
+      <div className="flex flex-col w-full gap-8">
+        <div>
+          <p className="text-2xl font-bold">Overview</p>
+          <BasicUserStatsTable />
+        </div>
+        <div>
+          <p className="text-2xl font-bold">Stats By User</p>
+          <StatsByUser />
+        </div>
       </div>
     </div>
   );
