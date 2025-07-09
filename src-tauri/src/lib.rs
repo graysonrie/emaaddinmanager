@@ -1,4 +1,5 @@
 use services::addin_exporter::tauri_exports::*;
+use services::addin_updater::tauri_exports::*;
 use services::addins_registry::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
@@ -41,6 +42,8 @@ pub fn run() {
             change_user_stats_name,
             update_user_stats,
             get_all_user_stats,
+            // Addin Updater
+            check_for_updates,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

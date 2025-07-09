@@ -6,6 +6,7 @@ import { useSidebarStore } from "./components/sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useAddinUpdaterStore } from "@/lib/addin-updater/useAddinUpdater";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,8 @@ export default function DashboardLayout({
 }) {
   const { isOpen } = useSidebarStore();
   const router = useRouter();
+
+  const { startPeriodicChecking } = useAddinUpdaterStore();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -31,6 +34,10 @@ export default function DashboardLayout({
     router.prefetch("/dashboard/publish");
 
     return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    startPeriodicChecking();
   }, []);
 
   return (

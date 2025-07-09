@@ -9,6 +9,7 @@ import { CategoryModel } from "../models/category.model";
 import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
 import { UserStatsModel } from "../models/user-stats.model";
+import { UpdateNotificationModel } from "../models/update-notification.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -38,6 +39,7 @@ interface TauriCommands {
   doesUserExist: (userEmail: string) => Promise<boolean>;
   changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
   changeUserStatsName: (newUserName: string) => Promise<void>;
+  checkForUpdates: () => Promise<UpdateNotificationModel[]>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -176,7 +178,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const getAllUserStats = async () => {
     return await invoke<UserStatsModel[]>("get_all_user_stats");
-  }
+  };
 
   const changeUserStatsEmail = async (newUserEmail: string) => {
     return await invoke<void>("change_user_stats_email", { newUserEmail });
@@ -184,6 +186,10 @@ export default function getTauriCommands(): TauriCommands {
 
   const changeUserStatsName = async (newUserName: string) => {
     return await invoke<void>("change_user_stats_name", { newUserName });
+  };
+
+  const checkForUpdates = async () => {
+    return await invoke<UpdateNotificationModel[]>("check_for_updates");
   };
 
   return {
@@ -207,5 +213,6 @@ export default function getTauriCommands(): TauriCommands {
     getAllUserStats,
     changeUserStatsEmail,
     changeUserStatsName,
+    checkForUpdates,
   };
 }
