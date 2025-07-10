@@ -102,7 +102,7 @@ export default function LibraryPage() {
           </div>
           <div className="flex flex-1 min-h-0 px-8 pb-8 gap-8">
             {/* Left: Tree View */}
-            <div className="w-full max-w-md flex-shrink-0">
+            <div className="w-full max-w-md flex-shrink-0 overflow-y-auto thin-scrollbar">
               <FileTreeView
                 nodes={tree}
                 onSelect={(addin) => setSelectedAddin(addin)}

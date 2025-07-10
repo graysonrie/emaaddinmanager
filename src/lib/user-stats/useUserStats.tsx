@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import useLocalAddins from "../local-addins/useLocalAddins";
 import { UserStatsModel } from "../models/user-stats.model";
 import getTauriCommands from "../commands/getTauriCommands";
+import useConfig from "../persistence/config/useConfig";
+import { useConfigValue } from "../persistence/config/useConfigValue";
 
 interface UserStatsState {
   userStats: UserStatsModel[];
@@ -16,6 +18,8 @@ export default function useUserStats(): UserStatsState {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const userEmail = useConfigValue("userEmail");
+
   const { getAllUserStats, createUserStats, doesUserExist } =
     getTauriCommands();
 
@@ -24,8 +28,10 @@ export default function useUserStats(): UserStatsState {
       const stats = await getAllUserStats();
       setUserStats(stats);
     } catch (err) {
+      console.warn("Error fetching user stats", err);
       setError(err as string);
     } finally {
+      console.log("Got user stats");
       setLoading(false);
     }
   };
@@ -40,7 +46,7 @@ export default function useUserStats(): UserStatsState {
       } catch (error) {
         console.warn("Failed to create user stats", error);
       }
-      fetchUserStats();
+      await fetchUserStats();
     };
     createUserStatsIfNotExists();
   }, []);

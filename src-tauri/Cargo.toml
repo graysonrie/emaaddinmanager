@@ -39,3 +39,4 @@ tauri-plugin-dialog = "2"
 csv = "1.3"
 chrono = "0.4"
 rev = { path = "C:\\Users\\grieger.EMA\\Desktop\\Rust\\revitcli" }
+rayon = "1.7"

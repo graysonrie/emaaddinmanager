@@ -19,12 +19,17 @@ import {
   usePublishActions,
 } from "./hooks";
 import { getFileNameFromPath } from "@/lib/utils";
+import { useAdvancedOptionsPopupStore } from "./advanced-options/useAdvancedOptionsPopupStore";
+import { Settings } from "lucide-react";
+import AdvancedOptionsPopup from "./advanced-options";
 
 export default function PublishPage() {
   const [pageTitle, setPageTitle] = useState("Publish Addin");
   const { categories } = useAddinRegistry();
   const [destinationCategory, setDestinationCategory] =
     useState<CategoryModel | null>(null);
+
+  const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
 
   // Custom hooks
   const publishState = usePublishState();
@@ -84,7 +89,17 @@ export default function PublishPage() {
           <Processing message={publishState.processingMessage} />
         ) : projectSetup.projectDir ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
-            <h1 className="text-2xl font-bold">{pageTitle}</h1>
+            <div className="flex justify-center w-full gap-2">
+              <h1 className="text-2xl font-bold">{pageTitle}</h1>
+              <Button
+                variant="ghost"
+                onClick={() => advancedOptionsPopupStore.setIsOpen(true)}
+                title="Advanced Options"
+                className="w-8 h-8 "
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-y-auto">
               {addinFileInfo && (
                 <AddinInfoForm
@@ -148,6 +163,7 @@ export default function PublishPage() {
           buildResult={publishState.buildResult}
           errorsList={publishState.errorsList}
         />
+        <AdvancedOptionsPopup />
       </div>
     </PageWrapper>
   );

@@ -3,6 +3,7 @@ import { CategoryModel } from "@/lib/models/category.model";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
 import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
 import { ErrorList } from "@/types/error-list";
+import { useAdvancedOptionsPopupStore } from "../advanced-options/useAdvancedOptionsPopupStore";
 
 interface UsePublishActionsProps {
   onStartProcessing: (message: string) => void;
@@ -22,8 +23,10 @@ export default function usePublishActions({
   onShowResults,
   onResetStore,
 }: UsePublishActionsProps) {
-  const { exportAddin, buildAddin, addinFileInfo, setAddinFileInfo, dlls } =
+  const { exportAddin, buildAddin, addinFileInfo } =
     useLocalAddinExporterStore();
+
+  const { selectedProjectDlls } = useAdvancedOptionsPopupStore();
 
   const handlePublish = useCallback(
     async (destinationCategory: CategoryModel | null) => {
@@ -31,15 +34,31 @@ export default function usePublishActions({
         return;
       }
 
-      onStartProcessing("Building addin...");
-      const buildResult = await buildAddin();
-      onStartProcessing("Exporting addin...");
+      const errorsList: ErrorList = { errors: [], warnings: [] };
 
-      const errorsList = await exportAddin(
-        addinFileInfo,
-        dlls.map((dll) => dll.name),
-        destinationCategory.fullPath
-      );
+      onStartProcessing("Building addin...");
+      let buildResult: string =
+        "Failed to build addin. Please open your C# file and ensure there are no errors.";
+      try {
+        buildResult = await buildAddin();
+
+        // Only export if build was successful
+        onStartProcessing("Exporting addin...");
+
+        const exportErrorsList = await exportAddin(
+          addinFileInfo,
+          selectedProjectDlls.map((dll) => dll.dll.name),
+          destinationCategory.fullPath
+        );
+
+        errorsList.errors = [...errorsList.errors, ...exportErrorsList.errors];
+        errorsList.warnings = [
+          ...errorsList.warnings,
+          ...exportErrorsList.warnings,
+        ];
+      } catch (error) {
+        errorsList.errors.push("Failed to build addin");
+      }
 
       onStopProcessing();
 
@@ -63,7 +82,7 @@ export default function usePublishActions({
     },
     [
       addinFileInfo,
-      dlls,
+      selectedProjectDlls,
       buildAddin,
       exportAddin,
       onStartProcessing,

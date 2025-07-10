@@ -11,20 +11,32 @@ import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificati
 import AddinUpdateNotificationCard from "./AddinUpdateNotificationCard";
 import CheckForUpdatesButton from "./CheckForUpdatesButton";
 import { useAddinUpdater } from "@/lib/addin-updater/useAddinUpdater";
+import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 
 export default function NotificationsPage() {
   const {
-    addinUpdateNotifications,
+    addinUpdateNotifications: storeNotifications,
+    setAddinUpdateNotifications,
     hasUserCheckedNotifications,
     setCheckedNotifications,
   } = useNotificationsStore();
   const { isChecking } = useAddinUpdater();
   const [hasCheckedForUpdates, setHasCheckedForUpdates] = useState(false);
 
-  // Set the notifications as checked when the page is loaded
+  // Local state for notifications
+  const [addinUpdateNotifications, setLocalNotifications] = useState<
+    UpdateNotificationModel[]
+  >([]);
+
+  // When the page is loaded (or on click, if you want), copy and clear
   useEffect(() => {
+    if (storeNotifications.length > 0) {
+      setLocalNotifications(storeNotifications);
+      setAddinUpdateNotifications([]); // Clear the store
+    }
     setCheckedNotifications();
-  }, []);
+    // eslint-disable-next-line
+  }, []); // Only run on mount
 
   // Reset hasCheckedForUpdates when new notifications come in
   useEffect(() => {

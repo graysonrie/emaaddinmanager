@@ -38,7 +38,6 @@ export const useNotificationsStore = create<NotificationsStore>((set) => {
     setCheckedNotifications: () =>
       set({
         hasUserCheckedNotifications: true,
-        addinUpdateNotifications: [],
       }),
   };
 });

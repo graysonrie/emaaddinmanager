@@ -1,6 +1,7 @@
 use std::{fmt::Display, fs, path::Path};
 
 use chrono::{DateTime, Utc};
+use rayon::prelude::*;
 
 use crate::services::{
     addin_updater::models::UpdateNotificationModel,
@@ -33,8 +34,6 @@ impl AddinUpdaterService {
     pub async fn check_for_updates(
         &self,
     ) -> Result<Vec<UpdateNotificationModel>, CheckForUpdatesError> {
-        let mut update_notifications = Vec::new();
-
         let addins = self
             .addins_registry
             .get_addins()
@@ -45,26 +44,43 @@ impl AddinUpdaterService {
             .map_err(|e| CheckForUpdatesError::LocalAddins(e.to_string()))?;
 
         // For each local addin, check if their DLL file has been modified earlier than the registry addin's DLL file
-        for current_local_addin in current_local_addins.iter() {
-            let current_local_addin_dll_name = Self::get_addin_dll_folder_name(current_local_addin);
-            if let Some(corresponding_registry_addin) = addins.iter().find(|addin| {
-                let registry_addin_dll_name = Self::get_addin_dll_folder_name(addin);
-                registry_addin_dll_name == current_local_addin_dll_name
-            }) {
-                let registry_addin_dll_modification_time =
-                    Self::get_addin_dll_modification_time(corresponding_registry_addin)?;
-                let current_local_addin_dll_modification_time =
-                    Self::get_addin_dll_modification_time(current_local_addin)?;
-                if registry_addin_dll_modification_time > current_local_addin_dll_modification_time
-                {
-                    println!("Update found for addin: {}", current_local_addin.name);
-                    // Apply the update:
-                    let update_notification =
-                        Self::update_addin(corresponding_registry_addin, current_local_addin)?;
-                    update_notifications.push(update_notification);
+        let update_notifications: Vec<_> = current_local_addins
+            .par_iter()
+            .filter_map(|current_local_addin| {
+                let current_local_addin_dll_name =
+                    Self::get_addin_dll_folder_name(current_local_addin);
+                if let Some(corresponding_registry_addin) = addins.iter().find(|addin| {
+                    let registry_addin_dll_name = Self::get_addin_dll_folder_name(addin);
+                    registry_addin_dll_name == current_local_addin_dll_name
+                }) {
+                    let registry_addin_dll_modification_time =
+                        Self::get_addin_dll_modification_time(corresponding_registry_addin).ok()?;
+                    let current_local_addin_dll_modification_time =
+                        Self::get_addin_dll_modification_time(current_local_addin).ok()?;
+                    if registry_addin_dll_modification_time
+                        > current_local_addin_dll_modification_time
+                    {
+                        println!("Update found for addin: {}", current_local_addin.name);
+                        // Apply the update:
+                        match Self::update_addin(corresponding_registry_addin, current_local_addin)
+                        {
+                            Ok(update_notification) => Some(update_notification),
+                            Err(e) => {
+                                eprintln!(
+                                    "Failed to update addin {}: {:?}",
+                                    current_local_addin.name, e
+                                );
+                                None
+                            }
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
                 }
-            }
-        }
+            })
+            .collect();
 
         Ok(update_notifications)
     }
@@ -120,14 +136,46 @@ impl AddinUpdaterService {
             let target_path = target_dll_folder.join(source_path.file_name().unwrap());
 
             if source_path.is_file() {
-                fs::copy(&source_path, &target_path).map_err(|e| {
-                    CheckForUpdatesError::Update(format!(
-                        "Failed to copy file from {} to {}: {}",
-                        source_path.display(),
-                        target_path.display(),
-                        e
-                    ))
-                })?;
+                // Only copy if file is missing or different
+                let should_copy = if target_path.exists() {
+                    let src_meta = fs::metadata(&source_path).map_err(|e| {
+                        CheckForUpdatesError::Update(format!(
+                            "Failed to get source metadata: {}",
+                            e
+                        ))
+                    })?;
+                    let tgt_meta = fs::metadata(&target_path).map_err(|e| {
+                        CheckForUpdatesError::Update(format!(
+                            "Failed to get target metadata: {}",
+                            e
+                        ))
+                    })?;
+                    src_meta.len() != tgt_meta.len()
+                        || src_meta.modified().map_err(|e| {
+                            CheckForUpdatesError::Update(format!(
+                                "Failed to get source modified time: {}",
+                                e
+                            ))
+                        })? != tgt_meta.modified().map_err(|e| {
+                            CheckForUpdatesError::Update(format!(
+                                "Failed to get target modified time: {}",
+                                e
+                            ))
+                        })?
+                } else {
+                    true
+                };
+
+                if should_copy {
+                    fs::copy(&source_path, &target_path).map_err(|e| {
+                        CheckForUpdatesError::Update(format!(
+                            "Failed to copy file from {} to {}: {}",
+                            source_path.display(),
+                            target_path.display(),
+                            e
+                        ))
+                    })?;
+                }
             }
         }
 

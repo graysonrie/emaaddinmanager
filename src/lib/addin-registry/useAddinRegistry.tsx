@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useTauriCommands from "../commands/getTauriCommands";
 import useConfig from "../persistence/config/useConfig";
-import { useConfigValueOrDefault } from "../persistence/config/useConfigValue";
+import { useConfigValue } from "../persistence/config/useConfigValue";
 import { AddinModel } from "../models/addin.model";
 import { CategoryModel } from "../models/category.model";
 
@@ -13,10 +13,7 @@ export default function useAddinRegistry() {
     delistAddin: delistAddinCommand,
   } = useTauriCommands();
   const { update } = useConfig();
-  const { data: localRegistryPath } = useConfigValueOrDefault(
-    "localAddinRegistryPath",
-    "S:\\BasesRevitAddinsRegistry"
-  );
+  const localRegistryPath = useConfigValue("localAddinRegistryPath");
 
   const [addins, setAddins] = useState<AddinModel[]>([]);
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -31,6 +28,14 @@ export default function useAddinRegistry() {
   // Function to load addins and categories
   const loadRegistryData = async () => {
     const path = localRegistryPath;
+
+    if (!path) {
+      setAddinsError("No registry path found");
+      setCategoriesError("No registry path found");
+      setIsLoadingAddins(false);
+      return;
+    }
+
     setIsLoadingAddins(true);
     setAddinsError(null);
     setCategoriesError(null);

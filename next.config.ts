@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   // ! Uncomment this to export the app for production
-  // output: "export",
+  output: "export",
 
   /* config options here */
   // ! The following are required in order for assets to use in the dev build:

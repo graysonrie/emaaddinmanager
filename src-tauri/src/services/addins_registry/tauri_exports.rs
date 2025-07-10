@@ -7,6 +7,8 @@ use crate::services::{
         services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
 };
+use futures::stream::{FuturesUnordered, StreamExt};
+use rayon::prelude::*;
 use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
@@ -26,16 +28,27 @@ pub async fn install_addins(
     addins_registry_service: State<'_, Arc<LocalAddinsRegistryService>>,
     install_requests: Vec<InstallAddinRequestModel>,
 ) -> Result<(), String> {
+    let mut futures = FuturesUnordered::new();
+
     for install_request in install_requests {
-        let addin = install_request.addin;
-        let for_revit_versions = install_request.for_revit_versions;
-        let addin_id = addin.addin_id.clone();
-        addins_registry_service
-            .install_addin(addin, for_revit_versions)
-            .await
-            .map_err(|e| e.to_string())?;
-        app.emit("addin_installed", addin_id)
-            .map_err(|e| e.to_string())?;
+        let addins_registry_service = addins_registry_service.clone(); // must be cloneable or Arc
+        let app = app.clone(); // must be cloneable or Arc
+        futures.push(async move {
+            let addin = install_request.addin;
+            let for_revit_versions = install_request.for_revit_versions;
+            let addin_id = addin.addin_id.clone();
+            addins_registry_service
+                .install_addin(addin, for_revit_versions)
+                .await
+                .map_err(|e| e.to_string())?;
+            app.emit("addin_installed", addin_id)
+                .map_err(|e| e.to_string())?;
+            Ok::<_, String>(())
+        });
+    }
+
+    while let Some(result) = futures.next().await {
+        result?; // propagate error if any
     }
     Ok(())
 }

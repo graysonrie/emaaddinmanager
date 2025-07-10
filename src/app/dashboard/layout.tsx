@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAddinUpdaterStore } from "@/lib/addin-updater/useAddinUpdater";
+import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,11 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const { startPeriodicChecking } = useAddinUpdaterStore();
+
+   useConfigValueOrDefault(
+    "localAddinRegistryPath",
+    "S:\\BasesRevitAddinsRegistry"
+  );
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
