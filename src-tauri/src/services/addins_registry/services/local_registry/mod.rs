@@ -103,7 +103,7 @@ impl AddinsRegistry for LocalAddinsRegistryService {
                     } else if entry_path.is_file() {
                         if let Some(ext) = entry_path.extension() {
                             if ext == "addin" {
-                                let addin_info = rev::get_addin_file_info_from_file(
+                                let addin_info = revitcli::get_addin_file_info_from_file(
                                     entry_path.to_str().unwrap(),
                                 )
                                 .map_err(|e| {
