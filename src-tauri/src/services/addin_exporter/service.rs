@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use rev::{AddinFileInfo, ErrorList};
+use revitcli::{AddinFileInfo, ErrorList};
 
 use crate::services::addin_exporter::models::dll_model::DllModel;
 use crate::services::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
@@ -12,7 +12,7 @@ impl AddinExporterService {
     ///
     /// If the .addin file is not found, an error is returned
     pub fn get_addin_file_info(project_dir: &str) -> Result<SimplifiedAddinInfoModel, String> {
-        rev::get_addin_file_info(project_dir)
+        revitcli::get_addin_file_info(project_dir)
             .map(|addin_file_info| addin_file_info.into())
             .map_err(|e| e.to_string())
     }
@@ -25,7 +25,7 @@ impl AddinExporterService {
         project_dir: &str,
         addin_file_info: SimplifiedAddinInfoModel,
     ) -> Result<String, String> {
-        let project_name = rev::get_project_name(project_dir).map_err(|e| e.to_string())?;
+        let project_name = revitcli::get_project_name(project_dir).map_err(|e| e.to_string())?;
         let assembly = format!("{}\\{}.dll", project_name, project_name);
 
         let addin_id = uuid::Uuid::new_v4().to_string();
@@ -41,7 +41,7 @@ impl AddinExporterService {
             vendor_email: addin_file_info.email,
         };
 
-        let path = rev::create_addin_file_for_project(project_dir, addin_file_info)
+        let path = revitcli::create_addin_file_for_project(project_dir, addin_file_info)
             .map_err(|e| e.to_string())?;
 
         if !Path::exists(Path::new(&path)) {
@@ -59,14 +59,14 @@ impl AddinExporterService {
         destination_dir: &str,
     ) -> ErrorList {
         let destination_dir_path = Path::new(destination_dir);
-        rev::export_addin(project_dir, extra_dlls, destination_dir_path).await
+        revitcli::export_addin(project_dir, extra_dlls, destination_dir_path).await
     }
 
     /// Returns all the DLLs in the project directory
     ///
     /// An error is returned if any one of the DLLs has an invalid name
     pub fn get_all_project_dlls(project_dir: &str) -> Result<Vec<DllModel>, String> {
-        match rev::get_project_dlls(project_dir) {
+        match revitcli::get_project_dlls(project_dir) {
             Ok(dlls) => {
                 let mut result = Vec::new();
                 for dll in dlls {
@@ -100,7 +100,7 @@ impl AddinExporterService {
     ///
     /// Otherwise, returns the output of the build command
     pub async fn build_addin(project_dir: &str) -> Result<String, String> {
-        rev::build_project(project_dir).await
+        revitcli::build_project(project_dir).await
     }
 }
 

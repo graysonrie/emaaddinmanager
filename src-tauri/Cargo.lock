@@ -164,7 +164,7 @@ dependencies = [
  "print_err",
  "quick-xml 0.31.0",
  "rayon",
- "rev",
+ "revitcli",
  "sea-orm",
  "sea-schema",
  "serde",
@@ -3905,8 +3905,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "rev"
-version = "0.1.1"
+name = "revitcli"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9606d104094271f2cd8132d2c818d2e3eb82c0858347cfb2f00679d012255793"
 dependencies = [
  "clap",
  "clipboard",
