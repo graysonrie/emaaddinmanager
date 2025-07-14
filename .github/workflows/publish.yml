@@ -7,6 +7,7 @@ on:
 
 # This is the example from the readme.
 # On each push to the `release` branch it will create or update a GitHub release, build your app, and upload the artifacts to the release.
+#
 
 jobs:
   publish-tauri:
