@@ -9,3 +9,5 @@ Todo:
 ! unimportant:
 
 - Add a new way to add new categories to the registry when in the app
+
+water bucket release
