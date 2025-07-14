@@ -1,6 +1,6 @@
+use rayon::prelude::*;
 use std::fs;
 use std::path::Path;
-use rayon::prelude::*;
 
 pub fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
     fs::create_dir_all(dst)?;
@@ -10,9 +10,9 @@ pub fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
         .collect::<Result<_, _>>()?;
 
     // Split into files and directories
-    let (dirs, files): (Vec<_>, Vec<_>) = entries.into_iter().partition(|(path, file_type)| {
-        file_type.as_ref().map(|ft| ft.is_dir()).unwrap_or(false)
-    });
+    let (dirs, files): (Vec<_>, Vec<_>) = entries
+        .into_iter()
+        .partition(|(path, file_type)| file_type.as_ref().map(|ft| ft.is_dir()).unwrap_or(false));
 
     // Copy files in parallel
     files.par_iter().try_for_each(|(src_path, _)| {

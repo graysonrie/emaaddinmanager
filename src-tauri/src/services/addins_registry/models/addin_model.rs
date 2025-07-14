@@ -1,5 +1,3 @@
-
-
 #[derive(Clone, serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct AddinModel {
@@ -29,7 +27,7 @@ pub struct AddinModel {
 
 impl AddinModel {
     /// Create a new AddinModel from XML data and file paths. Should be used for addins in the library
-    /// 
+    ///
     /// Will return None if the AddinID is not present in the XML file, since it is required for the addin to be installed
     fn from_xml_common(
         xml_file_path: String,

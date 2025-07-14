@@ -57,7 +57,6 @@ impl RevitAddIns {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

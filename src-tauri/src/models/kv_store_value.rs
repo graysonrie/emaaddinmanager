@@ -67,7 +67,8 @@ where
 
     /// Only works if you initialized this instance with `new_with_key`, otherwise, this function will panic
     pub async fn get_data_updated(&self) -> Result<T, String> {
-        self.bounded_key.db
+        self.bounded_key
+            .db
             .kv_store_table()
             .refresh_value_key(&self.bounded_key.key, self)
             .await?;

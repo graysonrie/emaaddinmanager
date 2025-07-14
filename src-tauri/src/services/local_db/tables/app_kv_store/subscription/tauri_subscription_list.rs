@@ -51,7 +51,10 @@ impl TauriSubscriptionList {
     pub async fn emit_to_subscribers(&self, key: &str, value: &serde_json::Value) {
         for event in self.events.read().await.iter() {
             if event.key == key {
-                println!("AppKVStore - TauriSubscriptionList: Emitting to Tauri subscribers: {}", event.event_name);
+                println!(
+                    "AppKVStore - TauriSubscriptionList: Emitting to Tauri subscribers: {}",
+                    event.event_name
+                );
                 if let Err(err) = self.app_handle.emit(&event.event_name, value) {
                     println!("AppKVStore - TauriSubscriptionList: Error emitting to Tauri subscribers: {}",err);
                 }

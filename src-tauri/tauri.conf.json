@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "EMA Addin Launcher",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "identifier": "com.ema.addinmanager",
   "build": {
     "frontendDist": "../out",
@@ -38,6 +38,17 @@
     ],
     "resources": [
       "../public/**/*"
-    ]
+    ],
+    "createUpdaterArtifacts": true
+  }
+  ,
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/graysonrie/emaaddinmanager/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg0NjI0NzVFNjUwNkUxQTIKUldTaTRRWmxYa2RpaEUzYjVWMFkrZVRrZWhvZDBHbHNzUlNyRHBqU25OR1ZGcHIzWGdMSGM2bzIK"
+    }
   }
 }
