@@ -15,6 +15,7 @@ mod utils;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
@@ -55,10 +56,11 @@ pub fn run() {
                         .build(),
                 )?;
             }
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                app_updater::update(handle).await.unwrap();
-            });
+            // Prefer checking for updates on startup in the frontend
+            // let handle = app.handle().clone();
+            // tauri::async_runtime::spawn(async move {
+            //     app_updater::update(handle).await.unwrap();
+            // });
             // ! Initialize the app service container regardless of if debug mode:
             app_service_container::initialize_app(app.handle());
             Ok(())

@@ -9,6 +9,7 @@ import StatsDisplay from "./components/stats-display";
 import ProfileSection from "../shared/UserAvatar";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
+import UpdaterPopup from "./components/updater-popup";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
@@ -45,6 +46,7 @@ export default function Home() {
 
   // Show main app content
   return (
+    <>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -61,7 +63,9 @@ export default function Home() {
         <Separator className="w-full" />
 
         <StatsDisplay />
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
+      <UpdaterPopup />
+    </>
   );
 }
