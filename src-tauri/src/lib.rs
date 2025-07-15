@@ -6,6 +6,7 @@ use services::local_db::tables::app_kv_store::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
 
 mod app_service_container;
+mod app_updater;
 mod constants;
 mod models;
 mod services;
@@ -54,6 +55,10 @@ pub fn run() {
                         .build(),
                 )?;
             }
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                app_updater::update(handle).await.unwrap();
+            });
             // ! Initialize the app service container regardless of if debug mode:
             app_service_container::initialize_app(app.handle());
             Ok(())
