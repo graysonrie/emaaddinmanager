@@ -55,7 +55,7 @@ export default function Home() {
         <div className="flex flex-col gap-2">
           <p className="text-2xl font-bold">Home</p>
           <p className="text-sm text-muted-foreground">
-            Welcome back, {config.userName?.split(" ")[0]}
+            Welcome back, {config.userName?.split(" ")[0]}.
           </p>
         </div>
         <Separator className="w-full" />
