@@ -1,18 +1,29 @@
 import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Blocks, ChevronLeft, ChevronRight, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-type Props<T extends { fileTreePath: string }> = {
+export interface FilePathNode {
+  fileTreePath: string;
+  displayName?: string;
+}
+
+export interface FileTreeRules {
+  onlyFolders?: boolean;
+  hideFoldersWithName?: string[];
+  overrideShowHiddenFolders?: boolean;
+}
+
+type Props<T extends FilePathNode> = {
   nodes: TreeNode<T>[];
   onSelect?: (addin: T) => void;
   onSelectFolder?: (folder: T) => void;
   nodeName: string;
-  onlyFolders?: boolean;
+  rules?: FileTreeRules;
 };
 
-function findNodeByPath<T extends { fileTreePath: string }>(
+function findNodeByPath<T extends FilePathNode>(
   nodes: TreeNode<T>[],
   path: string[]
 ): TreeNode<T>[] {
@@ -25,17 +36,27 @@ function findNodeByPath<T extends { fileTreePath: string }>(
   return current;
 }
 
-export default function FileTreeView<T extends { fileTreePath: string }>({
+export default function FileTreeView<T extends FilePathNode>({
   nodes,
   onSelect,
   onSelectFolder,
-  onlyFolders,
+  rules,
   nodeName,
 }: Props<T>) {
   const [path, setPath] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const currentNodes = findNodeByPath(nodes, path);
+
+  // Filter nodes based on hideFoldersWithName rule
+  const filteredNodes = currentNodes.filter((node) => {
+    if (!rules?.hideFoldersWithName || rules.overrideShowHiddenFolders) {
+      return true; // Show all nodes if no hiding rules or override is enabled
+    }
+
+    // Hide folders that match the hideFoldersWithName array
+    return !rules.hideFoldersWithName.includes(node.name);
+  });
 
   // Breadcrumbs
   const breadcrumbs = [
@@ -47,12 +68,16 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
   ];
 
   const isFolder = (node: TreeNode<T>) => {
-    if (onlyFolders) {
+    if (rules?.onlyFolders) {
       return (
         (node.children && node.children.length > 0) || !node.name.includes(".")
       );
     }
     return node.children && node.children.length > 0;
+  };
+
+  const isHiddenFolder = (node: TreeNode<T>) => {
+    return rules?.hideFoldersWithName?.includes(node.name) ?? false;
   };
 
   const breadcrumbsToDisplay = [breadcrumbs[breadcrumbs.length - 1]];
@@ -92,7 +117,10 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
 
       {/* Folder/Addin List */}
       <ul className="space-y-2">
-        {currentNodes.map((node) => {
+        {filteredNodes.map((node) => {
+          const nodeName = node.data.displayName
+            ? node.data.displayName
+            : node.name;
           return isFolder(node) ? (
             <li key={node.name}>
               <button
@@ -102,7 +130,7 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
                     : "bg-card hover:bg-accent"
                 }`}
                 onClick={() => {
-                  if (onlyFolders && onSelectFolder && node.data) {
+                  if (rules?.onlyFolders && onSelectFolder && node.data) {
                     // Single click: select the folder
                     setSelectedNode(node.name);
                     onSelectFolder(node.data);
@@ -112,36 +140,39 @@ export default function FileTreeView<T extends { fileTreePath: string }>({
                   }
                 }}
                 onDoubleClick={() => {
-                  if (onlyFolders) {
+                  if (rules?.onlyFolders) {
                     // Double click: navigate into folder
                     setPath([...path, node.name]);
                     setSelectedNode(null); // Clear selection when navigating
                   }
                 }}
               >
-                <span className="font-medium">{node.name}</span>
-                {!onlyFolders && (
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    (Folder)
-                  </span>
-                )}
+                <div className="flex items-center">
+                  {rules?.overrideShowHiddenFolders && isHiddenFolder(node) && (
+                    <EyeOff className="w-4 h-4 mr-2 text-muted-foreground" />
+                  )}
+                  <span className="font-medium">{node.name}</span>
+                  {!rules?.onlyFolders && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      (Folder)
+                    </span>
+                  )}
+                </div>
               </button>
             </li>
           ) : (
-            <li key={node.name}>
+            <li key={nodeName}>
               <button
-                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition cursor-pointer"
+                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition cursor-pointer flex items-center"
                 onClick={() => node.data && onSelect?.(node.data)}
               >
-                <span className="font-medium">{node.name}</span>
-                <span className="ml-2 text-xs text-muted-foreground">
-                  ({nodeName})
-                </span>
+                <Blocks className="w-4 h-4 mr-2" />
+                <span className="font-medium">{nodeName}</span>
               </button>
             </li>
           );
         })}
-        {currentNodes.length === 0 && (
+        {filteredNodes.length === 0 && (
           <li className="text-muted-foreground px-4 py-3">
             No items in this folder.
           </li>

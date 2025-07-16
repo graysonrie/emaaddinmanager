@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BellIcon,
+  ChartBarBig,
   HomeIcon,
   LibraryIcon,
   PackageIcon,
@@ -13,6 +15,8 @@ import { motion } from "framer-motion";
 import { useNotificationsStore } from "@/lib/notifications/useNotificationsStore";
 import { Badge } from "@/components/ui/badge";
 import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificationsStore";
+import { useAuthStore } from "@/lib/auth/useAuthStore";
+import { Separator } from "@/components/ui/separator";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -69,9 +73,20 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { addinUpdateNotifications, hasUserCheckedNotifications } =
     useNotificationsStore();
+  const authStore = useAuthStore();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const hasUnreadNotifications =
     addinUpdateNotifications.length > 0 && !hasUserCheckedNotifications;
+
+  // Check admin status on component mount
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const adminResult = await authStore.isAdmin();
+      setIsAdmin(adminResult);
+    };
+    checkAdminStatus();
+  }, [authStore]);
 
   const buttons = [
     {
@@ -90,11 +105,6 @@ export default function Sidebar() {
       link: "/dashboard/installed",
     },
     {
-      icon: <Upload />,
-      label: "Publish",
-      link: "/dashboard/publish",
-    },
-    {
       icon: <BellIcon />,
       label: "Notifications",
       link: "/dashboard/notifications",
@@ -108,6 +118,19 @@ export default function Sidebar() {
     },
   ];
 
+  const adminButtons = [
+    {
+      icon: <ChartBarBig />,
+      label: "User Stats",
+      link: "/dashboard/user-stats",
+    },
+    {
+      icon: <Upload />,
+      label: "Publish",
+      link: "/dashboard/publish",
+    },
+  ];
+
   return (
     <div className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
       {buttons.map((button) => (
@@ -117,6 +140,14 @@ export default function Sidebar() {
           isActive={pathname === button.link}
         />
       ))}
+      {isAdmin && (
+        <>
+          <Separator className="w-full my-2" />
+          {adminButtons.map((button) => (
+            <SidebarButton key={button.label} {...button} />
+          ))}
+        </>
+      )}
     </div>
   );
 }

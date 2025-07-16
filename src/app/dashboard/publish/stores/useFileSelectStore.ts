@@ -1,13 +1,19 @@
+import { create } from "zustand";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useCallback, useState } from "react";
 
-export default function useFileSelect(
-  onProjectSelected: (projectDir: string) => void
-) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const handleFileSelect = useCallback(async () => {
+interface FileSelectStore {
+  isProcessing: boolean;
+  handleFileSelect: (
+    onProjectSelected: (projectDir: string) => void
+  ) => Promise<void>;
+}
+
+export const useFileSelectStore = create<FileSelectStore>((set) => ({
+  isProcessing: false,
+
+  handleFileSelect: async (onProjectSelected: (projectDir: string) => void) => {
     try {
-      setIsProcessing(true);
+      set({ isProcessing: true });
       const selected = await open({
         multiple: false,
         filters: [
@@ -26,9 +32,7 @@ export default function useFileSelect(
     } catch (error) {
       console.error("Error selecting file:", error);
     } finally {
-      setIsProcessing(false);
+      set({ isProcessing: false });
     }
-  }, [onProjectSelected]);
-
-  return { handleFileSelect, isProcessing };
-}
+  },
+}));

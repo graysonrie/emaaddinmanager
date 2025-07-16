@@ -63,7 +63,6 @@ export default function BasicUserStatsTable() {
             <TableHead>Name</TableHead>
             <TableHead>Addins Published</TableHead>
             <TableHead>Addins Installed</TableHead>
-            <TableHead>Discipline</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -78,7 +77,6 @@ export default function BasicUserStatsTable() {
               </TableCell>
               <TableCell>{stats.publishedAddins}</TableCell>
               <TableCell>{stats.installedAddins}</TableCell>
-              <TableCell>{stats.disciplines.join(", ")}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import useLocalAddins from "../local-addins/useLocalAddins";
+import useLocalAddins from "../addins/local-addins/useLocalAddins";
 import { UserStatsModel } from "../models/user-stats.model";
 import getTauriCommands from "../commands/getTauriCommands";
 import useConfig from "../persistence/config/useConfig";

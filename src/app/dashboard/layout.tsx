@@ -6,8 +6,9 @@ import { useSidebarStore } from "./components/sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useAddinUpdaterStore } from "@/lib/addin-updater/useAddinUpdater";
+import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
+import UpdaterPopup from "./components/updater-popup";
 
 export default function DashboardLayout({
   children,
@@ -19,7 +20,7 @@ export default function DashboardLayout({
 
   const { startPeriodicChecking } = useAddinUpdaterStore();
 
-   useConfigValueOrDefault(
+  useConfigValueOrDefault(
     "localAddinRegistryPath",
     "S:\\BasesRevitAddinsRegistry"
   );
@@ -57,6 +58,7 @@ export default function DashboardLayout({
         <Sidebar />
       </motion.div>
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+      <UpdaterPopup />
     </div>
   );
 }

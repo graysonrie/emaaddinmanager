@@ -142,7 +142,7 @@ export default function UpdaterPopup() {
     }
 
     return (
-      <>
+      <div>
         A new version of the app is available: <b>{update?.version}</b>
         {update?.body && (
           <div className="mt-2 text-sm text-muted-foreground">
@@ -150,7 +150,7 @@ export default function UpdaterPopup() {
             <div className="mt-1 whitespace-pre-wrap">{update.body}</div>
           </div>
         )}
-      </>
+      </div>
     );
   };
 
@@ -168,17 +168,17 @@ export default function UpdaterPopup() {
               {getStatusText()}
             </div>
           </DialogTitle>
-          <DialogDescription>{getDescription()}</DialogDescription>
-          {status === "downloading" && contentLength > 0 && (
-            <div className="mt-4">
-              <Progress value={progress} className="w-full" />
-              <div className="text-xs text-muted-foreground mt-1">
-                {Math.round((downloaded / 1024 / 1024) * 100) / 100} MB /{" "}
-                {Math.round((contentLength / 1024 / 1024) * 100) / 100} MB
-              </div>
-            </div>
-          )}
         </DialogHeader>
+        <div className="mt-4">{getDescription()}</div>
+        {status === "downloading" && contentLength > 0 && (
+          <div className="mt-4">
+            <Progress value={progress} className="w-full" />
+            <div className="text-xs text-muted-foreground mt-1">
+              {Math.round((downloaded / 1024 / 1024) * 100) / 100} MB /{" "}
+              {Math.round((contentLength / 1024 / 1024) * 100) / 100} MB
+            </div>
+          </div>
+        )}
         <DialogFooter>
           <Button
             className="flex w-full"

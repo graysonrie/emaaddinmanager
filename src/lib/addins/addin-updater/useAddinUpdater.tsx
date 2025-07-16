@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { UpdateNotificationModel } from "../models/update-notification.model";
-import getTauriCommands from "../commands/getTauriCommands";
-import { eventBus, EVENTS } from "../events/eventBus";
+import { UpdateNotificationModel } from "../../models/update-notification.model";
+import getTauriCommands from "../../commands/getTauriCommands";
+import { eventBus, EVENTS } from "../../events/eventBus";
 
 interface AddinUpdaterState {
   updateNotifications: UpdateNotificationModel[];

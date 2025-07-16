@@ -16,9 +16,8 @@ import { DisciplineSetup } from "./DisciplineSetup";
 export default function SetupPage() {
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
-  const userDisciplines = useKeyValueSubscription<string[]>("userDisciplines");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "disciplines" | "done">("email");
+  const [step, setStep] = useState<"email" | "name" | "done">("email");
   const router = useRouter();
 
   useEffect(() => {
@@ -28,13 +27,10 @@ export default function SetupPage() {
     } else if (!userName) {
       setIsOpen(false);
       setStep("name");
-    } else if (!userDisciplines) {
-      setIsOpen(false);
-      setStep("disciplines");
-    } else if (userEmail && userName && userDisciplines) {
+    } else if (userEmail && userName) {
       setStep("done");
     }
-  }, [userEmail, userName, userDisciplines]);
+  }, [userEmail, userName]);
 
   useEffect(() => {
     if (step === "done") {
@@ -76,19 +72,7 @@ export default function SetupPage() {
             transition={{ duration: 0.35, ease: "easeInOut" }}
             className="w-full"
           >
-            <NameSetup onComplete={() => setStep("disciplines")} />
-          </motion.div>
-        )}
-        {step === "disciplines" && (
-          <motion.div
-            key="disciplines"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }} 
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="w-full"
-          >
-            <DisciplineSetup onComplete={() => setStep("done")} />
+            <NameSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
       </AnimatePresence>

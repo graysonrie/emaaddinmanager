@@ -18,7 +18,7 @@ import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 
 export default function StatsDisplay() {
   return (
-    <div className="flex flex-row gap-4 w-full items-center h-full justify-center overflow-auto">
+    <div className="flex flex-row gap-4 w-full h-full justify-center overflow-auto">
       <div className="flex flex-col w-full gap-8">
         <div>
           <p className="text-2xl font-bold">Overview</p>

@@ -1,49 +1,38 @@
-import { useCallback } from "react";
+import { create } from "zustand";
 import { CategoryModel } from "@/lib/models/category.model";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { ErrorList } from "@/types/error-list";
 import { useAdvancedOptionsPopupStore } from "../advanced-options/useAdvancedOptionsPopupStore";
+import { usePublishStateStore } from "./usePublishStateStore";
 
-interface UsePublishActionsProps {
-  onStartProcessing: (message: string) => void;
-  onStopProcessing: () => void;
-  onShowResults: (
-    title: string,
-    message: string,
-    buildResult: string,
-    errorsList?: ErrorList
-  ) => void;
-  onResetStore: () => void;
+interface PublishActionsStore {
+  handlePublish: (destinationCategory: CategoryModel | null) => Promise<void>;
 }
 
-export default function usePublishActions({
-  onStartProcessing,
-  onStopProcessing,
-  onShowResults,
-  onResetStore,
-}: UsePublishActionsProps) {
-  const { exportAddin, buildAddin, addinFileInfo } =
-    useLocalAddinExporterStore();
+export const usePublishActionsStore = create<PublishActionsStore>(
+  (set, get) => ({
+    handlePublish: async (destinationCategory: CategoryModel | null) => {
+      const { exportAddin, buildAddin, addinFileInfo } =
+        useLocalAddinExporterStore.getState();
+      const { selectedProjectDlls } = useAdvancedOptionsPopupStore.getState();
+      const { startProcessing, stopProcessing, showResults } =
+        usePublishStateStore.getState();
 
-  const { selectedProjectDlls } = useAdvancedOptionsPopupStore();
-
-  const handlePublish = useCallback(
-    async (destinationCategory: CategoryModel | null) => {
       if (!addinFileInfo || !destinationCategory) {
         return;
       }
 
       const errorsList: ErrorList = { errors: [], warnings: [] };
 
-      onStartProcessing("Building addin...");
+      startProcessing("Building addin...");
       let buildResult: string =
         "Failed to build addin. Please open your C# file and ensure there are no errors.";
       try {
         buildResult = await buildAddin();
 
         // Only export if build was successful
-        onStartProcessing("Exporting addin...");
+        startProcessing("Exporting addin...");
 
         const exportErrorsList = await exportAddin(
           addinFileInfo,
@@ -60,7 +49,7 @@ export default function usePublishActions({
         errorsList.errors.push("Failed to build addin");
       }
 
-      onStopProcessing();
+      stopProcessing();
 
       // Determine result message
       let title: string;
@@ -77,22 +66,11 @@ export default function usePublishActions({
         message = "Addin published successfully.";
       }
 
-      onShowResults(title, message, buildResult, errorsList);
-      onResetStore();
-    },
-    [
-      addinFileInfo,
-      selectedProjectDlls,
-      buildAddin,
-      exportAddin,
-      onStartProcessing,
-      onStopProcessing,
-      onShowResults,
-      onResetStore,
-    ]
-  );
+      showResults(title, message, buildResult, errorsList);
 
-  return {
-    handlePublish,
-  };
-}
+      // Reset the local addin exporter store
+      const { reset } = useLocalAddinExporterStore.getState();
+      reset();
+    },
+  })
+);

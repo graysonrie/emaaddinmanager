@@ -1,5 +1,11 @@
 import useUserStats from "@/lib/user-stats/useUserStats";
-import { Download, Loader2, Upload, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Download,
+  Loader2,
+  Upload,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/app/shared/UserAvatar";
@@ -41,7 +47,7 @@ export default function StatsByUser() {
           userStats.installedAddins
         );
         const isExpanded = expandedUsers.has(userStats.userEmail);
-        
+
         return (
           <div key={userStats.userEmail} className="flex flex-col gap-2 w-full">
             <Card className="p-1 pt-2">
@@ -79,7 +85,7 @@ export default function StatsByUser() {
                   </Button>
                 </div>
               </CardHeader>
-              
+
               {isExpanded && (
                 <CardContent className="pt-0 pb-2">
                   <div className="flex flex-col gap-4">
@@ -98,7 +104,10 @@ export default function StatsByUser() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                         {userStats.publishedAddins.map((addin) => {
                           return (
-                            <AddinCard addinInfo={addin} key={addin.addin.name} />
+                            <AddinCard
+                              addinInfo={addin}
+                              key={addin.addin.name}
+                            />
                           );
                         })}
                       </div>
@@ -118,7 +127,10 @@ export default function StatsByUser() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                         {deduplicatedInstalledAddins.map((addin) => {
                           return (
-                            <AddinCard addinInfo={addin} key={addin.addin.name} />
+                            <AddinCard
+                              addinInfo={addin}
+                              key={addin.addin.name}
+                            />
                           );
                         })}
                       </div>

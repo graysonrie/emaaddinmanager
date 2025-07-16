@@ -64,7 +64,7 @@ export default function SelectDestinationForm({
                   setDestinationCategory(category);
                 }}
                 nodeName="Category"
-                onlyFolders={true}
+                rules={{ onlyFolders: true }}
               />
             </div>
           </CardContent>
