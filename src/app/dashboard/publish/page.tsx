@@ -3,7 +3,7 @@
 import OpenProjectDropZone from "./OpenProjectDropZone";
 import AddinInfoForm from "./AddinInfoForm";
 import { useEffect, useState } from "react";
-import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import { useAddinRegistryStoreInit } from "@/lib/addin-registry/useAddinRegistryStore";
 import SelectDestinationForm from "./SelectDestinationForm";
 import { Button } from "@/components/ui/button";
 import { CategoryModel } from "@/lib/models/category.model";
@@ -25,29 +25,29 @@ import AdvancedOptionsPopup from "./advanced-options";
 
 export default function PublishPage() {
   const [pageTitle, setPageTitle] = useState("Publish Addin");
-  const { categories } = useAddinRegistry();
+  const { categories } = useAddinRegistryStoreInit();
   const [destinationCategory, setDestinationCategory] =
     useState<CategoryModel | null>(null);
 
   const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
 
-  // Custom hooks
+  // Zustand stores
   const publishState = usePublishState();
   const { addinFileInfo, setAddinFileInfo } = useLocalAddinExporterStore();
-  const addinValidation = useAddinValidation(addinFileInfo);
+  const addinValidation = useAddinValidation();
   const projectSetup = useProjectSetup();
-  const { handleFileSelect, isProcessing: isFileSelectProcessing } =
-    useFileSelect(projectSetup.handleInitialProjectSelected);
+  const fileSelectStore = useFileSelect();
+  const publishActions = usePublishActions();
 
-  const publishActions = usePublishActions({
-    onStartProcessing: publishState.startProcessing,
-    onStopProcessing: publishState.stopProcessing,
-    onShowResults: publishState.showResults,
-    onResetStore: () => {
-      projectSetup.resetProject();
-      setAddinFileInfo(null);
-    },
-  });
+  // Set addin file info in validation store when it changes
+  useEffect(() => {
+    addinValidation.setAddinFileInfo(addinFileInfo);
+  }, [addinFileInfo]);
+
+  // Handle file selection
+  const handleFileSelect = () => {
+    fileSelectStore.handleFileSelect(projectSetup.handleInitialProjectSelected);
+  };
 
   const handlePublish = () => {
     publishActions.handlePublish(destinationCategory);
@@ -139,7 +139,7 @@ export default function PublishPage() {
               <Button
                 className="w-full p-0 m-0 text-xs text-muted-foreground"
                 variant="link"
-                disabled={isFileSelectProcessing}
+                disabled={fileSelectStore.isProcessing}
                 onClick={handleFileSelect}
               >
                 Select a different project

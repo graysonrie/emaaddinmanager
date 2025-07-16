@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import useAddinRegistry from "@/lib/addin-registry/useAddinRegistry";
+import { useAddinRegistryStoreInit } from "@/lib/addin-registry/useAddinRegistryStore";
 import { findCommonRoot } from "@/components/file-tree/builder/utils";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useLibraryStore } from "./store";
@@ -24,7 +24,7 @@ interface AddinWithTreePath extends AddinModel {
 
 export default function LibraryPage() {
   const { addins, installAddins, refreshRegistry, delistAddin } =
-    useAddinRegistry();
+    useAddinRegistryStoreInit();
   const root = useMemo(
     () => findCommonRoot(addins.map((a) => a.pathToAddinDllFolder)),
     [addins]

@@ -5,14 +5,14 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FolderOpen } from "lucide-react";
-import useFileSelect from "./hooks/useFileSelect";
+import { useFileSelectStore } from "./stores/useFileSelectStore";
 
 interface Props {
   onProjectSelected: (projectDir: string) => void;
 }
 
 export default function OpenProjectDropZone({ onProjectSelected }: Props) {
-  const { handleFileSelect, isProcessing } = useFileSelect(onProjectSelected);
+  const fileSelectStore = useFileSelectStore();
 
   return (
     <Card
@@ -20,9 +20,9 @@ export default function OpenProjectDropZone({ onProjectSelected }: Props) {
         relative p-8 border-2 border-dashed transition-all duration-200 cursor-pointer
         border-muted-foreground/25 hover:border-primary/50
         
-        ${isProcessing ? "opacity-50 pointer-events-none" : ""}
+        ${fileSelectStore.isProcessing ? "opacity-50 pointer-events-none" : ""}
       `}
-      onClick={handleFileSelect}
+      onClick={() => fileSelectStore.handleFileSelect(onProjectSelected)}
     >
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
         <div className="flex items-center space-x-2">
