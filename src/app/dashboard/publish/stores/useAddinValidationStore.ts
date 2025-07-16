@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
-import { useAddinRegistryStore } from "@/lib/addin-registry/useAddinRegistryStore";
+import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { getParentDirectoryFromPath } from "@/lib/utils";
 import { getAddinCsharpProjectName } from "@/lib/models/addin.model";
 

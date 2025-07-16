@@ -2,7 +2,7 @@ import { AddinModel } from "@/lib/models/addin.model";
 import { AddinGroup } from "@/app/dashboard/installed/addin-grouping";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import useLocalAddins from "@/lib/local-addins/useLocalAddins";
+import useLocalAddins from "@/lib/addins/local-addins/useLocalAddins";
 import AddinCard from "./AddinCard";
 import { useInstalledAddinsStore } from "./store";
 

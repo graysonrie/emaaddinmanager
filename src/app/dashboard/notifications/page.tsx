@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificationsStore";
 import AddinUpdateNotificationCard from "./AddinUpdateNotificationCard";
 import CheckForUpdatesButton from "./CheckForUpdatesButton";
-import { useAddinUpdater } from "@/lib/addin-updater/useAddinUpdater";
+import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 
 export default function NotificationsPage() {

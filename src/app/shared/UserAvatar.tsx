@@ -1,7 +1,9 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useAuthStore } from "@/lib/auth/useAuthStore";
+import { Badge } from "@/components/ui/badge";
 
 // Function to generate a color based on a string
 function generateColorFromString(str: string): string {
@@ -29,6 +31,15 @@ export default function UserAvatar({ userName, size = "md", showFullname = false
   const userFirstName = useMemo(() => {
     return userName?.split(" ")[0];
   }, [userName]);
+
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const isAdmin = await useAuthStore.getState().isAdmin();
+      setIsAdmin(isAdmin);
+    };
+    checkAdmin();
+  }, []);
 
   const userNameInitials = useMemo(() => {
     return userName
@@ -61,6 +72,9 @@ export default function UserAvatar({ userName, size = "md", showFullname = false
           </Avatar>
           <p className="font-sans text-sm">{displayName}</p>
         </>
+      )}
+      {isAdmin && (
+        <p className="text-xs text-muted-foreground">(Admin)</p>
       )}
     </div>
   );

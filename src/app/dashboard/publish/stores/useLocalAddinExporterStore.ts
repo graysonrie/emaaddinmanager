@@ -11,7 +11,7 @@ interface LocalAddinExporterState {
   dlls: DllModel[];
   loading: boolean;
   error: string | null;
-  setProjectDir: (dir: string | null) => void;
+  handleProjectSelected: (dir: string | null) => void;
   setAddinFileInfo: (info: SimplifiedAddinInfoModel | null) => void;
   setDlls: (dlls: DllModel[]) => void;
   setLoading: (loading: boolean) => void;
@@ -31,6 +31,7 @@ interface LocalAddinExporterState {
   ) => Promise<ErrorList>;
   buildAddin: () => Promise<string>;
   getAllProjectDlls: () => Promise<DllModel[]>;
+  reset: () => void;
 }
 
 const tauri = useTauriCommands();
@@ -42,7 +43,7 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
     dlls: [],
     loading: false,
     error: null,
-    setProjectDir: (dir) => set({ projectDir: dir }),
+
     setAddinFileInfo: (info) => set({ addinFileInfo: info }),
     setDlls: (dlls) => set({ dlls }),
     setLoading: (loading) => set({ loading }),
@@ -109,6 +110,28 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
       const dlls = await tauri.getAllProjectDlls(projectDir);
       set({ dlls });
       return dlls;
+    },
+    reset: () => {
+      set({ projectDir: null, addinFileInfo: null, dlls: [] });
+    },
+    handleProjectSelected: async (projectDir: string | null) => {
+      if (!projectDir) {
+        throw new Error("Project directory not set");
+      }
+      set({ projectDir });
+      const projectDlls = await get().getAllProjectDlls();
+
+      // TODO: Ensure that the user can change the project dlls
+      const requiredDllNames = ["RealRevitPlugin"];
+      const foundDlls = projectDlls.filter((dll) =>
+        requiredDllNames.includes(dll.name)
+      );
+      console.log("foundDlls", foundDlls);
+      if (foundDlls.length !== requiredDllNames.length) {
+        console.warn("Required DLLs not found in project");
+      }
+      set({ dlls: foundDlls });
+      get().refresh();
     },
   })
 );

@@ -3,25 +3,23 @@
 import OpenProjectDropZone from "./OpenProjectDropZone";
 import AddinInfoForm from "./AddinInfoForm";
 import { useEffect, useState } from "react";
-import { useAddinRegistryStoreInit } from "@/lib/addin-registry/useAddinRegistryStore";
+import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import SelectDestinationForm from "./SelectDestinationForm";
 import { Button } from "@/components/ui/button";
 import { CategoryModel } from "@/lib/models/category.model";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import Processing from "./load-pages/Processing";
 import ResultsPopup from "./results-popup";
 import PageWrapper from "@/components/PageWrapper";
-import {
-  useFileSelect,
-  usePublishState,
-  useAddinValidation,
-  useProjectSetup,
-  usePublishActions,
-} from "./hooks";
+
 import { getFileNameFromPath } from "@/lib/utils";
 import { useAdvancedOptionsPopupStore } from "./advanced-options/useAdvancedOptionsPopupStore";
 import { Settings } from "lucide-react";
 import AdvancedOptionsPopup from "./advanced-options";
+import { usePublishStateStore } from "./stores";
+import { useAddinValidationStore } from "./stores/useAddinValidationStore";
+import { useFileSelectStore } from "./stores/useFileSelectStore";
+import { usePublishActionsStore } from "./stores/usePublishActionsStore";
 
 export default function PublishPage() {
   const [pageTitle, setPageTitle] = useState("Publish Addin");
@@ -32,12 +30,13 @@ export default function PublishPage() {
   const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
 
   // Zustand stores
-  const publishState = usePublishState();
-  const { addinFileInfo, setAddinFileInfo } = useLocalAddinExporterStore();
-  const addinValidation = useAddinValidation();
-  const projectSetup = useProjectSetup();
-  const fileSelectStore = useFileSelect();
-  const publishActions = usePublishActions();
+  const publishState = usePublishStateStore();
+  const { addinFileInfo, setAddinFileInfo, projectDir } =
+    useLocalAddinExporterStore();
+  const addinValidation = useAddinValidationStore();
+  const localAddinExporter = useLocalAddinExporterStore();
+  const fileSelectStore = useFileSelectStore();
+  const publishActions = usePublishActionsStore();
 
   // Set addin file info in validation store when it changes
   useEffect(() => {
@@ -46,7 +45,7 @@ export default function PublishPage() {
 
   // Handle file selection
   const handleFileSelect = () => {
-    fileSelectStore.handleFileSelect(projectSetup.handleInitialProjectSelected);
+    fileSelectStore.handleFileSelect(localAddinExporter.handleProjectSelected);
   };
 
   const handlePublish = () => {
@@ -87,7 +86,7 @@ export default function PublishPage() {
       <div className="flex flex-col items-center justify-center h-full">
         {publishState.isProcessing ? (
           <Processing message={publishState.processingMessage} />
-        ) : projectSetup.projectDir ? (
+        ) : projectDir ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
             <div className="flex justify-center w-full gap-2">
               <h1 className="text-2xl font-bold">{pageTitle}</h1>
@@ -151,7 +150,7 @@ export default function PublishPage() {
             <h1 className="text-2xl font-bold">{pageTitle}</h1>
 
             <OpenProjectDropZone
-              onProjectSelected={projectSetup.handleInitialProjectSelected}
+              onProjectSelected={localAddinExporter.handleProjectSelected}
             />
           </div>
         )}

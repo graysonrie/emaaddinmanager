@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import { useEffect } from "react";
-import useTauriCommands from "../commands/getTauriCommands";
-import useConfig from "../persistence/config/useConfig";
-import { useConfigValue } from "../persistence/config/useConfigValue";
-import { AddinModel } from "../models/addin.model";
-import { CategoryModel } from "../models/category.model";
+import useTauriCommands from "../../commands/getTauriCommands";
+import useConfig from "../../persistence/config/useConfig";
+import { useConfigValue } from "../../persistence/config/useConfigValue";
+import { AddinModel } from "../../models/addin.model";
+import { CategoryModel } from "../../models/category.model";
 
 interface AddinRegistryStore {
   addins: AddinModel[];

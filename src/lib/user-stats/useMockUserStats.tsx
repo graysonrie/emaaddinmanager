@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import useLocalAddins from "../local-addins/useLocalAddins";
+import useLocalAddins from "../addins/local-addins/useLocalAddins";
 import {
   generateMockInstalledAddin,
   generateMockPublishedAddin,
@@ -18,7 +18,9 @@ interface UserStatsState {
 }
 
 export default function useMockUserStats(): UserStatsState {
-  const [userStats, setUserStats] = useState<UserStatsModel[]>(generateMockUserStats());
+  const [userStats, setUserStats] = useState<UserStatsModel[]>(
+    generateMockUserStats()
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

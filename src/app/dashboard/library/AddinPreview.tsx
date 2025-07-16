@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { determineRevitVersions } from "./helpers";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
-import useLocalAddins from "@/lib/local-addins/useLocalAddins";
+import useLocalAddins from "@/lib/addins/local-addins/useLocalAddins";
 
 interface AddinPreviewProps {
   onInstallClicked?: () => void;

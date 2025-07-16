@@ -1,7 +1,7 @@
 export type TreeNode<T extends { fileTreePath: string }> = {
   name: string;
   children?: TreeNode<T>[];
-  data?: T;
+  data: T;
 };
 
 export function buildTree<T extends { fileTreePath: string }>(
@@ -17,7 +17,7 @@ export function buildTree<T extends { fileTreePath: string }>(
       const part = parts[i];
       let node = current.find((n) => n.name === part);
       if (!node) {
-        node = { name: part, children: [] };
+        node = { name: part, children: [], data: dataPoint };
         current.push(node);
       }
       if (i === parts.length - 1) {

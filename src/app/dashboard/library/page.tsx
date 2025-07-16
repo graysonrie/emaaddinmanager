@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAddinRegistryStoreInit } from "@/lib/addin-registry/useAddinRegistryStore";
+import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { findCommonRoot } from "@/components/file-tree/builder/utils";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useLibraryStore } from "./store";
@@ -10,19 +10,29 @@ import {
   buildTree,
   TreeNode,
 } from "@/components/file-tree/builder/tree-builder";
-import FileTreeView from "@/components/file-tree";
+import FileTreeView, { FileTreeRules } from "@/components/file-tree";
 import { determineRevitVersions } from "./helpers";
 import FailedToDelistAddinDialog from "@/app/shared/FailedToDelistAddinDialog";
 import PageWrapper from "@/components/PageWrapper";
 import MessageDialog from "@/components/dialogs/MessageDialog";
 import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
+import { useAuthStore } from "@/lib/auth/useAuthStore";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
   fileTreePath: string;
+  displayName: string;
 }
 
 export default function LibraryPage() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const isAdmin = await useAuthStore.getState().isAdmin();
+      setIsAdmin(isAdmin);
+    };
+    checkAdmin();
+  }, []);
   const { addins, installAddins, refreshRegistry, delistAddin } =
     useAddinRegistryStoreInit();
   const root = useMemo(
@@ -33,6 +43,7 @@ export default function LibraryPage() {
     const addinsWithTreePath: AddinWithTreePath[] = addins.map((addin) => ({
       ...addin,
       fileTreePath: addin.pathToAddinDllFolder,
+      displayName: addin.name,
     }));
 
     return buildTree(addinsWithTreePath, root);
@@ -55,6 +66,7 @@ export default function LibraryPage() {
       addin: selectedAddin,
       forRevitVersions: await determineRevitVersions(selectedAddin),
     };
+    console.log("reuqest", request);
     const result = await installAddins([request]);
     console.log(result);
 
@@ -89,6 +101,11 @@ export default function LibraryPage() {
     }
   };
 
+  const fileTreeRules: FileTreeRules = {
+    hideFoldersWithName: ["Testing"],
+    overrideShowHiddenFolders: isAdmin,
+  };
+
   return (
     <PageWrapper>
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
@@ -107,6 +124,7 @@ export default function LibraryPage() {
                 nodes={tree}
                 onSelect={(addin) => setSelectedAddin(addin)}
                 nodeName="Addin"
+                rules={fileTreeRules}
               />
             </div>
           </div>

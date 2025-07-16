@@ -1,11 +1,10 @@
 import { create } from "zustand";
 import { CategoryModel } from "@/lib/models/category.model";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { ErrorList } from "@/types/error-list";
 import { useAdvancedOptionsPopupStore } from "../advanced-options/useAdvancedOptionsPopupStore";
 import { usePublishStateStore } from "./usePublishStateStore";
-import { useProjectSetupStore } from "./useProjectSetupStore";
 
 interface PublishActionsStore {
   handlePublish: (destinationCategory: CategoryModel | null) => Promise<void>;
@@ -70,15 +69,8 @@ export const usePublishActionsStore = create<PublishActionsStore>(
       showResults(title, message, buildResult, errorsList);
 
       // Reset the local addin exporter store
-      const { setProjectDir, setAddinFileInfo, setDlls } =
-        useLocalAddinExporterStore.getState();
-      setProjectDir(null);
-      setAddinFileInfo(null);
-      setDlls([]);
-
-      // Reset the project setup store
-      const { resetProject } = useProjectSetupStore.getState();
-      resetProject();
+      const { reset } = useLocalAddinExporterStore.getState();
+      reset();
     },
   })
 );

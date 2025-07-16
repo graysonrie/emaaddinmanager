@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useAddinUpdater } from "@/lib/addin-updater/useAddinUpdater";
+import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 
 interface CheckForUpdatesButtonProps {
   onClick?: () => void;

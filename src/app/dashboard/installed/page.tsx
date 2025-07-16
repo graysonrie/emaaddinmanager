@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import useLocalAddins from "@/lib/local-addins/useLocalAddins";
+import useLocalAddins from "@/lib/addins/local-addins/useLocalAddins";
 import { groupAddinsByRevitVersions } from "@/app/dashboard/installed/addin-grouping";
 import AddinGroupCard from "./AddinGroupCard";
 import FailedToInstallAddinDialog from "@/app/shared/FailedToUninstallAddinDialog";

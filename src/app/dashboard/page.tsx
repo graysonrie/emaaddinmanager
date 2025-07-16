@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useSidebarStore } from "./components/sidebar/store";
 import { useConfigInitialization } from "@/lib/persistence/useConfigInitialization";
-import StatsDisplay from "./components/stats-display";
+import StatsDisplay from "./user-stats/stats-display";
 import ProfileSection from "../shared/UserAvatar";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import UpdaterPopup from "./components/updater-popup";
+import PageWrapper from "@/components/PageWrapper";
+import Link from "next/link";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
@@ -46,26 +48,17 @@ export default function Home() {
 
   // Show main app content
   return (
-    <>
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="flex flex-col gap-4 p-4 h-full overflow-auto thin-scrollbar"
-    >
-      <div className="flex flex-col gap-4 max-w-screen-md w-full mx-auto">
+    <PageWrapper>
+      <div className="flex flex-col gap-4 max-w-screen-md w-full h-full mx-auto overflow-auto thin-scrollbar items-center justify-center">
         <div className="flex flex-col gap-2">
-          <p className="text-2xl font-bold">Home</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-2xl font-bold">
             Welcome back, {config.userName?.split(" ")[0]}.
           </p>
+          <p className="text-md text-muted-foreground">
+            Check out the <Link href="/dashboard/library" className="text-primary font-bold underline">addin library</Link> to get started.
+          </p>
         </div>
-        <Separator className="w-full" />
-
-        <StatsDisplay />
-        </div>
-      </motion.div>
-      <UpdaterPopup />
-    </>
+      </div>
+    </PageWrapper>
   );
 }

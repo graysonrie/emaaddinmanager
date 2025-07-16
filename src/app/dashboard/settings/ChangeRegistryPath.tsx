@@ -4,7 +4,7 @@ import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscripti
 import { Folder } from "lucide-react";
 import { useState } from "react";
 import useConfig from "@/lib/persistence/config/useConfig";
-import { useAddinRegistryStoreInit } from "@/lib/addin-registry/useAddinRegistryStore";
+import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { open } from "@tauri-apps/plugin-dialog";
 
 export default function ChangeRegistryPath() {

@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Settings } from "lucide-react";
-import { useLocalAddinExporterStore } from "@/lib/local-addins/useLocalAddinExporterStore";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DllModel } from "@/lib/models/dll.model";

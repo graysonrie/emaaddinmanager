@@ -174,34 +174,39 @@ impl LocalAddinsService {
         }))
     }
 
-    pub fn install_addin(
-        addin: &AddinModel,
-        for_revit_versions: &[String],
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let base_path = Self::path_to_local_addins_folder()?;
+    pub fn install_addin(addin: &AddinModel, for_revit_versions: &[String]) -> Result<(), String> {
+        let base_path = Self::path_to_local_addins_folder().map_err(|e| e.to_string())?;
 
-        for version in for_revit_versions {
-            let version_path = Path::new(&base_path).join(version);
+        use rayon::prelude::*;
 
-            // Ensure the version directory exists
-            fs::create_dir_all(&version_path)?;
+        for_revit_versions
+            .par_iter()
+            .try_for_each(|version| {
+                let version_path = Path::new(&base_path).join(version);
 
-            // Copy the .addin file
-            let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
-            let addin_xml_dst = version_path.join(
-                addin_xml_src
-                    .file_name()
-                    .ok_or("Invalid addin XML file name")?,
-            );
-            fs::copy(addin_xml_src, &addin_xml_dst)?;
+                // Ensure the version directory exists
+                fs::create_dir_all(&version_path).map_err(|e| e.to_string())?;
 
-            // Copy the DLL folder (recursively)
-            let dll_src = Path::new(&addin.path_to_addin_dll_folder);
-            let dll_dst = version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
-            if dll_src.exists() && dll_src.is_dir() {
-                utils::copy_dir_all(dll_src, &dll_dst)?;
-            }
-        }
+                // Copy the .addin file
+                let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
+                let addin_xml_dst = version_path.join(
+                    addin_xml_src
+                        .file_name()
+                        .ok_or("Invalid addin XML file name")?,
+                );
+                fs::copy(addin_xml_src, &addin_xml_dst).map_err(|e| e.to_string())?;
+
+                // Copy the DLL folder (recursively)
+                let dll_src = Path::new(&addin.path_to_addin_dll_folder);
+                let dll_dst =
+                    version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
+                if dll_src.exists() && dll_src.is_dir() {
+                    utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
+                }
+
+                Ok::<(), String>(())
+            })
+            .map_err(|e| e.to_string())?;
         Ok(())
     }
 
