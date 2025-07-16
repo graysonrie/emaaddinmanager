@@ -55,10 +55,6 @@ export function UserSettings() {
             <ChangeName />
           </div>
 
-          <div className="bg-card border rounded-lg p-6 space-y-6">
-            {/* Disciplines Setting */}
-            <ChangeDisciplines />
-          </div>
         </div>
 
         {/* Help Section */}
