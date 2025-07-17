@@ -2,7 +2,7 @@ import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
 import { Blocks, ChevronLeft, ChevronRight, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export interface FilePathNode {
   fileTreePath: string;
@@ -13,6 +13,7 @@ export interface FileTreeRules {
   onlyFolders?: boolean;
   hideFoldersWithName?: string[];
   overrideShowHiddenFolders?: boolean;
+  setFirstFolderAsRoot?: boolean;
 }
 
 type Props<T extends FilePathNode> = {
@@ -46,7 +47,40 @@ export default function FileTreeView<T extends FilePathNode>({
   const [path, setPath] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
+  // Auto-navigate to first folder if setFirstFolderAsRoot is enabled
+  useEffect(() => {
+    if (rules?.setFirstFolderAsRoot && nodes.length > 0) {
+      const firstNode = nodes[0];
+      if (isFolder(firstNode)) {
+        setPath([firstNode.name]);
+      }
+    }
+  }, [nodes, rules?.setFirstFolderAsRoot]);
+
   const currentNodes = findNodeByPath(nodes, path);
+
+  const isFolder = useCallback(
+    (node: TreeNode<T>) => {
+      if (rules?.onlyFolders) {
+        return (
+          (node.children && node.children.length > 0) ||
+          !node.name.includes(".")
+        );
+      }
+      return node.children && node.children.length > 0;
+    },
+    [rules?.onlyFolders]
+  );
+
+  // Auto-navigate to first folder if setFirstFolderAsRoot is enabled
+  useEffect(() => {
+    if (rules?.setFirstFolderAsRoot && nodes.length > 0) {
+      const firstNode = nodes[0];
+      if (isFolder(firstNode)) {
+        setPath([firstNode.name]);
+      }
+    }
+  }, [nodes, rules?.setFirstFolderAsRoot, isFolder]);
 
   // Filter nodes based on hideFoldersWithName rule
   const filteredNodes = currentNodes.filter((node) => {
@@ -67,22 +101,14 @@ export default function FileTreeView<T extends FilePathNode>({
     })),
   ];
 
-  const isFolder = (node: TreeNode<T>) => {
-    if (rules?.onlyFolders) {
-      return (
-        (node.children && node.children.length > 0) || !node.name.includes(".")
-      );
-    }
-    return node.children && node.children.length > 0;
-  };
-
   const isHiddenFolder = (node: TreeNode<T>) => {
     return rules?.hideFoldersWithName?.includes(node.name) ?? false;
   };
 
   const breadcrumbsToDisplay = [breadcrumbs[breadcrumbs.length - 1]];
 
-  const showBackButton = breadcrumbs.length > 1;
+  const showBackButton =
+    breadcrumbs.length > 1 && (!rules?.setFirstFolderAsRoot || path.length > 1);
 
   const onNavigateBackClicked = () => {
     setPath(breadcrumbs[breadcrumbs.length - 2].path);

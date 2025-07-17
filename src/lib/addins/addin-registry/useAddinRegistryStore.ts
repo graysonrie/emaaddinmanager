@@ -1,10 +1,9 @@
 import { create } from "zustand";
-import { useEffect } from "react";
 import useTauriCommands from "../../commands/getTauriCommands";
 import useConfig from "../../persistence/config/useConfig";
-import { useConfigValue } from "../../persistence/config/useConfigValue";
 import { AddinModel } from "../../models/addin.model";
 import { CategoryModel } from "../../models/category.model";
+import { getConfigValue } from "@/lib/persistence/config/getConfigValue";
 
 interface AddinRegistryStore {
   addins: AddinModel[];
@@ -14,7 +13,7 @@ interface AddinRegistryStore {
   addinsError: string | null;
   categoriesError: string | null;
   canChangeRegistryPath: boolean;
-  localRegistryPath: string | null;
+  localRegistryPath: Promise<string | undefined>;
 
   // Actions
   loadRegistryData: () => Promise<void>;
@@ -23,7 +22,6 @@ interface AddinRegistryStore {
   delistAddin: (addin: AddinModel) => Promise<void>;
   installAddins: (installRequests: any[]) => Promise<any>;
   setCanChangeRegistryPath: (canChange: boolean) => void;
-  setLocalRegistryPath: (path: string | null) => void;
 }
 
 export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
@@ -34,11 +32,11 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   addinsError: null,
   categoriesError: null,
   canChangeRegistryPath: true,
-  localRegistryPath: null,
+  localRegistryPath: getConfigValue("localAddinRegistryPath"),
 
   loadRegistryData: async () => {
     const { getAddins, getCategories } = useTauriCommands();
-    const path = get().localRegistryPath;
+    const path = await get().localRegistryPath;
 
     if (!path) {
       set({
@@ -74,10 +72,16 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   },
 
   refreshRegistry: async () => {
-    const { localRegistryPath } = get();
+    const localRegistryPath = await get().localRegistryPath;
+    console.log(
+      "refreshRegistry called, localRegistryPath:",
+      localRegistryPath
+    );
     if (localRegistryPath) {
       console.log("Manually refreshing addin registry...");
       await get().loadRegistryData();
+    } else {
+      console.warn("Cannot refresh registry: localRegistryPath is null");
     }
   },
 
@@ -87,7 +91,7 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
       try {
         const { update } = useConfig();
         await update("localAddinRegistryPath", path);
-        set({ localRegistryPath: path });
+        set({ localRegistryPath: Promise.resolve(path) });
       } catch (error) {
         console.error("Failed to update addin registry path in config:", error);
       }
@@ -95,7 +99,7 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   },
 
   delistAddin: async (addin: AddinModel) => {
-    const { localRegistryPath } = get();
+    const localRegistryPath = await get().localRegistryPath;
     if (!localRegistryPath) {
       return;
     }
@@ -112,31 +116,4 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   setCanChangeRegistryPath: (canChange: boolean) => {
     set({ canChangeRegistryPath: canChange });
   },
-
-  setLocalRegistryPath: (path: string | null) => {
-    set({ localRegistryPath: path });
-  },
 }));
-
-// Hook to initialize the store with config values
-export const useAddinRegistryStoreInit = () => {
-  const { setLocalRegistryPath, loadRegistryData } = useAddinRegistryStore();
-  const localRegistryPath = useConfigValue("localAddinRegistryPath");
-
-  useEffect(() => {
-    setLocalRegistryPath(localRegistryPath ?? null);
-  }, [localRegistryPath, setLocalRegistryPath]);
-
-  useEffect(() => {
-    if (localRegistryPath) {
-      loadRegistryData();
-    }
-  }, [localRegistryPath, loadRegistryData]);
-
-  useEffect(() => {
-    // Update loading state when config is ready
-    useAddinRegistryStore.setState({ isLoading: false });
-  }, []);
-
-  return useAddinRegistryStore();
-};

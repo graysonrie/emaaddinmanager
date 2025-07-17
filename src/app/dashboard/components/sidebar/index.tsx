@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificationsStore";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -34,12 +35,14 @@ const SidebarButton = ({
   isActive,
   showBadge,
   badgeCount,
-}: SidebarButtonProps) => {
+  onNavigate,
+}: SidebarButtonProps & { onNavigate?: () => void }) => {
   const router = useRouter();
 
   return (
     <motion.button
       onClick={() => {
+        onNavigate?.();
         router.push(link);
       }}
       whileHover={{ scale: 1.05 }}
@@ -75,6 +78,7 @@ export default function Sidebar() {
     useNotificationsStore();
   const authStore = useAuthStore();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { reset } = useLocalAddinExporterStore();
 
   const hasUnreadNotifications =
     addinUpdateNotifications.length > 0 && !hasUserCheckedNotifications;
@@ -128,6 +132,7 @@ export default function Sidebar() {
       icon: <Upload />,
       label: "Publish",
       link: "/dashboard/publish",
+      onNavigate: reset,
     },
   ];
 
@@ -144,7 +149,14 @@ export default function Sidebar() {
         <>
           <Separator className="w-full my-2" />
           {adminButtons.map((button) => (
-            <SidebarButton key={button.label} {...button} />
+            <SidebarButton
+              key={button.label}
+              icon={button.icon}
+              label={button.label}
+              link={button.link}
+              isActive={pathname === button.link}
+              onNavigate={button.onNavigate}
+            />
           ))}
         </>
       )}

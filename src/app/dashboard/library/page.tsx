@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { findCommonRoot } from "@/components/file-tree/builder/utils";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useLibraryStore } from "./store";
@@ -17,6 +16,7 @@ import PageWrapper from "@/components/PageWrapper";
 import MessageDialog from "@/components/dialogs/MessageDialog";
 import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
+import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -34,7 +34,7 @@ export default function LibraryPage() {
     checkAdmin();
   }, []);
   const { addins, installAddins, refreshRegistry, delistAddin } =
-    useAddinRegistryStoreInit();
+    useAddinRegistryStore();
   const root = useMemo(
     () => findCommonRoot(addins.map((a) => a.pathToAddinDllFolder)),
     [addins]
@@ -100,6 +100,10 @@ export default function LibraryPage() {
       setIsFailedToDelistAddinOpen(true);
     }
   };
+
+  useEffect(() => {
+    refreshRegistry();
+  }, []);
 
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["Testing"],
