@@ -1,9 +1,0 @@
-C:\Users\grieger.EMA\Desktop\Rust\emaaddinmanager\src-tauri\db_manager\target\debug\deps\futures_macro-7fb97256ed470184.dll: C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\lib.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\executor.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\join.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\select.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\stream_select.rs
-
-C:\Users\grieger.EMA\Desktop\Rust\emaaddinmanager\src-tauri\db_manager\target\debug\deps\futures_macro-7fb97256ed470184.d: C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\lib.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\executor.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\join.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\select.rs C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\stream_select.rs
-
-C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\lib.rs:
-C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\executor.rs:
-C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\join.rs:
-C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\select.rs:
-C:\Users\grieger.EMA\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\futures-macro-0.3.31\src\stream_select.rs:
