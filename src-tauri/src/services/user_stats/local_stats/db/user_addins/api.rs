@@ -127,4 +127,42 @@ impl UserAddinsTable {
             None => Err(UserAddinsError::UserNotFound),
         }
     }
+
+    pub async fn change_email(
+        &self,
+        user_email: String,
+        new_user_email: String,
+    ) -> Result<(), UserAddinsError> {
+        println!("Changing email from {} to {}", user_email, new_user_email);
+
+        // First, find the existing user
+        let user = user::Entity::find()
+            .filter(user::Column::UserEmail.eq(&user_email))
+            .one(self.db.as_ref())
+            .await
+            .map_err(UserAddinsError::DbError)?;
+
+        if let Some(user) = user {
+            // Delete the old record
+            user::Entity::delete_by_id(&user_email)
+                .exec(self.db.as_ref())
+                .await
+                .map_err(UserAddinsError::DbError)?;
+
+            // Insert a new record with the new email
+            let new_user = user::ActiveModel {
+                user_email: Set(new_user_email),
+                allowed_addin_ids: Set(user.allowed_addin_ids),
+                allowed_addin_paths: Set(user.allowed_addin_paths),
+                discipline: Set(user.discipline),
+            };
+
+            new_user
+                .insert(self.db.as_ref())
+                .await
+                .map_err(UserAddinsError::DbError)?;
+        }
+
+        Ok(())
+    }
 }

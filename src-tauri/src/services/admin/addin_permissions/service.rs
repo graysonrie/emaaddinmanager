@@ -63,6 +63,18 @@ impl AddinPermissionsService {
             .map_err(|e| e.to_string())
     }
 
+    pub async fn change_email(
+        &self,
+        user_email: String,
+        new_user_email: String,
+    ) -> Result<(), String> {
+        let table = self.get_table();
+        table
+            .change_email(user_email, new_user_email)
+            .await
+            .map_err(|e| e.to_string())
+    }
+
     fn get_table(&self) -> &UserAddinsTable {
         self.local_stats.stats_db.user_addins_table()
     }

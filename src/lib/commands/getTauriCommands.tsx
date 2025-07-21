@@ -203,8 +203,11 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<UpdateNotificationModel[]>("check_for_updates");
   };
 
-  const registerUser = async (userEmail: string, discipline: string) => {
-    return await invoke<UserModel>("register_user", { userEmail, discipline });
+  const registerUser = async (userEmail: string, userDiscipline: string) => {
+    return await invoke<UserModel>("register_user", {
+      userEmail,
+      userDiscipline,
+    });
   };
 
   const getUser = async (userEmail: string) => {
@@ -229,6 +232,10 @@ export default function getTauriCommands(): TauriCommands {
       userEmail,
       addinPaths,
     });
+  };
+
+  const changeEmail = async (userEmail: string, newUserEmail: string) => {
+    return await invoke<void>("change_email", { userEmail, newUserEmail });
   };
 
   return {

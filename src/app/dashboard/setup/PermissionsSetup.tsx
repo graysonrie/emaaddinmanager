@@ -14,11 +14,11 @@ import { Button } from "@/components/ui/button";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
 
 export default function PermissionsSetup() {
-  const { registerUser, addAllowedAddinPaths } = useUserPermissions();
+  const { registerAndAddAllowedAddinPaths } = useUserPermissions();
   const addinPermissions = DEFAULT_ADDIN_PERMISSIONS;
 
-  const onPermissionClick = (permission: AddinPermission) => {
-    registerUser()
+  const onPermissionClick = async (permission: AddinPermission) => {
+    await registerAndAddAllowedAddinPaths(permission.forDiscipline);
   };
   return (
     <Card className="w-full max-w-md mx-auto">

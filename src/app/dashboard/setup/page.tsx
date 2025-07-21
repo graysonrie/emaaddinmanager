@@ -15,39 +15,43 @@ import { DisciplineSetup } from "./DisciplineSetup";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
 import { UserModel } from "@/lib/models/user.model";
 import PermissionsSetup from "./PermissionsSetup";
+import useUserPermissions from "@/lib/persistence/useUserPermissions";
 
 export default function SetupPage() {
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "permissions" | "done">("email");
-  const [user, setUser] = useState<UserModel | undefined | null>(null); // Replace 'any' with your user type
+  const [step, setStep] = useState<"email" | "name" | "permissions" | "done">(
+    "email"
+  );
+  const { user, isLoading } = useUserPermissions();
   const router = useRouter();
 
-  // Fetch user when userEmail changes
   useEffect(() => {
-    if (userEmail) {
-      getTauriCommands().getUser(userEmail).then(setUser);
-    } else {
-      setUser(undefined);
-    }
-  }, [userEmail]);
+    console.log("SetupPage: useEffect triggered with:", {
+      userEmail,
+      userName,
+      user,
+    });
 
-  useEffect(() => {
     if (!userEmail) {
+      console.log("SetupPage: No userEmail, setting step to email");
       setIsOpen(false);
       setStep("email");
     } else if (!userName) {
+      console.log("SetupPage: No userName, setting step to name");
       setIsOpen(false);
       setStep("name");
-    } else if (user === null) {
-      // Still loading user, do nothing
-    } else if (!user) {
+    } else if (!user && !isLoading) {
+      console.log(
+        "SetupPage: user is falsy (user doesn't exist), setting step to permissions"
+      );
       setStep("permissions");
     } else if (userEmail && userName && user) {
+      console.log("SetupPage: All conditions met, setting step to done");
       setStep("done");
     }
-  }, [userEmail, userName, user, setIsOpen]);
+  }, [userEmail, userName, user, setIsOpen, isLoading]);
 
   useEffect(() => {
     if (step === "done") {
@@ -92,20 +96,18 @@ export default function SetupPage() {
             <NameSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
-        {
-          step === "permissions" && (
-            <motion.div
-              key="permissions"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="w-full"
-            >
-              <PermissionsSetup />
-            </motion.div>
-          )
-        }
+        {step === "permissions" && (
+          <motion.div
+            key="permissions"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="w-full"
+          >
+            <PermissionsSetup />
+          </motion.div>
+        )}
       </AnimatePresence>
     </motion.div>
   );
