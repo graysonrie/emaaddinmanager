@@ -1,14 +1,13 @@
 use std::sync::Arc;
 
 use crate::services::{
-    addin_exporter::models::category_model::CategoryModel,
+    admin::addin_exporter::models::category_model::CategoryModel,
     addins_registry::{
         models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
         services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
 };
 use futures::stream::{FuturesUnordered, StreamExt};
-use rayon::prelude::*;
 use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]

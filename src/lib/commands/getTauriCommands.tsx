@@ -10,6 +10,7 @@ import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
 import { UserStatsModel } from "../models/user-stats.model";
 import { UpdateNotificationModel } from "../models/update-notification.model";
+import { UserModel } from "../models/user.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -40,6 +41,16 @@ interface TauriCommands {
   changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
   changeUserStatsName: (newUserName: string) => Promise<void>;
   checkForUpdates: () => Promise<UpdateNotificationModel[]>;
+  registerUser: (userEmail: string, discipline: string) => Promise<UserModel>;
+  getUser: (userEmail: string) => Promise<UserModel | undefined>;
+  addAllowedAddinPaths: (
+    userEmail: string,
+    addinPaths: string[]
+  ) => Promise<void>;
+  removeAllowedAddinPaths: (
+    userEmail: string,
+    addinPaths: string[]
+  ) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -192,6 +203,34 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<UpdateNotificationModel[]>("check_for_updates");
   };
 
+  const registerUser = async (userEmail: string, discipline: string) => {
+    return await invoke<UserModel>("register_user", { userEmail, discipline });
+  };
+
+  const getUser = async (userEmail: string) => {
+    return await invoke<UserModel | undefined>("get_user", { userEmail });
+  };
+
+  const addAllowedAddinPaths = async (
+    userEmail: string,
+    addinPaths: string[]
+  ) => {
+    return await invoke<void>("add_allowed_addin_paths", {
+      userEmail,
+      addinPaths,
+    });
+  };
+
+  const removeAllowedAddinPaths = async (
+    userEmail: string,
+    addinPaths: string[]
+  ) => {
+    return await invoke<void>("remove_allowed_addin_paths", {
+      userEmail,
+      addinPaths,
+    });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -214,5 +253,9 @@ export default function getTauriCommands(): TauriCommands {
     changeUserStatsEmail,
     changeUserStatsName,
     checkForUpdates,
+    registerUser,
+    getUser,
+    addAllowedAddinPaths,
+    removeAllowedAddinPaths,
   };
 }

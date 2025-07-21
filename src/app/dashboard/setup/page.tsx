@@ -12,13 +12,26 @@ import { useSidebarStore } from "../components/sidebar/store";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { SUCCESS_DELAY } from "./constants";
 import { DisciplineSetup } from "./DisciplineSetup";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
+import { UserModel } from "@/lib/models/user.model";
+import PermissionsSetup from "./PermissionsSetup";
 
 export default function SetupPage() {
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "done">("email");
+  const [step, setStep] = useState<"email" | "name" | "permissions" | "done">("email");
+  const [user, setUser] = useState<UserModel | undefined | null>(null); // Replace 'any' with your user type
   const router = useRouter();
+
+  // Fetch user when userEmail changes
+  useEffect(() => {
+    if (userEmail) {
+      getTauriCommands().getUser(userEmail).then(setUser);
+    } else {
+      setUser(undefined);
+    }
+  }, [userEmail]);
 
   useEffect(() => {
     if (!userEmail) {
@@ -27,10 +40,14 @@ export default function SetupPage() {
     } else if (!userName) {
       setIsOpen(false);
       setStep("name");
-    } else if (userEmail && userName) {
+    } else if (user === null) {
+      // Still loading user, do nothing
+    } else if (!user) {
+      setStep("permissions");
+    } else if (userEmail && userName && user) {
       setStep("done");
     }
-  }, [userEmail, userName]);
+  }, [userEmail, userName, user, setIsOpen]);
 
   useEffect(() => {
     if (step === "done") {
@@ -75,6 +92,20 @@ export default function SetupPage() {
             <NameSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
+        {
+          step === "permissions" && (
+            <motion.div
+              key="permissions"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.35, ease: "easeInOut" }}
+              className="w-full"
+            >
+              <PermissionsSetup />
+            </motion.div>
+          )
+        }
       </AnimatePresence>
     </motion.div>
   );

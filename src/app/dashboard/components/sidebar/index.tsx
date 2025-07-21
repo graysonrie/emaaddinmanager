@@ -98,11 +98,7 @@ export default function Sidebar() {
       label: "Home",
       link: "/dashboard",
     },
-    {
-      icon: <LibraryIcon />,
-      label: "Library",
-      link: "/dashboard/library",
-    },
+
     {
       icon: <PackageIcon />,
       label: "Installed",
@@ -123,6 +119,11 @@ export default function Sidebar() {
   ];
 
   const adminButtons = [
+    {
+      icon: <LibraryIcon />,
+      label: "Library",
+      link: "/dashboard/library",
+    },
     {
       icon: <ChartBarBig />,
       label: "User Stats",

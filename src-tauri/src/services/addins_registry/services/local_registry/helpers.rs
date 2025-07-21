@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use log::{info, warn};
 
 use crate::services::{
-    addin_exporter::models::category_model::CategoryModel,
+    admin::addin_exporter::models::category_model::CategoryModel,
     addins_registry::models::{addin_model::AddinModel, addin_xml_model::RevitAddIns},
     local_addins::service::LocalAddinsService,
 };

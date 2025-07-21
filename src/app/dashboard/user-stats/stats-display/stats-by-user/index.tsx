@@ -5,6 +5,9 @@ import {
   Upload,
   ChevronDown,
   ChevronUp,
+  Settings2,
+  Settings,
+  User2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +16,18 @@ import AddinCard from "./AddinCard";
 import { deduplicateInstalledAddins } from "../helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useState } from "react";
+import { useManageDialogStore } from "../../manage-dialog/store";
 
 export default function StatsByUser() {
   const { userStats, loading, error, refresh } = useUserStats();
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+
+  const manageDialogStore = useManageDialogStore();
+
+  const handleUserAvatarClick = (userEmail: string) => {
+    manageDialogStore.setIsVisible(true);
+    manageDialogStore.setUserEmail(userEmail);
+  };
 
   const toggleUserExpansion = (userEmail: string) => {
     const newExpanded = new Set(expandedUsers);
@@ -49,15 +60,17 @@ export default function StatsByUser() {
         const isExpanded = expandedUsers.has(userStats.userEmail);
 
         return (
-          <div key={userStats.userEmail} className="flex flex-col gap-2 w-full">
+          <div key={userStats.userEmail} className="flex flex-col w-full">
             <Card className="p-1 pt-2">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+
                     <UserAvatar
                       userName={userStats.userName}
                       showFullname={true}
                       size="md"
+                      onClick={() => handleUserAvatarClick(userStats.userEmail)}
                     />
                     <div className="flex flex-col gap-1">
                       <p className="text-sm text-muted-foreground">
@@ -89,6 +102,7 @@ export default function StatsByUser() {
               {isExpanded && (
                 <CardContent className="pt-0 pb-2">
                   <div className="flex flex-col gap-4">
+                    {userStats.publishedAddins.length > 0 && (
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-row gap-2 items-center">
                         <Upload className="w-4 h-4 flex-shrink-0" />
@@ -109,9 +123,10 @@ export default function StatsByUser() {
                               key={addin.addin.name}
                             />
                           );
-                        })}
+                          })}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-row gap-2 items-center">
                         <Download className="w-4 h-4 flex-shrink-0" />

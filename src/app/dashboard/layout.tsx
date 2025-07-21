@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
 import UpdaterPopup from "./components/updater-popup";
+import useConfig from "@/lib/persistence/config/useConfig";
 
 export default function DashboardLayout({
   children,
@@ -19,13 +20,14 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const { startPeriodicChecking } = useAddinUpdaterStore();
-
-  useConfigValueOrDefault(
-    "localAddinRegistryPath",
-    "S:\\BasesRevitAddinsRegistry"
-  );
+  const config = useConfig();
 
   useEffect(() => {
+    config.update(
+      "localAddinRegistryPath",
+      "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry"
+    );
+
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
         e.preventDefault();

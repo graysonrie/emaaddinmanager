@@ -12,16 +12,18 @@ import { Loader2 } from "lucide-react";
 import UpdaterPopup from "./components/updater-popup";
 import PageWrapper from "@/components/PageWrapper";
 import Link from "next/link";
+import useUserPermissions from "@/lib/persistence/useUserPermissions";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete, config } = useConfigInitialization();
+  const { user } = useUserPermissions();
   const router = useRouter();
 
   useEffect(() => {
     if (!isInitialized) return; // Don't make routing decisions until initialized
 
-    if (!isComplete) {
+    if (!isComplete || !user) {
       setIsOpen(false);
       router.replace("/dashboard/setup");
     } else {

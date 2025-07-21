@@ -1,4 +1,4 @@
-pub mod addin_exporter;
+pub mod admin;
 pub mod addin_updater;
 pub mod addins_registry;
 pub mod app_save;

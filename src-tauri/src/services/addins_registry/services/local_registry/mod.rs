@@ -9,7 +9,7 @@ use crate::{
     constants::Fut,
     models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
     services::{
-        addin_exporter::models::category_model::CategoryModel,
+        admin::addin_exporter::models::category_model::CategoryModel,
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
         config::keys::LOCAL_ADDIN_REGISTRY_PATH,
         local_addins::service::LocalAddinsService,
@@ -29,9 +29,6 @@ impl LocalAddinsRegistryService {
                 local_db.clone(),
             ),
         }
-    }
-    pub async fn get_registry_location(&self) -> String {
-        self.registry_location.get_data_updated().await.unwrap()
     }
 }
 

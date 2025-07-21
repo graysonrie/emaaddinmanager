@@ -9,6 +9,7 @@ import StatsDisplay from "./stats-display";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
+import ManageDialog from "./manage-dialog";
 
 export default function UserStatsPage() {
   // Show main app content
@@ -22,6 +23,7 @@ export default function UserStatsPage() {
 
         <StatsDisplay />
       </div>
+      <ManageDialog />
     </PageWrapper>
   );
 }
