@@ -1,11 +1,11 @@
-export interface AddinPermission {
+export interface AddinPermissionModel {
   relativePathToAddin: string;
   displayName: string;
   forDiscipline: string;
   emoji: string;
 }
 
-export const DEFAULT_ADDIN_PERMISSIONS: AddinPermission[] = [
+export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
   {
     relativePathToAddin: "All Versions/EMABASES",
     displayName: "EMA Bases",

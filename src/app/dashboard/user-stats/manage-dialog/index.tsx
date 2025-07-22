@@ -14,8 +14,7 @@ import { User } from "lucide-react";
 import AddinPermissionsList from "./addin-permissions-list";
 
 export default function ManageDialog() {
-  const { isVisible, setIsVisible, userEmail, setUserEmail } =
-    useManageDialogStore();
+  const { isVisible, setIsVisible, userName } = useManageDialogStore();
 
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
@@ -23,15 +22,18 @@ export default function ManageDialog() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            <p className="font-sans text-foreground">Manage User</p>
+            <div className="flex flex-row gap-1">
+              <p className="font-sans text-foreground">Manage</p>
+              <p className="font-sans text-chart-2 text">{userName}</p>
+            </div>
           </DialogTitle>
           <DialogDescription>
             Manage the addins that this user has access to
           </DialogDescription>
           <DialogDescription>
-            Adding an add-in will automatically install it for them. Removing an
-            add-in will cause it to get uninstalled the next time the user opens
-            this app.
+            Toggling on an add-in will automatically install it for them.
+            Toggling off an add-in will cause it to get uninstalled the next
+            time the user opens this app.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">

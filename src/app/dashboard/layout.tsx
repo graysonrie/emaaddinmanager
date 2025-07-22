@@ -6,10 +6,10 @@ import { useSidebarStore } from "./components/sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
 import UpdaterPopup from "./components/updater-popup";
 import useConfig from "@/lib/persistence/config/useConfig";
+import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 
 export default function DashboardLayout({
   children,
@@ -19,8 +19,8 @@ export default function DashboardLayout({
   const { isOpen } = useSidebarStore();
   const router = useRouter();
 
-  const { startPeriodicChecking } = useAddinUpdaterStore();
   const config = useConfig();
+  useAddinUpdater();
 
   useEffect(() => {
     config.update(
@@ -45,9 +45,6 @@ export default function DashboardLayout({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  useEffect(() => {
-    startPeriodicChecking();
-  }, []);
 
   return (
     <div className="flex h-full w-full overflow-hidden">

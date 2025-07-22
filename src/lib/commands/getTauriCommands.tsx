@@ -40,7 +40,10 @@ interface TauriCommands {
   doesUserExist: (userEmail: string) => Promise<boolean>;
   changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
   changeUserStatsName: (newUserName: string) => Promise<void>;
-  checkForUpdates: () => Promise<UpdateNotificationModel[]>;
+  /** Returns true if there are updates available */
+  checkForUpdatesManual: () => Promise<boolean>;
+  isRevitRunning: () => Promise<boolean>;
+  getPendingUpdatesInfo: () => Promise<string | undefined>;
   registerUser: (userEmail: string, discipline: string) => Promise<UserModel>;
   getUser: (userEmail: string) => Promise<UserModel | undefined>;
   addAllowedAddinPaths: (
@@ -51,6 +54,7 @@ interface TauriCommands {
     userEmail: string,
     addinPaths: string[]
   ) => Promise<void>;
+  isUserAdmin: () => Promise<boolean>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -199,8 +203,16 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("change_user_stats_name", { newUserName });
   };
 
-  const checkForUpdates = async () => {
-    return await invoke<UpdateNotificationModel[]>("check_for_updates");
+  const checkForUpdatesManual = async () => {
+    return await invoke<boolean>("check_for_updates_manual");
+  };
+
+  const isRevitRunning = async () => {
+    return await invoke<boolean>("is_revit_running");
+  };
+
+  const getPendingUpdatesInfo = async () => {
+    return await invoke<string | undefined>("get_pending_updates_info");
   };
 
   const registerUser = async (userEmail: string, userDiscipline: string) => {
@@ -234,8 +246,8 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
-  const changeEmail = async (userEmail: string, newUserEmail: string) => {
-    return await invoke<void>("change_email", { userEmail, newUserEmail });
+  const isUserAdmin = async () => {
+    return await invoke<boolean>("is_user_admin");
   };
 
   return {
@@ -259,10 +271,13 @@ export default function getTauriCommands(): TauriCommands {
     getAllUserStats,
     changeUserStatsEmail,
     changeUserStatsName,
-    checkForUpdates,
+    checkForUpdatesManual,
+    isRevitRunning,
+    getPendingUpdatesInfo,
     registerUser,
     getUser,
     addAllowedAddinPaths,
     removeAllowedAddinPaths,
+    isUserAdmin,
   };
 }

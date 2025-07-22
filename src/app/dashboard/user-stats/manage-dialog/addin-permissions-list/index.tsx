@@ -1,14 +1,17 @@
-import { MessageCircleWarning } from "lucide-react";
+import { MessageCircleWarning, X } from "lucide-react";
 import { useManageDialogStore } from "../store";
 
 import useAddinPermissions from "./useAddinPermissions";
 import { Button } from "@/components/ui/button";
+import AddinPermission from "./AddinPermission";
+import { DEFAULT_ADDIN_PERMISSIONS } from "../types";
 
 export default function AddinPermissionsList() {
   const { userEmail } = useManageDialogStore();
   const { allowedAddinPaths, hasUserRegistered } = useAddinPermissions({
     userEmail,
   });
+  const addinPermission = DEFAULT_ADDIN_PERMISSIONS;
 
   const manageDialog = useManageDialogStore();
 
@@ -16,10 +19,10 @@ export default function AddinPermissionsList() {
     <div className="flex flex-col gap-2">
       {hasUserRegistered ? (
         <>
-          <p className="text-sm font-bold font-sans">Addin Permissions</p>
+          <p className="text-sm font-bold font-sans">Allowed Addins</p>
           <div className="flex flex-col gap-2">
-            {allowedAddinPaths.map((path) => (
-              <p key={path}>{path}</p>
+            {addinPermission.map((permission) => (
+              <AddinPermission key={permission.relativePathToAddin} permission={permission} />
             ))}
           </div>
         </>

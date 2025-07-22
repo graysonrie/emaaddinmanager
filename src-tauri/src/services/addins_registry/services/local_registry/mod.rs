@@ -7,10 +7,10 @@ use helpers::*;
 
 use crate::{
     constants::Fut,
-    models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
+    models::kv_store_value::KvStoreValue,
     services::{
-        admin::addin_exporter::models::category_model::CategoryModel,
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
+        admin::addin_exporter::models::category_model::CategoryModel,
         config::keys::LOCAL_ADDIN_REGISTRY_PATH,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,

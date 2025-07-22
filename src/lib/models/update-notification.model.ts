@@ -1,5 +1,4 @@
 export interface UpdateNotificationModel {
-  addinName: string;
-  addinVendorId: string;
-  addinVendorEmail: string;
+  title: string;
+  description: string;
 }

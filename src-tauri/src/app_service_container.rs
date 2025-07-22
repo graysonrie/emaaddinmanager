@@ -5,7 +5,7 @@ use tauri::{AppHandle, Manager};
 use crate::services::{
     addin_updater::service::AddinUpdaterService,
     addins_registry::services::local_registry::LocalAddinsRegistryService,
-    admin::addin_permissions::service::AddinPermissionsService,
+    admin::{addin_permissions::service::AddinPermissionsService, service::AdminService},
     app_save::service::{AppSavePath, AppSaveService},
     local_db::service::LocalDbService,
     user_stats::LocalUserStatsService,
@@ -29,9 +29,10 @@ pub fn initialize_app(handle: &AppHandle) {
         )
         .await;
         let addin_updater_service =
-            initialize_addin_updater_service(Arc::clone(&addins_registry_service));
+            initialize_addin_updater_service(Arc::clone(&addins_registry_service), handle.clone());
         let addin_permissions_service =
             initialize_addins_permissions_service(Arc::clone(&user_stats_service)).await;
+        let admin_service = initialize_admin_service(Arc::clone(&local_db_service)).await;
 
         handle.manage(Arc::clone(&local_db_service));
         handle.manage(Arc::clone(&app_save_service));
@@ -39,6 +40,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&user_stats_service));
         handle.manage(Arc::clone(&addin_updater_service));
         handle.manage(Arc::clone(&addin_permissions_service));
+        handle.manage(Arc::clone(&admin_service));
     });
 }
 
@@ -54,8 +56,9 @@ fn initialize_addins_registry_service_local(
 
 fn initialize_addin_updater_service(
     addins_registry: Arc<LocalAddinsRegistryService>,
+    app_handle: AppHandle,
 ) -> Arc<AddinUpdaterService> {
-    Arc::new(AddinUpdaterService::new(addins_registry))
+    Arc::new(AddinUpdaterService::new(addins_registry, app_handle))
 }
 
 async fn initialize_local_db_service(
@@ -77,4 +80,8 @@ async fn initialize_addins_permissions_service(
     user_stats: Arc<LocalUserStatsService>,
 ) -> Arc<AddinPermissionsService> {
     Arc::new(AddinPermissionsService::new(user_stats))
+}
+
+async fn initialize_admin_service(local_db: Arc<LocalDbService>) -> Arc<AdminService> {
+    Arc::new(AdminService::new(local_db))
 }

@@ -14,6 +14,7 @@ import UserAvatar from "@/app/shared/UserAvatar";
 import { Loader2 } from "lucide-react";
 import { deduplicateInstalledAddins } from "./helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
+import { useManageDialogStore } from "../manage-dialog/store";
 
 interface UserFacingStats {
   userEmail: string;
@@ -25,6 +26,13 @@ interface UserFacingStats {
 
 export default function BasicUserStatsTable() {
   const { userStats, loading, error, refresh } = useUserStats();
+
+  const manageDialogStore = useManageDialogStore();
+
+  const handleUserAvatarClick = (userEmail: string, userName: string) => {
+    manageDialogStore.setIsVisible(true);
+    manageDialogStore.setUserEmailAndName(userEmail, userName);
+  };
 
   const userFacingStats = useMemo(() => {
     return userStats?.map((stats) => {
@@ -73,6 +81,7 @@ export default function BasicUserStatsTable() {
                   userName={stats.userName}
                   showFullname={true}
                   size="sm"
+                  onClick={() => handleUserAvatarClick(stats.userEmail, stats.userName)}
                 />
               </TableCell>
               <TableCell>{stats.publishedAddins}</TableCell>

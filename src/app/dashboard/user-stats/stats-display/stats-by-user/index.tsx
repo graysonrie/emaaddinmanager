@@ -24,9 +24,9 @@ export default function StatsByUser() {
 
   const manageDialogStore = useManageDialogStore();
 
-  const handleUserAvatarClick = (userEmail: string) => {
+  const handleUserAvatarClick = (userEmail: string, userName: string) => {
     manageDialogStore.setIsVisible(true);
-    manageDialogStore.setUserEmail(userEmail);
+    manageDialogStore.setUserEmailAndName(userEmail, userName);
   };
 
   const toggleUserExpansion = (userEmail: string) => {
@@ -70,7 +70,7 @@ export default function StatsByUser() {
                       userName={userStats.userName}
                       showFullname={true}
                       size="md"
-                      onClick={() => handleUserAvatarClick(userStats.userEmail)}
+                      onClick={() => handleUserAvatarClick(userStats.userEmail, userStats.userName)}
                     />
                     <div className="flex flex-col gap-1">
                       <p className="text-sm text-muted-foreground">

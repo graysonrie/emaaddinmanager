@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
-use db_manager::db::user_addins_table::user;
-
-use crate::services::{admin::addin_permissions::models::user::UserModel, user_stats::{db::user_addins::UserAddinsTable, LocalUserStatsService}};
+use crate::services::{
+    admin::addin_permissions::models::user::UserModel,
+    user_stats::{db::user_addins::UserAddinsTable, LocalUserStatsService},
+};
 
 pub struct AddinPermissionsService {
     local_stats: Arc<LocalUserStatsService>,
@@ -28,14 +29,24 @@ impl AddinPermissionsService {
             .create_user(user_email, user_discipline)
             .await
             .map_err(|e| e.to_string())?;
-        let user_model = user.try_into().map_err(|e: serde_json::Error| e.to_string())?;
+        let user_model = user
+            .try_into()
+            .map_err(|e: serde_json::Error| e.to_string())?;
         Ok(user_model)
     }
 
     pub async fn get_user(&self, user_email: String) -> Result<Option<UserModel>, String> {
         let table = self.get_table();
-        let user = table.get_user(user_email).await.map_err(|e| e.to_string())?;
-        let user_model = user.map(|user| user.try_into().map_err(|e: serde_json::Error| e.to_string())).transpose()?;
+        let user = table
+            .get_user(user_email)
+            .await
+            .map_err(|e| e.to_string())?;
+        let user_model = user
+            .map(|user| {
+                user.try_into()
+                    .map_err(|e: serde_json::Error| e.to_string())
+            })
+            .transpose()?;
         Ok(user_model)
     }
 
@@ -59,18 +70,6 @@ impl AddinPermissionsService {
         let table = self.get_table();
         table
             .remove_allowed_addin_paths(user_email, addin_paths)
-            .await
-            .map_err(|e| e.to_string())
-    }
-
-    pub async fn change_email(
-        &self,
-        user_email: String,
-        new_user_email: String,
-    ) -> Result<(), String> {
-        let table = self.get_table();
-        table
-            .change_email(user_email, new_user_email)
             .await
             .map_err(|e| e.to_string())
     }
