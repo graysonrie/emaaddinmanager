@@ -29,3 +29,10 @@ pub fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
 
     Ok(())
 }
+
+/// Converts double backslashes to single forward slashes
+/// 
+/// Example: "C:\\Users\\John\\AppData\\Local\\Revit\\Addins\\2025\\" -> "C:/Users/John/AppData/Local/Revit/Addins/2025/"
+pub fn double_backslash_to_single_forward_slash(path: &str) -> String {
+    path.replace("\\", "/")
+}

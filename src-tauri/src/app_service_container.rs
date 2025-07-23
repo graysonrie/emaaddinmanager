@@ -29,7 +29,7 @@ pub fn initialize_app(handle: &AppHandle) {
         )
         .await;
         let addin_updater_service =
-            initialize_addin_updater_service(Arc::clone(&addins_registry_service), handle.clone());
+            initialize_addin_updater_service(Arc::clone(&addins_registry_service), handle.clone(), Arc::clone(&user_stats_service), Arc::clone(&local_db_service) );
         let addin_permissions_service =
             initialize_addins_permissions_service(Arc::clone(&user_stats_service)).await;
         let admin_service = initialize_admin_service(Arc::clone(&local_db_service)).await;
@@ -57,8 +57,10 @@ fn initialize_addins_registry_service_local(
 fn initialize_addin_updater_service(
     addins_registry: Arc<LocalAddinsRegistryService>,
     app_handle: AppHandle,
+    user_stats: Arc<LocalUserStatsService>,
+    db: Arc<LocalDbService>,
 ) -> Arc<AddinUpdaterService> {
-    Arc::new(AddinUpdaterService::new(addins_registry, app_handle))
+    Arc::new(AddinUpdaterService::new(addins_registry, app_handle, user_stats, db))
 }
 
 async fn initialize_local_db_service(

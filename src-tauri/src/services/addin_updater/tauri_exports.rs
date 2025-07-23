@@ -1,23 +1,17 @@
 use std::sync::Arc;
-use tauri::{AppHandle, State};
+use tauri::State;
 
 use crate::services::addin_updater::{
-    service::AddinUpdaterService,
-    update_checker::{manual_check_for_updates, PendingUpdatesStateType},
+    service::AddinUpdaterService, update_checker::PendingUpdatesStateType,
 };
 
 /// Manually trigger a check for addin updates
 #[tauri::command]
 pub async fn check_for_updates_manual(
-    app: AppHandle,
     addin_updater_service: State<'_, Arc<AddinUpdaterService>>,
-    pending_updates_state: State<'_, PendingUpdatesStateType>,
 ) -> Result<bool, String> {
-    // Get the addins registry from the service
-    let addins_registry = &addin_updater_service.addins_registry;
-
     // Perform the manual check
-    match manual_check_for_updates(addins_registry, &pending_updates_state, &app).await {
+    match addin_updater_service.manually_check_for_updates().await {
         Ok(_notifications) => {
             // The manual check will emit notification events to the frontend
             Ok(!_notifications.is_empty())

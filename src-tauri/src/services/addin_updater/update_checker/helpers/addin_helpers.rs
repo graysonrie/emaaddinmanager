@@ -1,5 +1,7 @@
 use crate::services::{
-    addin_updater::{helpers, models::UpdateNotificationModel, service::CheckForUpdatesError},
+    addin_updater::{
+        models::UpdateNotificationModel, service::CheckForUpdatesError, update_checker::helpers,
+    },
     addins_registry::models::addin_model::AddinModel,
 };
 

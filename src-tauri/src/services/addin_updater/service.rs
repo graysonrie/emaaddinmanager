@@ -1,10 +1,11 @@
-use std::fmt::Display;
+use std::{fmt::Display, sync::Arc};
 use tauri::AppHandle;
-use tokio::task::JoinHandle;
 
 use crate::services::{
-    addin_updater::{update_checker},
+    addin_updater::{models::UpdateNotificationModel, update_checker::AddinUpdateChecker, *},
     addins_registry::services::AsyncAddinsRegistryServiceType,
+    local_db::service::LocalDbService,
+    user_stats::LocalUserStatsService,
 };
 
 #[derive(Debug)]
@@ -22,16 +23,26 @@ impl Display for CheckForUpdatesError {
 
 /// A service to manage the background update checker.
 pub struct AddinUpdaterService {
-    pub addins_registry: AsyncAddinsRegistryServiceType,
-    update_checker_task: JoinHandle<()>,
+    pub update_checker: AddinUpdateChecker,
 }
 
 impl AddinUpdaterService {
-    pub fn new(addins_registry: AsyncAddinsRegistryServiceType, app_handle: AppHandle) -> Self {
-        let update_checker_task = update_checker::spawn_update_checker(app_handle, addins_registry.clone());
-        Self {
-            addins_registry,
-            update_checker_task,
-        }
+    pub fn new(
+        addins_registry: AsyncAddinsRegistryServiceType,
+        app_handle: AppHandle,
+        user_stats: Arc<LocalUserStatsService>,
+        db: Arc<LocalDbService>,
+    ) -> Self {
+        let update_checker = update_checker::AddinUpdateChecker::new(
+            app_handle,
+            addins_registry.clone(),
+            user_stats,
+            db,
+        );
+        update_checker.spawn_update_checker();
+        Self { update_checker }
+    }
+    pub async fn manually_check_for_updates(&self) -> Result<Vec<UpdateNotificationModel>, String> {
+        self.update_checker.manual_check_for_updates().await
     }
 }

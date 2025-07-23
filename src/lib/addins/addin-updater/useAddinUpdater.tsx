@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { listen } from "@tauri-apps/api/event";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { useAddinUpdaterStore } from "./useAddinUpdaterStore";
 
 export function useAddinUpdater() {
-  const unlistenRef = useRef<(() => void) | null>(null);
+  const unlistenRef = useRef<UnlistenFn | null>(null);
   const { updateNotifications, setUpdateNotifications } =
     useAddinUpdaterStore();
 
