@@ -55,6 +55,12 @@ interface TauriCommands {
     addinPaths: string[]
   ) => Promise<void>;
   isUserAdmin: () => Promise<boolean>;
+  isUserSuperAdmin: () => Promise<boolean>;
+
+  isOtherUserAdmin: (userEmail: string) => Promise<boolean>;
+  isOtherUserSuperAdmin: (userEmail: string) => Promise<boolean>;
+  /** Remove the user from the stats db so that they do not appear at all on the stats page. This is only available to admins. */
+  unregisterUser: (userEmail: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -250,6 +256,22 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<boolean>("is_user_admin");
   };
 
+  const isUserSuperAdmin = async () => {
+    return await invoke<boolean>("is_user_super_admin");
+  };
+
+  const isOtherUserAdmin = async (userEmail: string) => {
+    return await invoke<boolean>("is_other_user_admin", { userEmail });
+  };
+
+  const isOtherUserSuperAdmin = async (userEmail: string) => {
+    return await invoke<boolean>("is_other_user_super_admin", { userEmail });
+  };
+
+  const unregisterUser = async (userEmail: string) => {
+    return await invoke<void>("unregister_user", { userEmail });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -279,5 +301,9 @@ export default function getTauriCommands(): TauriCommands {
     addAllowedAddinPaths,
     removeAllowedAddinPaths,
     isUserAdmin,
+    isUserSuperAdmin,
+    isOtherUserAdmin,
+    isOtherUserSuperAdmin,
+    unregisterUser,
   };
 }

@@ -7,10 +7,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
-import { X, Download, Clock, CheckCircle } from "lucide-react";
+import { X, Download, Clock, CheckCircle, Info } from "lucide-react";
+import { UpdateNotificationWithTime } from "@/lib/addins/addin-updater/update-notification-with-time.model";
 
 interface AddinUpdateNotificationCardProps {
-  notification: UpdateNotificationModel;
+  notification: UpdateNotificationWithTime;
   onDismiss: () => void;
 }
 
@@ -19,30 +20,36 @@ export default function AddinUpdateNotificationCard({
   onDismiss,
 }: AddinUpdateNotificationCardProps) {
   // Determine if this is a pending update (Revit is running) or completed update
-  const isPendingUpdate = notification.description.includes(
-    "will be updated once Revit is closed"
-  );
-  const isCompletedUpdate =
-    notification.description.includes("has been updated");
+  const isPendingUpdate = notification.notificationType === "warning";
+  const isCompletedUpdate = notification.notificationType === "install";
 
   const getIcon = () => {
     if (isPendingUpdate) {
-      return <Clock className="w-5 h-5 text-info" />;
+      return <Clock className="w-5 h-5 text-chart-3" />;
     } else if (isCompletedUpdate) {
-      return <CheckCircle className="w-5 h-5 text-chart-2" />;
+      return <Download className="w-5 h-5 text-primary" />;
     } else {
-      return <Download className="w-5 h-5 text-chart-2" />;
+      return <Info className="w-5 h-5 text-chart-2" />;
     }
   };
 
   const getCardStyle = () => {
     if (isPendingUpdate) {
-      return "border-info/20 bg-info/10 hover:bg-info/20 transition-colors";
+      return "border-chart-3/20 bg-chart-3/10 hover:bg-chart-3/20 transition-colors";
     } else if (isCompletedUpdate) {
-      return "border-chart-2/20 bg-chart-2/10 hover:bg-chart-2/20 transition-colors";
+      return "border-primary/20 bg-primary/10 hover:bg-primary/20 transition-colors";
     } else {
       return "border-chart-2/20 bg-chart-2/10 hover:bg-chart-2/20 transition-colors";
     }
+  };
+
+  const getSimplifiedTime = (time: Date) => {
+    // Format as "h:mm AM/PM"
+    return time.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   return (
@@ -57,6 +64,9 @@ export default function AddinUpdateNotificationCard({
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground leading-relaxed">
                 {notification.description}
+              </CardDescription>
+              <CardDescription className="text-sm text-muted-foreground leading-relaxed">
+                {getSimplifiedTime(notification.time)}
               </CardDescription>
             </div>
           </div>

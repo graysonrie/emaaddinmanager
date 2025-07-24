@@ -3,8 +3,8 @@ use std::{fs, path::Path};
 use log::{info, warn};
 
 use crate::services::{
-    admin::addin_exporter::models::category_model::CategoryModel,
     addins_registry::models::{addin_model::AddinModel, addin_xml_model::RevitAddIns},
+    admin::addin_exporter::models::category_model::CategoryModel,
     local_addins::service::LocalAddinsService,
 };
 
@@ -44,7 +44,7 @@ pub fn process_addin_file(
     xml_file_path: &Path,
     addins: &mut Vec<AddinModel>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    info!("Processing addin file: {:?}", xml_file_path);
+    // info!("Processing addin file: {:?}", xml_file_path);
 
     // Try to parse the XML file
     let revit_addins = RevitAddIns::from_file(xml_file_path)?;

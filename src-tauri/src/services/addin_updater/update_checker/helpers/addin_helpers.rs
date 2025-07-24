@@ -1,6 +1,8 @@
 use crate::services::{
     addin_updater::{
-        models::UpdateNotificationModel, service::CheckForUpdatesError, update_checker::helpers,
+        models::{UpdateNotificationModel, UpdateNotificationType},
+        service::CheckForUpdatesError,
+        update_checker::helpers,
     },
     addins_registry::models::addin_model::AddinModel,
 };
@@ -25,5 +27,6 @@ pub fn install_addin(
             "The addin has been updated to version {}",
             up_to_date_addin.version
         ),
+        notification_type: UpdateNotificationType::Install,
     })
 }

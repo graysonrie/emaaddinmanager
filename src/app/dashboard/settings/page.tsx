@@ -9,7 +9,7 @@ export default function SettingsPage() {
   const router = useRouter();
   return (
     <PageWrapper>
-      <div className="flex flex-col h-full bg-background ">
+      <div className="flex flex-col h-full  ">
         {/* Header */}
         <div className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
           <div className="flex items-center justify-between px-6 py-4">

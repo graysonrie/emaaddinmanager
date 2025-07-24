@@ -12,34 +12,88 @@ import { Label } from "@/components/ui/label";
 import { useManageDialogStore } from "./store";
 import { User } from "lucide-react";
 import AddinPermissionsList from "./addin-permissions-list";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/lib/auth/useAuthStore";
+import UnregisterForm from "./UnregisterForm";
 
 export default function ManageDialog() {
-  const { isVisible, setIsVisible, userName } = useManageDialogStore();
+  const {
+    isVisible,
+    setIsVisible,
+    userName,
+    userEmail,
+    setUnregisteringUser,
+    unregisteringUser,
+  } = useManageDialogStore();
+  const [canModify, setCanModify] = useState(false);
+  const [canUnregister, setCanUnregister] = useState(false);
+  const { isAdmin, amIAnAdmin } = useAuthStore();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const selfAdminStatus = await amIAnAdmin();
+      if (selfAdminStatus === "super") {
+        setCanModify(true);
+        setCanUnregister(true);
+        return;
+      }
+      setCanUnregister(false);
+      const userAdminStatus = await isAdmin(userEmail);
+      if (userAdminStatus === "admin" || userAdminStatus === "super") {
+        setCanModify(false);
+      } else {
+        setCanModify(true);
+      }
+    };
+    checkAdmin();
+  }, [isAdmin]);
 
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            <div className="flex flex-row gap-1">
-              <p className="font-sans text-foreground">Manage</p>
-              <p className="font-sans text-chart-2 text">{userName}</p>
-            </div>
-          </DialogTitle>
-          <DialogDescription>
-            Manage the addins that this user has access to
-          </DialogDescription>
-          <DialogDescription>
-            Toggling on an add-in will automatically install it for them.
-            Toggling off an add-in will cause it to get uninstalled the next
-            time the user opens this app.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <AddinPermissionsList />
-        </div>
-      </DialogContent>
+      {unregisteringUser ? (
+        <UnregisterForm />
+      ) : (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              <div className="flex flex-row gap-1">
+                <p className="font-sans text-foreground">Manage</p>
+                <p className="font-sans text-chart-2 text">{userName}</p>
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Manage the addins that this user has access to
+            </DialogDescription>
+            <DialogDescription>
+              Toggling on an add-in will automatically install it for them.
+              Toggling off an add-in will cause it to get uninstalled the next
+              time the user opens this app.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            {canModify ? (
+              <>
+                <AddinPermissionsList />
+                {canUnregister && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setUnregisteringUser(userEmail)}
+                  >
+                    Unregister User
+                  </Button>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-destructive">
+                  You do not have permission to modify this user
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

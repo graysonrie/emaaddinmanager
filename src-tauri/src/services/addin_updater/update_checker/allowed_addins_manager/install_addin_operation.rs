@@ -42,7 +42,7 @@ impl InstallAddinOperation {
             .await
             .map_err(|e| UpdateCheckError::AddinsRegistry(e.to_string()))?;
         // Emit a notification to the frontend that the addin is now available
-        notifications::allowed_addin_installed(&self.app_handle, &registry_addin);
+        notifications::with(&self.app_handle).allowed_addin_installed(&registry_addin);
         Ok(())
     }
 

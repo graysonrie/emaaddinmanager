@@ -165,4 +165,12 @@ impl UserAddinsTable {
 
         Ok(())
     }
+
+    pub async fn delete_user(&self, user_email: &str) -> Result<(), String> {
+        user::Entity::delete_by_id(user_email)
+            .exec(self.db.as_ref())
+            .await
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
 }

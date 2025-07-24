@@ -28,8 +28,8 @@ export default function LibraryPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     const checkAdmin = async () => {
-      const isAdmin = await useAuthStore.getState().isAdmin();
-      setIsAdmin(isAdmin);
+      const adminStatus = await useAuthStore.getState().amIAnAdmin();
+      setIsAdmin(adminStatus === "admin" || adminStatus === "super");
     };
     checkAdmin();
   }, []);
@@ -113,7 +113,7 @@ export default function LibraryPage() {
   return (
     <PageWrapper>
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full min-w-70 bg-background">
+        <div className="flex flex-col h-full w-full min-w-70 ">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
             <p className="text-muted-foreground mb-4">

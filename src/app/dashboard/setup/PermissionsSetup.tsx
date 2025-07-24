@@ -7,9 +7,9 @@ import {
 } from "@/components/ui/card";
 import { Hammer } from "lucide-react";
 import {
-  AddinPermission,
+  AddinPermissionModel,
   DEFAULT_ADDIN_PERMISSIONS,
-} from "../user-stats/manage-dialog/types";
+} from "../../../lib/addins/addin-management/types";
 import { Button } from "@/components/ui/button";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
 
@@ -17,7 +17,7 @@ export default function PermissionsSetup() {
   const { registerAndAddAllowedAddinPaths } = useUserPermissions();
   const addinPermissions = DEFAULT_ADDIN_PERMISSIONS;
 
-  const onPermissionClick = async (permission: AddinPermission) => {
+  const onPermissionClick = async (permission: AddinPermissionModel) => {
     await registerAndAddAllowedAddinPaths(permission.forDiscipline);
   };
   return (

@@ -65,12 +65,17 @@ export default function StatsByUser() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-
                     <UserAvatar
                       userName={userStats.userName}
+                      userEmail={userStats.userEmail}
                       showFullname={true}
                       size="md"
-                      onClick={() => handleUserAvatarClick(userStats.userEmail, userStats.userName)}
+                      onClick={() =>
+                        handleUserAvatarClick(
+                          userStats.userEmail,
+                          userStats.userName
+                        )
+                      }
                     />
                     <div className="flex flex-col gap-1">
                       <p className="text-sm text-muted-foreground">
@@ -103,26 +108,26 @@ export default function StatsByUser() {
                 <CardContent className="pt-0 pb-2">
                   <div className="flex flex-col gap-4">
                     {userStats.publishedAddins.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-row gap-2 items-center">
-                        <Upload className="w-4 h-4 flex-shrink-0" />
+                      <div className="flex flex-col gap-2">
                         <div className="flex flex-row gap-2 items-center">
-                          <p className="text-sm font-bold font-sans">
-                            Published Addins
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ({userStats.publishedAddins.length})
-                          </p>
+                          <Upload className="w-4 h-4 flex-shrink-0" />
+                          <div className="flex flex-row gap-2 items-center">
+                            <p className="text-sm font-bold font-sans">
+                              Published Addins
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ({userStats.publishedAddins.length})
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                        {userStats.publishedAddins.map((addin) => {
-                          return (
-                            <AddinCard
-                              addinInfo={addin}
-                              key={addin.addin.name}
-                            />
-                          );
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                          {userStats.publishedAddins.map((addin) => {
+                            return (
+                              <AddinCard
+                                addinInfo={addin}
+                                key={addin.addin.name}
+                              />
+                            );
                           })}
                         </div>
                       </div>

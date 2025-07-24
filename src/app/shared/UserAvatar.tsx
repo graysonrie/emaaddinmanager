@@ -22,22 +22,30 @@ function generateColorFromString(str: string): string {
 
 interface UserAvatarProps {
   userName: string | undefined;
+  userEmail: string;
   size?: "sm" | "md" | "lg";
   showFullname?: boolean;
   onClick?: () => void;
 }
 
 /** If the userName is not set, the component will not render anything */
-export default function UserAvatar({ userName, size = "md", showFullname = false, onClick }: UserAvatarProps) {
+export default function UserAvatar({
+  userName,
+  userEmail,
+  size = "md",
+  showFullname = false,
+  onClick,
+}: UserAvatarProps) {
   const userFirstName = useMemo(() => {
     return userName?.split(" ")[0];
   }, [userName]);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminStatus, setAdminStatus] = useState<string | undefined>();
   useEffect(() => {
     const checkAdmin = async () => {
-      const isAdmin = await useAuthStore.getState().isAdmin();
-      setIsAdmin(isAdmin);
+      const status = await useAuthStore.getState().isAdmin(userEmail);
+      console.log("admin status", status);
+      setAdminStatus(status);
     };
     checkAdmin();
   }, []);
@@ -71,7 +79,13 @@ export default function UserAvatar({ userName, size = "md", showFullname = false
     >
       {userFirstName && (
         <>
-          <Avatar className={cn("size-7", size === "sm" && "size-5", size === "lg" && "size-9")}>
+          <Avatar
+            className={cn(
+              "size-7",
+              size === "sm" && "size-5",
+              size === "lg" && "size-9"
+            )}
+          >
             <AvatarFallback
               className="text-xs font-bold font-sans text-white"
               style={{ backgroundColor: avatarColor }}
@@ -79,11 +93,25 @@ export default function UserAvatar({ userName, size = "md", showFullname = false
               {userNameInitials}
             </AvatarFallback>
           </Avatar>
-          <p className={cn("font-sans text-sm text-foreground", onClick && "hover:text-blue-500")}>{displayName}</p>
+          <p
+            className={cn(
+              "font-sans text-sm text-foreground",
+              onClick && "hover:text-blue-500"
+            )}
+          >
+            {displayName}
+          </p>
         </>
       )}
-      {isAdmin && (
-        <p className="text-xs text-muted-foreground">(Admin)</p>
+      {(adminStatus === "admin" || adminStatus === "super") && (
+        <p
+          className={cn(
+            "text-xs text-muted-foreground",
+            adminStatus == "super" && "rainbow-text font-bold"
+          )}
+        >
+          (Admin)
+        </p>
       )}
     </div>
   );

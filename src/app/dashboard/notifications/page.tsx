@@ -7,11 +7,10 @@ import { CheckForUpdatesButton } from "./CheckForUpdatesButton";
 import { RevitStatusIndicator } from "./RevitStatusIndicator";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { Info } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function NotificationsPage() {
-  const { updateNotifications, clearNotifications } = useAddinUpdater();
-
-
+  const { updateNotifications, clearUpdateNotifications } = useAddinUpdater();
 
   return (
     <PageWrapper>
@@ -24,7 +23,7 @@ export default function NotificationsPage() {
               <CheckForUpdatesButton />
               {updateNotifications.length > 0 && (
                 <button
-                  onClick={clearNotifications}
+                  onClick={clearUpdateNotifications}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Clear all
@@ -39,8 +38,12 @@ export default function NotificationsPage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Info className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">No updates available</h3>
-                <p className="text-muted-foreground">All addins are up to date</p>
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  No updates available
+                </h3>
+                <p className="text-muted-foreground">
+                  All addins are up to date
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -54,7 +57,7 @@ export default function NotificationsPage() {
                         (_, i) => i !== index
                       );
                       // This would need to be handled by the hook, but for now we'll just clear all
-                      clearNotifications();
+                      clearUpdateNotifications();
                     }}
                   />
                 ))}

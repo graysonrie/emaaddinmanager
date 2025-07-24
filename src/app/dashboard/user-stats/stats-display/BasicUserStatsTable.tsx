@@ -79,6 +79,7 @@ export default function BasicUserStatsTable() {
               <TableCell>
                 <UserAvatar
                   userName={stats.userName}
+                  userEmail={stats.userEmail}
                   showFullname={true}
                   size="sm"
                   onClick={() => handleUserAvatarClick(stats.userEmail, stats.userName)}

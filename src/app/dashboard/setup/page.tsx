@@ -93,7 +93,7 @@ export default function SetupPage() {
             transition={{ duration: 0.35, ease: "easeInOut" }}
             className="w-full"
           >
-            <NameSetup onComplete={() => setStep("done")} />
+            <NameSetup onComplete={() => setStep("permissions")} />
           </motion.div>
         )}
         {step === "permissions" && (

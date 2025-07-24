@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
+import { AddinPermissionModel, DEFAULT_ADDIN_PERMISSIONS } from "./types";
 
 interface Props {
   userEmail: string;
 }
 
 export default function useAddinPermissions({ userEmail }: Props) {
-  const [allowedAddinPaths, setAllowedAddinPaths] = useState<string[]>([]);
+  const [allowedAddins, setAllowedAddins] = useState<AddinPermissionModel[]>([]);
   const [hasUserRegistered, setHasUserRegistered] = useState(false);
 
   const fetchUser = async () => {
     const user = await getTauriCommands().getUser(userEmail);
     if (user) {
-      setAllowedAddinPaths(user.allowedAddinPaths);
+      setAllowedAddins(user.allowedAddinPaths.map((path) => {
+        const addin = DEFAULT_ADDIN_PERMISSIONS.find((addin) => addin.relativePathToAddin === path);
+        if (!addin) {
+          throw new Error("Addin not found");
+        }
+        return addin;
+      }));
       setHasUserRegistered(true);
     } else {
       setHasUserRegistered(false);
-      setAllowedAddinPaths([]);
+      setAllowedAddins([]);
     }
   };
 
@@ -38,11 +45,11 @@ export default function useAddinPermissions({ userEmail }: Props) {
   };
 
   const isAllowedAddinPath = (path: string) => {
-    return allowedAddinPaths.includes(path);
+    return allowedAddins.some((addin) => addin.relativePathToAddin === path);
   };
 
   return {
-    allowedAddinPaths,
+    allowedAddins,
     hasUserRegistered,
     addAllowedAddinPath,
     removeAllowedAddinPath,

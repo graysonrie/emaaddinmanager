@@ -4,7 +4,6 @@ import { useKeyValueSubscription } from "./useKeyValueSubscription";
 interface ConfigState {
   userEmail: string | undefined;
   userName: string | undefined;
-  userDisciplines: string[] | undefined;
 }
 
 interface UseConfigInitializationReturn {
@@ -19,7 +18,6 @@ export function useConfigInitialization(): UseConfigInitializationReturn {
 
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
-  const userDisciplines = useKeyValueSubscription<string[]>("userDisciplines");
 
   useEffect(() => {
     if (hasCheckedOnce) return;
@@ -37,9 +35,9 @@ export function useConfigInitialization(): UseConfigInitializationReturn {
 
     // Mark as initialized once we've received any response (even undefined)
     setIsInitialized(true);
-  }, [userEmail, userName, userDisciplines, hasCheckedOnce]);
+  }, [userEmail, userName, hasCheckedOnce]);
 
-  const isComplete = Boolean(userEmail && userName && userDisciplines);
+  const isComplete = Boolean(userEmail && userName);
 
   return {
     isInitialized,
@@ -47,7 +45,6 @@ export function useConfigInitialization(): UseConfigInitializationReturn {
     config: {
       userEmail,
       userName,
-      userDisciplines,
     },
   };
 }

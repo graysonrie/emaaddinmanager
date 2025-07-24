@@ -4,6 +4,7 @@ use tauri::{AppHandle, Manager};
 use tokio::time::sleep;
 use tokio::{sync::Mutex, task::JoinHandle};
 
+use crate::services::admin::service::AdminService;
 use crate::services::{
     addin_updater::update_checker::allowed_addins_manager::AllowedAddinsManager,
     local_db::service::LocalDbService, user_stats::LocalUserStatsService,
@@ -22,11 +23,18 @@ use crate::services::{
     local_addins::service::LocalAddinsService,
 };
 
+pub enum UpdateResult {
+    Updated,
+    RevitIsOpen,
+    NoUpdatesAvailable,
+}
+
 pub struct AddinUpdateChecker {
     app_handle: AppHandle,
     addins_registry: AsyncAddinsRegistryServiceType,
     pending_updates_state: PendingUpdatesStateType,
     allowed_addins_manager: AllowedAddinsManager,
+    admin_service: Arc<AdminService>,
 }
 
 impl AddinUpdateChecker {
@@ -35,6 +43,7 @@ impl AddinUpdateChecker {
         addins_registry: AsyncAddinsRegistryServiceType,
         user_stats: Arc<LocalUserStatsService>,
         db: Arc<LocalDbService>,
+        admin_service: Arc<AdminService>,
     ) -> Self {
         let allowed_addins_manager =
             AllowedAddinsManager::new(app_handle.clone(), user_stats, db, addins_registry.clone());
@@ -45,6 +54,7 @@ impl AddinUpdateChecker {
             addins_registry,
             pending_updates_state,
             allowed_addins_manager,
+            admin_service,
         }
     }
     /// Spawns the background update checker loop and manages the shared state
@@ -53,12 +63,14 @@ impl AddinUpdateChecker {
         let addins_registry = self.addins_registry.clone();
         let pending_updates_state = self.pending_updates_state.clone();
         let allowed_addins_manager = self.allowed_addins_manager.clone();
+        let admin_service = self.admin_service.clone();
         tokio::spawn(async move {
             AddinUpdateChecker {
                 app_handle,
                 addins_registry,
                 pending_updates_state,
                 allowed_addins_manager,
+                admin_service,
             }
             .update_checker_loop()
             .await;
@@ -68,7 +80,7 @@ impl AddinUpdateChecker {
     /// Checks for updates, applies them if possible, and manages pending updates
     ///
     /// TODO: if one install fails, the whole thing fails. Consider just emitting notifications for errors
-    async fn check_and_apply_updates(&self) -> Result<Vec<UpdateNotificationModel>, String> {
+    async fn check_and_apply_updates(&self) -> Result<UpdateResult, String> {
         let addins = self
             .addins_registry
             .get_addins()
@@ -79,17 +91,21 @@ impl AddinUpdateChecker {
         let addins_needing_updates =
             Self::detect_addins_needing_update(&addins, &current_local_addins)?;
 
-        let addins_needing_installs = self
-            .allowed_addins_manager
-            .run_check()
-            .await
-            .map_err(|e| e.to_string())?;
+        // Only check for addins needing installs if the user is NOT an admin:
+        let mut addins_needing_installs = Vec::new();
+        if !self.admin_service.is_admin().await {
+            addins_needing_installs = self
+                .allowed_addins_manager
+                .run_check()
+                .await
+                .map_err(|e| e.to_string())?;
+        }
         // ! Debug print:
         println!("Addins needing installs: {}", addins_needing_installs.len());
 
         if addins_needing_updates.is_empty() && addins_needing_installs.is_empty() {
             pending_updates::clear_pending_updates(&self.pending_updates_state).await;
-            return Ok(vec![]);
+            return Ok(UpdateResult::NoUpdatesAvailable);
         }
         let revit_is_running = revit_check::is_revit_running()
             .await
@@ -103,31 +119,25 @@ impl AddinUpdateChecker {
                 &addins_needing_updates,
             )
             .await;
-            let install_notifications =
-                notifications::install_addin_pending(&addins_needing_installs);
-            let mut notifications = vec![notifications::pending_update(&addins_needing_updates)];
-            notifications.extend(install_notifications);
-            return Ok(notifications);
+            notifications::with(&self.app_handle).install_addin_pending(&addins_needing_installs);
+            // notifications::with(&self.app_handle).pending_update(&addins_needing_updates);
+            return Ok(UpdateResult::RevitIsOpen);
         }
-        let notifications = Self::apply_updates(addins_needing_updates).await;
+        Self::apply_updates(addins_needing_updates).await;
         // Apply all of the installs:
         for install in addins_needing_installs.iter() {
             install.execute().await.map_err(|e| e.to_string())?;
         }
 
         pending_updates::clear_pending_updates(&self.pending_updates_state).await;
-        Ok(notifications)
+        Ok(UpdateResult::Updated)
     }
 
     /// The main background update checker loop
     pub async fn update_checker_loop(self) {
         loop {
             match self.check_and_apply_updates().await {
-                Ok(notifications) => {
-                    if !notifications.is_empty() {
-                        notifications::emit_update(&self.app_handle, &notifications);
-                    }
-                }
+                Ok(notifications) => {}
                 Err(e) => {
                     eprintln!("Error checking for updates: {}", e);
                 }
@@ -147,15 +157,13 @@ impl AddinUpdateChecker {
     }
 
     /// Manually trigger a check for updates (used by Tauri command)
-    pub async fn manual_check_for_updates(&self) -> Result<Vec<UpdateNotificationModel>, String> {
+    pub async fn manual_check_for_updates(&self) -> Result<UpdateResult, String> {
         println!("Manual update check triggered");
-        let notifications = self.check_and_apply_updates().await?;
-        if notifications.is_empty() {
-            notifications::emit_no_updates(&self.app_handle);
-        } else {
-            notifications::emit_update(&self.app_handle, &notifications);
+        let update_result = self.check_and_apply_updates().await?;
+        if let UpdateResult::NoUpdatesAvailable = update_result {
+            notifications::with(&self.app_handle).emit_no_updates();
         }
-        Ok(notifications)
+        Ok(update_result)
     }
 
     /// Returns a list of (registry_addin, local_addin) pairs that need updating

@@ -2,7 +2,8 @@ use std::sync::Arc;
 use tauri::State;
 
 use crate::services::addin_updater::{
-    service::AddinUpdaterService, update_checker::PendingUpdatesStateType,
+    service::AddinUpdaterService,
+    update_checker::{PendingUpdatesStateType, UpdateResult},
 };
 
 /// Manually trigger a check for addin updates
@@ -12,9 +13,12 @@ pub async fn check_for_updates_manual(
 ) -> Result<bool, String> {
     // Perform the manual check
     match addin_updater_service.manually_check_for_updates().await {
-        Ok(_notifications) => {
+        Ok(result) => {
             // The manual check will emit notification events to the frontend
-            Ok(!_notifications.is_empty())
+            match result {
+                UpdateResult::Updated => Ok(true),
+                _ => Ok(false),
+            }
         }
         Err(e) => {
             eprintln!("Manual update check failed: {}", e);

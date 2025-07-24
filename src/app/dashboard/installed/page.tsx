@@ -14,7 +14,7 @@ import PageWrapper from "@/components/PageWrapper";
  * Should also have a category for addins that are installed in every version of Revit (all)
  */
 export default function InstalledPage() {
-  const { addins, loading, error, refreshAddins } = useLocalAddins();
+  const { addins, error, refreshAddins } = useLocalAddins();
   const { failedToUninstallAddin, setFailedToUninstallAddin } =
     useInstalledAddinsStore();
 
@@ -22,28 +22,10 @@ export default function InstalledPage() {
     return groupAddinsByRevitVersions(addins);
   }, [addins]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full bg-background">
-          <div className="px-8 pt-8 pb-4">
-            <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
-            <p className="text-muted-foreground mb-4">
-              Loading your locally installed addins...
-            </p>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-muted-foreground">Loading...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full bg-background">
+        <div className="flex flex-col h-full w-full">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
             <p className="text-muted-foreground mb-4">
@@ -70,7 +52,7 @@ export default function InstalledPage() {
   return (
     <PageWrapper>
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full max-w-screen-lg mx-auto bg-background">
+        <div className="flex flex-col h-full w-full max-w-screen-lg mx-auto ">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
             <p className="text-muted-foreground mb-4">

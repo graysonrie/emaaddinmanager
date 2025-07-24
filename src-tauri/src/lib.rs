@@ -6,6 +6,7 @@ use services::admin::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
+use tauri::Manager;
 
 mod app_service_container;
 mod app_updater;
@@ -58,6 +59,10 @@ pub fn run() {
             remove_allowed_addin_paths,
             // Admin
             is_user_admin,
+            is_user_super_admin,
+            is_other_user_admin,
+            is_other_user_super_admin,
+            unregister_user
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -75,14 +80,14 @@ pub fn run() {
             // ! Initialize the app service container regardless of if debug mode:
             app_service_container::initialize_app(app.handle());
 
-            // let window = app.get_webview_window("main").unwrap();
-            // #[cfg(target_os = "macos")]
-            // window_vibrancy::apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
-            //     .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+            let window = app.get_webview_window("main").unwrap();
+            #[cfg(target_os = "macos")]
+            window_vibrancy::apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
-            // #[cfg(target_os = "windows")]
-            // window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
-            //     .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+            #[cfg(target_os = "windows")]
+            window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
+                .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
 
             Ok(())
         })

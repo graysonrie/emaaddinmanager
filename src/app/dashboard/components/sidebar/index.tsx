@@ -14,10 +14,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useNotificationsStore } from "@/lib/notifications/useNotificationsStore";
 import { Badge } from "@/components/ui/badge";
-import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificationsStore";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
 import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
+import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdaterStore";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -74,20 +74,24 @@ const SidebarButton = ({
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { addinUpdateNotifications, hasUserCheckedNotifications } =
-    useNotificationsStore();
+  const { updateNotifications, hasUserCheckedNotifications } =
+    useAddinUpdaterStore();
   const authStore = useAuthStore();
   const [isAdmin, setIsAdmin] = useState(false);
   const { reset } = useLocalAddinExporterStore();
 
   const hasUnreadNotifications =
-    addinUpdateNotifications.length > 0 && !hasUserCheckedNotifications;
+    updateNotifications.length > 0 && !hasUserCheckedNotifications;
 
   // Check admin status on component mount
   useEffect(() => {
     const checkAdminStatus = async () => {
-      const adminResult = await authStore.isAdmin();
-      setIsAdmin(adminResult);
+      const adminResult = await authStore.amIAnAdmin();
+      if (adminResult == "admin" || adminResult == "super") {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
     };
     checkAdminStatus();
   }, [authStore]);
@@ -108,8 +112,12 @@ export default function Sidebar() {
       icon: <BellIcon />,
       label: "Notifications",
       link: "/dashboard/notifications",
-      showBadge: hasUnreadNotifications,
-      badgeCount: addinUpdateNotifications.length,
+      showBadge:
+        updateNotifications.filter((x) => !x.title.includes("No updates"))
+          .length > 0,
+      badgeCount: updateNotifications.filter(
+        (x) => !x.title.includes("No updates")
+      ).length,
     },
     {
       icon: <SettingsIcon />,
@@ -138,7 +146,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
+    <div className="w-16  border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
       {buttons.map((button) => (
         <SidebarButton
           key={button.label}

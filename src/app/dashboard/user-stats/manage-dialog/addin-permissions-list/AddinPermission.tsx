@@ -1,7 +1,7 @@
-import useAddinPermissions from "./useAddinPermissions";
+import useAddinPermissions from "../../../../../lib/addins/addin-management/useAddinPermissions";
 import { useManageDialogStore } from "../store";
 import { Switch } from "@/components/ui/switch";
-import { AddinPermissionModel } from "../types";
+import { AddinPermissionModel } from "../../../../../lib/addins/addin-management/types";
 import { Blocks } from "lucide-react";
 
 interface AddinPermissionProps {

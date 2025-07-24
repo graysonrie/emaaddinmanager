@@ -9,6 +9,7 @@ import UserAvatar from "@/app/shared/UserAvatar";
 
 export function WindowChrome() {
   const userName = useKeyValueSubscription<string>("userName");
+  const userEmail = useKeyValueSubscription<string>("userEmail");
 
   const userFirstName = useMemo(() => {
     return userName?.split(" ")[0];
@@ -39,12 +40,12 @@ export function WindowChrome() {
   };
 
   return (
-    <div className="titlebar flex items-center justify-between bg-background border-b border-border px-4 py-2 select-none">
+    <div className="titlebar flex items-center justify-between  px-4 py-2 select-none">
       <div className="flex-1">
         <AppLogo />
       </div>
 
-      <UserAvatar userName={userName} />
+      <UserAvatar userName={userName} userEmail={userEmail ?? ""} />
 
       <div className="flex items-center space-x-1">
         <Button

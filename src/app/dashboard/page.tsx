@@ -13,6 +13,7 @@ import UpdaterPopup from "./components/updater-popup";
 import PageWrapper from "@/components/PageWrapper";
 import Link from "next/link";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
+import AddinBadgesDisplay from "./components/addin-badges-display";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
@@ -24,6 +25,11 @@ export default function Home() {
     if (!isInitialized) return; // Don't make routing decisions until initialized
 
     if (!isComplete || !user) {
+      if (!isComplete) {
+        console.warn("Config is not complete, redirecting to setup");
+      } else {
+        console.warn("User is not set, redirecting to setup");
+      }
       setIsOpen(false);
       router.replace("/dashboard/setup");
     } else {
@@ -51,14 +57,17 @@ export default function Home() {
   // Show main app content
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-4 max-w-screen-md w-full h-full mx-auto overflow-auto thin-scrollbar items-center justify-center">
-        <div className="flex flex-col gap-2">
-          <p className="text-2xl font-bold">
-            Welcome back, {config.userName?.split(" ")[0]}.
-          </p>
-          <p className="text-md text-muted-foreground">
-            Check out the <Link href="/dashboard/library" className="text-primary font-bold underline">addin library</Link> to get started.
-          </p>
+      <div className="flex flex-col gap-4 max-w-screen-lg w-full h-full mx-auto thin-scrollbar items-center justify-center">
+        <div className="flex flex-col gap-2 w-full h-full p-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-1">Your Addins</h2>
+            <p className="text-muted-foreground mb-4">
+              The addins you have been given access to.
+            </p>
+          </div>
+          <div className="flex flex-col gap-4 overflow-y-auto thin-scrollbar">
+            <AddinBadgesDisplay />
+          </div>
         </div>
       </div>
     </PageWrapper>
