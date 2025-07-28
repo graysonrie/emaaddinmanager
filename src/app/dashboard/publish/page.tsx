@@ -1,169 +1,61 @@
 "use client";
 
 import OpenProjectDropZone from "./OpenProjectDropZone";
-import AddinInfoForm from "./AddinInfoForm";
 import { useEffect, useState } from "react";
-import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
-import SelectDestinationForm from "./SelectDestinationForm";
-import { Button } from "@/components/ui/button";
-import { CategoryModel } from "@/lib/models/category.model";
+import { useRouter } from "next/navigation";
 import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
-import Processing from "./load-pages/Processing";
 import ResultsPopup from "./results-popup";
 import PageWrapper from "@/components/PageWrapper";
-
-import { getFileNameFromPath } from "@/lib/utils";
-import { useAdvancedOptionsPopupStore } from "./advanced-options/useAdvancedOptionsPopupStore";
-import { Settings } from "lucide-react";
-import AdvancedOptionsPopup from "./advanced-options";
 import { usePublishStateStore } from "./stores";
-import { useAddinValidationStore } from "./stores/useAddinValidationStore";
-import { useFileSelectStore } from "./stores/useFileSelectStore";
-import { usePublishActionsStore } from "./stores/usePublishActionsStore";
+import { useConflictingProjectsState } from "./stores/useConflictingProjectsState";
 
 export default function PublishPage() {
-  const [pageTitle, setPageTitle] = useState("Publish Addin");
-  const { categories } = useAddinRegistryStoreInit();
-  const [destinationCategory, setDestinationCategory] =
-    useState<CategoryModel | null>(null);
-
-  const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
-
+  const router = useRouter();
   // Zustand stores
-  const publishState = usePublishStateStore();
-  const { addinFileInfo, setAddinFileInfo, projectDir } =
-    useLocalAddinExporterStore();
-  const addinValidation = useAddinValidationStore();
+  const { projectDir, addinFileInfo } = useLocalAddinExporterStore();
   const localAddinExporter = useLocalAddinExporterStore();
-  const fileSelectStore = useFileSelectStore();
-  const publishActions = usePublishActionsStore();
+  const { getConflictingProjects } = useConflictingProjectsState();
 
-  // Set addin file info in validation store when it changes
-  useEffect(() => {
-    addinValidation.setAddinFileInfo(addinFileInfo);
-  }, [addinFileInfo]);
+  const publishState = usePublishStateStore();
 
-  // Handle file selection
-  const handleFileSelect = () => {
-    fileSelectStore.handleFileSelect(localAddinExporter.handleProjectSelected);
-  };
-
-  const handlePublish = () => {
-    publishActions.handlePublish(destinationCategory);
-  };
-
-  const isPublishButtonDisabled =
-    !addinFileInfo ||
-    !destinationCategory ||
-    !addinValidation.isAllAddinInfoFilled();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const addinExistsInRegistry = addinValidation.existingAddinsInRegistry();
-    if (addinExistsInRegistry) {
-      setPageTitle("Update Addin");
-    } else {
-      setPageTitle("Publish Addin");
-    }
-  }, [addinFileInfo, addinValidation.existingAddinsInRegistry]);
-
-  useEffect(() => {
-    const overrideDestinationPath = addinValidation.overrideDestinationPath;
-    if (overrideDestinationPath) {
-      const name = getFileNameFromPath(overrideDestinationPath);
-      if (!name) {
-        console.warn("Could not get name from path", overrideDestinationPath);
+    setLoading(true);
+    const checkConflictingProjects = async () => {
+      if (!projectDir || !addinFileInfo) {
         return;
       }
-      setDestinationCategory({
-        name,
-        fullPath: overrideDestinationPath,
-      });
-    }
-  }, [addinValidation.overrideDestinationPath]);
+      const conflictingProjectInfo = await getConflictingProjects();
+      if (conflictingProjectInfo.conflictingAddins.length > 0) {
+        router.push("/dashboard/publish/conflict");
+      } else {
+        router.push("/dashboard/publish/workspace");
+      }
+      setLoading(false);
+    };
+    checkConflictingProjects();
+  }, [projectDir, addinFileInfo, getConflictingProjects, router]);
 
   return (
     <PageWrapper>
       <div className="flex flex-col items-center justify-center h-full">
-        {publishState.isProcessing ? (
-          <Processing message={publishState.processingMessage} />
-        ) : projectDir ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 w-full max-w-4xl p-2">
-            <div className="flex justify-center w-full gap-2">
-              <h1 className="text-2xl font-bold">{pageTitle}</h1>
-              <Button
-                variant="ghost"
-                onClick={() => advancedOptionsPopupStore.setIsOpen(true)}
-                title="Advanced Options"
-                className="w-8 h-8 "
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-y-auto">
-              {addinFileInfo && (
-                <AddinInfoForm
-                  addinFileInfo={addinFileInfo}
-                  onAddinFileInfoChange={setAddinFileInfo}
-                />
-              )}
-              <SelectDestinationForm
-                categories={categories}
-                setDestinationCategory={setDestinationCategory}
-                overrideDestinationPath={
-                  addinValidation.overrideDestinationPath
-                }
-              />
-            </div>
-            <label className="text-sm text-muted-foreground">
-              {destinationCategory ? (
-                <>
-                  Publishing to{" "}
-                  <span className="font-bold">{destinationCategory.name}</span>
-                </>
-              ) : (
-                ""
-              )}
-            </label>
-            <div className=" flex justify-center w-1/2 pb-3 gap-4 flex-col">
-              <Button
-                className="w-full"
-                variant={isPublishButtonDisabled ? "outline" : "default"}
-                disabled={isPublishButtonDisabled}
-                onClick={handlePublish}
-              >
-                {addinValidation.existingAddinsInRegistry()
-                  ? "Update"
-                  : "Publish"}
-              </Button>
-              <Button
-                className="w-full p-0 m-0 text-xs text-muted-foreground"
-                variant="link"
-                disabled={fileSelectStore.isProcessing}
-                onClick={handleFileSelect}
-              >
-                Select a different project
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <h1 className="text-2xl font-bold">{pageTitle}</h1>
+        <div className="flex flex-col items-center justify-center h-full gap-4">
+          <h1 className="text-2xl font-bold">Publish Addin</h1>
 
-            <OpenProjectDropZone
-              onProjectSelected={localAddinExporter.handleProjectSelected}
-            />
-          </div>
-        )}
-        <ResultsPopup
-          isOpen={publishState.isResultsPopupOpen}
-          setIsOpen={publishState.closeResults}
-          title={publishState.resultsPopupTitle}
-          message={publishState.resultsPopupMessage}
-          buildResult={publishState.buildResult}
-          errorsList={publishState.errorsList}
-        />
-        <AdvancedOptionsPopup />
+          <OpenProjectDropZone
+            onProjectSelected={localAddinExporter.handleProjectSelected}
+          />
+        </div>
       </div>
+      <ResultsPopup
+        isOpen={publishState.isResultsPopupOpen}
+        setIsOpen={publishState.closeResults}
+        title={publishState.resultsPopupTitle}
+        message={publishState.resultsPopupMessage}
+        buildResult={publishState.buildResult}
+        errorsList={publishState.errorsList}
+      />
     </PageWrapper>
   );
 }

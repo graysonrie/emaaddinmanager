@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     constants::Fut,
     services::{
-        addin_exporter::models::category_model::CategoryModel,
+        admin::addin_exporter::models::category_model::CategoryModel,
         addins_registry::models::addin_model::AddinModel,
     },
 };

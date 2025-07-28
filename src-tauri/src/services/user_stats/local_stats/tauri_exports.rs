@@ -58,6 +58,10 @@ pub async fn get_all_user_stats(
 
 /// Changes the email of the user with the given email
 /// If the user does not exist, this function will return an error
+///
+/// Updates the email in the user stats table and the user addins table
+///
+/// TODO: Consider a unified API for this
 #[tauri::command]
 pub async fn change_user_stats_email(
     new_user_email: String,
@@ -66,7 +70,13 @@ pub async fn change_user_stats_email(
 ) -> Result<(), String> {
     let user_email = keys::get_user_email(local_db_service.inner().clone()).await?;
     let user_stats_table = user_stats_service.stats_db.user_stats_table();
+    let user_addins_table = user_stats_service.stats_db.user_addins_table();
     user_stats_table
+        .change_email(user_email.clone(), new_user_email.clone())
+        .await
+        .map_err(|e| e.to_string())?;
+    // Also change the email in the user addins table:
+    user_addins_table
         .change_email(user_email, new_user_email)
         .await
         .map_err(|e| e.to_string())?;

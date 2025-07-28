@@ -1,8 +1,8 @@
-use super::entities::user;
+use db_manager::db::user_stats_table::*;
 use sea_orm::{prelude::*, ActiveValue::Set};
 use std::sync::Arc;
 
-use crate::services::{local_db::table_creator::generate_table_lenient, user_stats::*};
+use crate::services::user_stats::*;
 
 pub struct UserStatsTable {
     db: Arc<DatabaseConnection>,
@@ -10,8 +10,6 @@ pub struct UserStatsTable {
 
 impl UserStatsTable {
     pub async fn new_async(db: Arc<DatabaseConnection>) -> Self {
-        generate_table_lenient(&db, user::Entity).await;
-
         Self { db }
     }
 
@@ -188,6 +186,14 @@ impl UserStatsTable {
             .map_err(|e| e.to_string())?;
         let user_stats = users.into_iter().map(UserStatsModel::from).collect();
         Ok(user_stats)
+    }
+
+    pub async fn delete_user(&self, user_email: &str) -> Result<(), String> {
+        user::Entity::delete_by_id(user_email)
+            .exec(self.db.as_ref())
+            .await
+            .map_err(|e| e.to_string())?;
+        Ok(())
     }
 
     // Util:

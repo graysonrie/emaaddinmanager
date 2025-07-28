@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { findCommonRoot } from "@/components/file-tree/builder/utils";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useLibraryStore } from "./store";
@@ -17,6 +16,7 @@ import PageWrapper from "@/components/PageWrapper";
 import MessageDialog from "@/components/dialogs/MessageDialog";
 import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
+import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -28,17 +28,24 @@ export default function LibraryPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     const checkAdmin = async () => {
-      const isAdmin = await useAuthStore.getState().isAdmin();
-      setIsAdmin(isAdmin);
+      const adminStatus = await useAuthStore.getState().amIAnAdmin();
+      setIsAdmin(adminStatus === "admin" || adminStatus === "super");
     };
     checkAdmin();
   }, []);
   const { addins, installAddins, refreshRegistry, delistAddin } =
-    useAddinRegistryStoreInit();
-  const root = useMemo(
-    () => findCommonRoot(addins.map((a) => a.pathToAddinDllFolder)),
-    [addins]
-  );
+    useAddinRegistryStore();
+  const root = useMemo(() => {
+    if (addins.length === 0) {
+      console.log("No addins loaded yet");
+      return "";
+    }
+    const paths = addins.map((a) => a.pathToAddinDllFolder);
+    const commonRoot = findCommonRoot(paths);
+    console.log("Addin paths:", paths);
+    console.log("Calculated root:", commonRoot);
+    return commonRoot;
+  }, [addins]);
   const tree = useMemo(() => {
     const addinsWithTreePath: AddinWithTreePath[] = addins.map((addin) => ({
       ...addin,
@@ -101,15 +108,21 @@ export default function LibraryPage() {
     }
   };
 
+  useEffect(() => {
+    refreshRegistry();
+  }, []);
+
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["Testing"],
     overrideShowHiddenFolders: isAdmin,
+    // Example: Auto-select a specific folder
+    // autoSelectPath: "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry\\Testing",
   };
 
   return (
     <PageWrapper>
       <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full min-w-70 bg-background">
+        <div className="flex flex-col h-full w-full min-w-70 ">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
             <p className="text-muted-foreground mb-4">
@@ -125,6 +138,7 @@ export default function LibraryPage() {
                 onSelect={(addin) => setSelectedAddin(addin)}
                 nodeName="Addin"
                 rules={fileTreeRules}
+                treeRoot={root}
               />
             </div>
           </div>

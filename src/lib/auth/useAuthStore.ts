@@ -1,26 +1,34 @@
 import { create } from "zustand";
-import { getConfigValue } from "../persistence/config/getConfigValue";
+import getTauriCommands from "../commands/getTauriCommands";
 
-// TODO: use something more sophisticated
-const ADMIN_USER_EMAILS = [
-  "grieger@emaengineer.com",
-  "skhadka@emaengineer.com",
-  "jbright@emaengineer.com",
-  "lcasey@emaengineer.com",
-];
+type AdminStatus = "none" | "admin" | "super";
 
 interface Store {
-  isAdmin: () => Promise<boolean>;
+  amIAnAdmin: () => Promise<AdminStatus>;
+  isAdmin: (email: string) => Promise<AdminStatus>;
 }
 
 export const useAuthStore = create<Store>(() => ({
-  isAdmin: async () => {
-    const userEmail = await getConfigValue("userEmail");
-    if (userEmail) {
-      if (ADMIN_USER_EMAILS.includes(userEmail)) {
-        return true;
-      }
+  amIAnAdmin: async () => {
+    if (await getTauriCommands().isUserSuperAdmin()) {
+      return "super";
     }
-    return false;
+    if (await getTauriCommands().isUserAdmin()) {
+      return "admin";
+    }
+    return "none";
+  },
+  isAdmin: async (email: string) => {
+    try {
+      if (await getTauriCommands().isOtherUserSuperAdmin(email)) {
+        return "super";
+      }
+      if (await getTauriCommands().isOtherUserAdmin(email)) {
+        return "admin";
+      }
+    } catch (e) {
+      console.warn("err when checking isAdmin:", e);
+    }
+    return "none";
   },
 }));

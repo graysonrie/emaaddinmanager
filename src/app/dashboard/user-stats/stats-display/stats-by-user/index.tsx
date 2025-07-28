@@ -1,10 +1,12 @@
-import useUserStats from "@/lib/user-stats/useUserStats";
 import {
   Download,
   Loader2,
   Upload,
   ChevronDown,
   ChevronUp,
+  Settings2,
+  Settings,
+  User2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +15,19 @@ import AddinCard from "./AddinCard";
 import { deduplicateInstalledAddins } from "../helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useState } from "react";
+import { useManageDialogStore } from "../../manage-dialog/store";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 export default function StatsByUser() {
-  const { userStats, loading, error, refresh } = useUserStats();
+  const { userStats, loading, error, refresh } = useUserStatsStore();
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+
+  const manageDialogStore = useManageDialogStore();
+
+  const handleUserAvatarClick = (userEmail: string, userName: string) => {
+    manageDialogStore.setIsVisible(true);
+    manageDialogStore.setUserEmailAndName(userEmail, userName);
+  };
 
   const toggleUserExpansion = (userEmail: string) => {
     const newExpanded = new Set(expandedUsers);
@@ -49,15 +60,22 @@ export default function StatsByUser() {
         const isExpanded = expandedUsers.has(userStats.userEmail);
 
         return (
-          <div key={userStats.userEmail} className="flex flex-col gap-2 w-full">
+          <div key={userStats.userEmail} className="flex flex-col w-full">
             <Card className="p-1 pt-2">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                     <UserAvatar
                       userName={userStats.userName}
+                      userEmail={userStats.userEmail}
                       showFullname={true}
                       size="md"
+                      onClick={() =>
+                        handleUserAvatarClick(
+                          userStats.userEmail,
+                          userStats.userName
+                        )
+                      }
                     />
                     <div className="flex flex-col gap-1">
                       <p className="text-sm text-muted-foreground">
@@ -89,29 +107,31 @@ export default function StatsByUser() {
               {isExpanded && (
                 <CardContent className="pt-0 pb-2">
                   <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-row gap-2 items-center">
-                        <Upload className="w-4 h-4 flex-shrink-0" />
+                    {userStats.publishedAddins.length > 0 && (
+                      <div className="flex flex-col gap-2">
                         <div className="flex flex-row gap-2 items-center">
-                          <p className="text-sm font-bold font-sans">
-                            Published Addins
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ({userStats.publishedAddins.length})
-                          </p>
+                          <Upload className="w-4 h-4 flex-shrink-0" />
+                          <div className="flex flex-row gap-2 items-center">
+                            <p className="text-sm font-bold font-sans">
+                              Published Addins
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ({userStats.publishedAddins.length})
+                            </p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                          {userStats.publishedAddins.map((addin) => {
+                            return (
+                              <AddinCard
+                                addinInfo={addin}
+                                key={addin.addin.name}
+                              />
+                            );
+                          })}
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                        {userStats.publishedAddins.map((addin) => {
-                          return (
-                            <AddinCard
-                              addinInfo={addin}
-                              key={addin.addin.name}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
+                    )}
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-row gap-2 items-center">
                         <Download className="w-4 h-4 flex-shrink-0" />

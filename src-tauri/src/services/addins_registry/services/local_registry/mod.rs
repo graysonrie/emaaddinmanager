@@ -7,10 +7,10 @@ use helpers::*;
 
 use crate::{
     constants::Fut,
-    models::{auto_serializing_value::AutoSerializingValue, kv_store_value::KvStoreValue},
+    models::kv_store_value::KvStoreValue,
     services::{
-        addin_exporter::models::category_model::CategoryModel,
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
+        admin::addin_exporter::models::category_model::CategoryModel,
         config::keys::LOCAL_ADDIN_REGISTRY_PATH,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
@@ -30,9 +30,6 @@ impl LocalAddinsRegistryService {
             ),
         }
     }
-    pub async fn get_registry_location(&self) -> String {
-        self.registry_location.get_data_updated().await.unwrap()
-    }
 }
 
 impl AddinsRegistry for LocalAddinsRegistryService {
@@ -44,7 +41,11 @@ impl AddinsRegistry for LocalAddinsRegistryService {
                 .await
                 .map_err(GetAddinsError::LocalDbError)?;
 
-            assert!(!dir_path.is_empty(), "Registry path is empty");
+            if dir_path.is_empty() {
+                return Err(GetAddinsError::RegistryNotFound(
+                    "Registry path is empty".to_string(),
+                ));
+            }
 
             let mut addins = Vec::new();
             let path = Path::new(&dir_path);

@@ -4,6 +4,7 @@ import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.mod
 import useTauriCommands from "@/lib/commands/getTauriCommands";
 import { getEmptySimplifiedAddinInfo } from "@/lib/models/simplified-addin-info.model";
 import { ErrorList } from "@/types/error-list";
+import { usePublishDestinationStore } from "./usePublishDestinationStore";
 
 interface LocalAddinExporterState {
   projectDir: string | null;
@@ -11,7 +12,7 @@ interface LocalAddinExporterState {
   dlls: DllModel[];
   loading: boolean;
   error: string | null;
-  handleProjectSelected: (dir: string | null) => void;
+  handleProjectSelected: (dir: string | null) => Promise<void>;
   setAddinFileInfo: (info: SimplifiedAddinInfoModel | null) => void;
   setDlls: (dlls: DllModel[]) => void;
   setLoading: (loading: boolean) => void;
@@ -112,6 +113,7 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
       return dlls;
     },
     reset: () => {
+      usePublishDestinationStore.getState().setDestinationCategory(null);
       set({ projectDir: null, addinFileInfo: null, dlls: [] });
     },
     handleProjectSelected: async (projectDir: string | null) => {
@@ -131,7 +133,7 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
         console.warn("Required DLLs not found in project");
       }
       set({ dlls: foundDlls });
-      get().refresh();
+      await get().refresh();
     },
   })
 );

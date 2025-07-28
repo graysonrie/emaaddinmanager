@@ -14,7 +14,8 @@ import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLo
 import { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DllModel } from "@/lib/models/dll.model";
-import useAutoDllSelector from "./useAutoDllSelector";
+import useAutoDllSelector from "./hooks/useAutoDllSelector";
+import { Button } from "@/components/ui/button";
 export default function AdvancedOptionsPopup() {
   const {
     isOpen,
@@ -57,6 +58,75 @@ export default function AdvancedOptionsPopup() {
     }
   };
 
+  const handleSelectAll = () => {
+    setSelectedProjectDlls(
+      availableProjectDlls.map((dll) => {
+        // Check if this DLL is already selected with canBeUntoggled: false
+        const existingSelection = selectedProjectDlls.find(
+          (selected) => selected.dll.name === dll.name
+        );
+
+        // Preserve the existing canBeUntoggled state if it's false
+        const canBeUntoggled = existingSelection?.canBeUntoggled ?? true;
+
+        return { dll, canBeUntoggled };
+      })
+    );
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedProjectDlls(
+      availableProjectDlls
+        .map((dll) => {
+          // Check if this DLL is already selected with canBeUntoggled: false
+          const existingSelection = selectedProjectDlls.find(
+            (selected) => selected.dll.name === dll.name
+          );
+
+          // Only include DLLs that have canBeUntoggled: false (required DLLs)
+          if (existingSelection?.canBeUntoggled === false) {
+            return { dll, canBeUntoggled: false };
+          }
+
+          // Exclude all other DLLs (deselect them)
+          return null;
+        })
+        .filter(
+          (item): item is { dll: any; canBeUntoggled: boolean } => item !== null
+        )
+    );
+  };
+
+  const dllsBrowser = () => {
+    return (
+      <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
+        {availableProjectDlls.map((dll) => {
+          // Find the selected DLL object (if any) to check canBeUntoggled
+          const selected = selectedProjectDlls.find(
+            (d) => d.dll.name === dll.name
+          );
+          const canBeUntoggled = selected ? selected.canBeUntoggled : true;
+
+          return (
+            <label
+              key={dll.name}
+              className={`flex items-center gap-2 ${
+                !canBeUntoggled ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <Checkbox
+                checked={isDllSelected(dll)}
+                onCheckedChange={() => handleDllToggle(dll)}
+                disabled={!canBeUntoggled}
+              />
+              {dll.name}
+            </label>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
@@ -74,32 +144,14 @@ export default function AdvancedOptionsPopup() {
             <p className="text-sm text-muted-foreground">
               Select the extra DLLs that are required for the addin to work.
             </p>
-            <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
-              {availableProjectDlls.map((dll) => {
-                // Find the selected DLL object (if any) to check canBeUntoggled
-                const selected = selectedProjectDlls.find(
-                  (d) => d.dll.name === dll.name
-                );
-                const canBeUntoggled = selected
-                  ? selected.canBeUntoggled
-                  : true;
-
-                return (
-                  <label
-                    key={dll.name}
-                    className={`flex items-center gap-2 ${
-                      !canBeUntoggled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    <Checkbox
-                      checked={isDllSelected(dll)}
-                      onCheckedChange={() => handleDllToggle(dll)}
-                      disabled={!canBeUntoggled}
-                    />
-                    {dll.name}
-                  </label>
-                );
-              })}
+            {dllsBrowser()}
+            <div className="flex flex-row gap-2 w-full justify-end">
+              <Button variant="outline" onClick={handleSelectAll}>
+                Select All
+              </Button>
+              <Button variant="outline" onClick={handleDeselectAll}>
+                Deselect All
+              </Button>
             </div>
           </div>
         </div>

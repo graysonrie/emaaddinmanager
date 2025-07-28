@@ -2,8 +2,8 @@ use std::path::Path;
 
 use revitcli::{AddinFileInfo, ErrorList};
 
-use crate::services::addin_exporter::models::dll_model::DllModel;
-use crate::services::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
+use crate::services::admin::addin_exporter::models::dll_model::DllModel;
+use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
 
 pub struct AddinExporterService {}
 

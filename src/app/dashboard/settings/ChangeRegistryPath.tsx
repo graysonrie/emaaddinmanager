@@ -4,15 +4,21 @@ import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscripti
 import { Folder } from "lucide-react";
 import { useState } from "react";
 import useConfig from "@/lib/persistence/config/useConfig";
-import { useAddinRegistryStoreInit } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { open } from "@tauri-apps/plugin-dialog";
+import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
+import { useAsync } from "react-use";
 
 export default function ChangeRegistryPath() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
 
-  const { localRegistryPath, changeRegistryPath } = useAddinRegistryStoreInit();
+  const { localRegistryPath, changeRegistryPath } = useAddinRegistryStore();
+
+  const loadedRegistryPath = useAsync(async () => {
+    const path = await localRegistryPath;
+    return path;
+  }, [localRegistryPath]);
 
   const handleRegistryInputClicked = async () => {
     const selected = await open({
@@ -40,7 +46,7 @@ export default function ChangeRegistryPath() {
               Configure the local addin registry path
             </p>
             <Input
-              value={localRegistryPath || ""}
+              value={loadedRegistryPath.value || ""}
               className="w-full mt-4"
               readOnly={true}
               onClick={handleRegistryInputClicked}

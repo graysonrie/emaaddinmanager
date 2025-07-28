@@ -14,9 +14,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useNotificationsStore } from "@/lib/notifications/useNotificationsStore";
 import { Badge } from "@/components/ui/badge";
-import { useMockNotificationsStore } from "@/lib/notifications/useMockNotificationsStore";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
+import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
+import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdaterStore";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -34,12 +35,14 @@ const SidebarButton = ({
   isActive,
   showBadge,
   badgeCount,
-}: SidebarButtonProps) => {
+  onNavigate,
+}: SidebarButtonProps & { onNavigate?: () => void }) => {
   const router = useRouter();
 
   return (
     <motion.button
       onClick={() => {
+        onNavigate?.();
         router.push(link);
       }}
       whileHover={{ scale: 1.05 }}
@@ -71,19 +74,24 @@ const SidebarButton = ({
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { addinUpdateNotifications, hasUserCheckedNotifications } =
-    useNotificationsStore();
+  const { updateNotifications, hasUserCheckedNotifications } =
+    useAddinUpdaterStore();
   const authStore = useAuthStore();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { reset } = useLocalAddinExporterStore();
 
   const hasUnreadNotifications =
-    addinUpdateNotifications.length > 0 && !hasUserCheckedNotifications;
+    updateNotifications.length > 0 && !hasUserCheckedNotifications;
 
   // Check admin status on component mount
   useEffect(() => {
     const checkAdminStatus = async () => {
-      const adminResult = await authStore.isAdmin();
-      setIsAdmin(adminResult);
+      const adminResult = await authStore.amIAnAdmin();
+      if (adminResult == "admin" || adminResult == "super") {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
     };
     checkAdminStatus();
   }, [authStore]);
@@ -94,11 +102,7 @@ export default function Sidebar() {
       label: "Home",
       link: "/dashboard",
     },
-    {
-      icon: <LibraryIcon />,
-      label: "Library",
-      link: "/dashboard/library",
-    },
+
     {
       icon: <PackageIcon />,
       label: "Installed",
@@ -108,8 +112,12 @@ export default function Sidebar() {
       icon: <BellIcon />,
       label: "Notifications",
       link: "/dashboard/notifications",
-      showBadge: hasUnreadNotifications,
-      badgeCount: addinUpdateNotifications.length,
+      showBadge:
+        updateNotifications.filter((x) => !x.title.includes("No updates"))
+          .length > 0,
+      badgeCount: updateNotifications.filter(
+        (x) => !x.title.includes("No updates")
+      ).length,
     },
     {
       icon: <SettingsIcon />,
@@ -120,6 +128,11 @@ export default function Sidebar() {
 
   const adminButtons = [
     {
+      icon: <LibraryIcon />,
+      label: "Library",
+      link: "/dashboard/library",
+    },
+    {
       icon: <ChartBarBig />,
       label: "User Stats",
       link: "/dashboard/user-stats",
@@ -128,11 +141,12 @@ export default function Sidebar() {
       icon: <Upload />,
       label: "Publish",
       link: "/dashboard/publish",
+      onNavigate: reset,
     },
   ];
 
   return (
-    <div className="w-16 bg-background border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
+    <div className="w-16  flex flex-col items-center p-2 gap-2 shadow-sm h-full">
       {buttons.map((button) => (
         <SidebarButton
           key={button.label}
@@ -144,7 +158,14 @@ export default function Sidebar() {
         <>
           <Separator className="w-full my-2" />
           {adminButtons.map((button) => (
-            <SidebarButton key={button.label} {...button} />
+            <SidebarButton
+              key={button.label}
+              icon={button.icon}
+              label={button.label}
+              link={button.link}
+              isActive={pathname === button.link}
+              onNavigate={button.onNavigate}
+            />
           ))}
         </>
       )}

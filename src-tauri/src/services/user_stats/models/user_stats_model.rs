@@ -1,8 +1,8 @@
 use std::path::Path;
 
+use crate::services::addins_registry::models::addin_model::AddinModel;
+use db_manager::db::user_stats_table::user;
 use serde::{Deserialize, Serialize};
-
-use crate::services::{addins_registry::models::addin_model::AddinModel, user_stats::db::user};
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

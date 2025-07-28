@@ -1,8 +1,8 @@
 use revitcli::ErrorList;
 
-use crate::services::addin_exporter::models::dll_model::DllModel;
-use crate::services::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
-use crate::services::addin_exporter::service::AddinExporterService;
+use crate::services::admin::addin_exporter::models::dll_model::DllModel;
+use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
+use crate::services::admin::addin_exporter::service::AddinExporterService;
 
 /// Will return an empty error list if the addin is exported successfully
 #[tauri::command]

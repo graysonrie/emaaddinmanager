@@ -10,6 +10,7 @@ import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
 import { UserStatsModel } from "../models/user-stats.model";
 import { UpdateNotificationModel } from "../models/update-notification.model";
+import { UserModel } from "../models/user.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -39,7 +40,31 @@ interface TauriCommands {
   doesUserExist: (userEmail: string) => Promise<boolean>;
   changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
   changeUserStatsName: (newUserName: string) => Promise<void>;
-  checkForUpdates: () => Promise<UpdateNotificationModel[]>;
+  /** Returns true if there are updates available */
+  checkForUpdatesManual: () => Promise<boolean>;
+  isRevitRunning: () => Promise<boolean>;
+  getPendingUpdatesInfo: () => Promise<string | undefined>;
+  registerUser: (
+    userEmail: string,
+    userName: string,
+    discipline: string
+  ) => Promise<UserModel>;
+  getUser: (userEmail: string) => Promise<UserModel | undefined>;
+  addAllowedAddinPaths: (
+    userEmail: string,
+    addinPaths: string[]
+  ) => Promise<void>;
+  removeAllowedAddinPaths: (
+    userEmail: string,
+    addinPaths: string[]
+  ) => Promise<void>;
+  isUserAdmin: () => Promise<boolean>;
+  isUserSuperAdmin: () => Promise<boolean>;
+
+  isOtherUserAdmin: (userEmail: string) => Promise<boolean>;
+  isOtherUserSuperAdmin: (userEmail: string) => Promise<boolean>;
+  /** Remove the user from the stats db so that they do not appear at all on the stats page. This is only available to admins. */
+  unregisterUser: (userEmail: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -188,8 +213,72 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("change_user_stats_name", { newUserName });
   };
 
-  const checkForUpdates = async () => {
-    return await invoke<UpdateNotificationModel[]>("check_for_updates");
+  const checkForUpdatesManual = async () => {
+    return await invoke<boolean>("check_for_updates_manual");
+  };
+
+  const isRevitRunning = async () => {
+    return await invoke<boolean>("is_revit_running");
+  };
+
+  const getPendingUpdatesInfo = async () => {
+    return await invoke<string | undefined>("get_pending_updates_info");
+  };
+
+  const registerUser = async (
+    userEmail: string,
+    userName: string,
+    userDiscipline: string
+  ) => {
+    return await invoke<UserModel>("register_user", {
+      userEmail,
+      userName,
+      userDiscipline,
+    });
+  };
+
+  const getUser = async (userEmail: string) => {
+    return await invoke<UserModel | undefined>("get_user", { userEmail });
+  };
+
+  const addAllowedAddinPaths = async (
+    userEmail: string,
+    addinPaths: string[]
+  ) => {
+    return await invoke<void>("add_allowed_addin_paths", {
+      userEmail,
+      addinPaths,
+    });
+  };
+
+  const removeAllowedAddinPaths = async (
+    userEmail: string,
+    addinPaths: string[]
+  ) => {
+    return await invoke<void>("remove_allowed_addin_paths", {
+      userEmail,
+      addinPaths,
+    });
+  };
+
+  const isUserAdmin = async () => {
+    return await invoke<boolean>("is_user_admin");
+  };
+
+  const isUserSuperAdmin = async () => {
+    return await invoke<boolean>("is_user_super_admin");
+  };
+
+  const isOtherUserAdmin = async (userEmail: string) => {
+    return await invoke<boolean>("is_other_user_admin", { userEmail });
+  };
+
+  const isOtherUserSuperAdmin = async (userEmail: string) => {
+    return await invoke<boolean>("is_other_user_super_admin", { userEmail });
+  };
+
+  const unregisterUser = async (userEmail: string) => {
+    return await invoke<void>("unregister_user", { userEmail });
   };
 
   return {
@@ -213,6 +302,17 @@ export default function getTauriCommands(): TauriCommands {
     getAllUserStats,
     changeUserStatsEmail,
     changeUserStatsName,
-    checkForUpdates,
+    checkForUpdatesManual,
+    isRevitRunning,
+    getPendingUpdatesInfo,
+    registerUser,
+    getUser,
+    addAllowedAddinPaths,
+    removeAllowedAddinPaths,
+    isUserAdmin,
+    isUserSuperAdmin,
+    isOtherUserAdmin,
+    isOtherUserSuperAdmin,
+    unregisterUser,
   };
 }
