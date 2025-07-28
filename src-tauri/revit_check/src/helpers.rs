@@ -1,7 +1,7 @@
-use std::process::Command;
+use std::{os::windows::process::CommandExt, process::Command};
 use windows::Win32::{
     Foundation::{CloseHandle, HWND, LPARAM, WPARAM},
-    System::Threading::{OpenProcess, PROCESS_TERMINATE},
+    System::Threading::{CREATE_NO_WINDOW, OpenProcess, PROCESS_TERMINATE},
     UI::WindowsAndMessaging::{
         EnumWindows, GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId, PostMessageW,
         WM_CLOSE,
@@ -128,6 +128,7 @@ fn is_process_running(process_name: &str) -> Result<bool, String> {
             "/FO",
             "CSV",
         ])
+        .creation_flags(CREATE_NO_WINDOW.0)
         .output()
         .map_err(|e| format!("Failed to execute tasklist: {}", e))?;
 
@@ -146,6 +147,7 @@ fn get_process_ids_by_name(process_name: &str) -> Result<Vec<u32>, String> {
             "/FO",
             "CSV",
         ])
+        .creation_flags(CREATE_NO_WINDOW.0)
         .output()
         .map_err(|e| format!("Failed to execute tasklist: {}", e))?;
 
@@ -176,6 +178,7 @@ fn get_process_executable_path(process_id: u32) -> Option<String> {
             "ExecutablePath",
             "/format:csv",
         ])
+        .creation_flags(CREATE_NO_WINDOW.0)
         .output();
 
     match output {
@@ -524,6 +527,7 @@ pub fn reopen_revit_windows(
 /// Launch Revit using a specific executable path
 fn launch_revit_executable(exec_path: &str) -> Result<(), String> {
     let result = Command::new(exec_path)
+        .creation_flags(CREATE_NO_WINDOW.0)
         .spawn()
         .map_err(|e| format!("Failed to launch Revit at {}: {}", exec_path, e))?;
 
@@ -605,6 +609,7 @@ fn launch_revit_by_title(title: &str) -> Result<(), String> {
     // Last resort: try using the start command
     let result = Command::new("start")
         .arg("revit")
+        .creation_flags(CREATE_NO_WINDOW.0)
         .spawn()
         .map_err(|e| format!("Failed to launch Revit using start command: {}", e))?;
 
