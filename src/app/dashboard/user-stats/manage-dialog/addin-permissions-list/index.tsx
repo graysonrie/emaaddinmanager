@@ -8,7 +8,7 @@ import { DEFAULT_ADDIN_PERMISSIONS } from "../../../../../lib/addins/addin-manag
 
 export default function AddinPermissionsList() {
   const { userEmail } = useManageDialogStore();
-  const { allowedAddinPaths, hasUserRegistered } = useAddinPermissions({
+  const { allowedAddins, hasUserRegistered } = useAddinPermissions({
     userEmail,
   });
   const addinPermission = DEFAULT_ADDIN_PERMISSIONS;

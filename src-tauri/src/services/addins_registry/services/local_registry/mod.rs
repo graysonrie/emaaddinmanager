@@ -41,7 +41,11 @@ impl AddinsRegistry for LocalAddinsRegistryService {
                 .await
                 .map_err(GetAddinsError::LocalDbError)?;
 
-            assert!(!dir_path.is_empty(), "Registry path is empty");
+            if dir_path.is_empty() {
+                return Err(GetAddinsError::RegistryNotFound(
+                    "Registry path is empty".to_string(),
+                ));
+            }
 
             let mut addins = Vec::new();
             let path = Path::new(&dir_path);

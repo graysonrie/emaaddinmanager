@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::services::{config::keys, local_db::service::LocalDbService};
 
-const SUPER_ADMIN_USER_EMAILS: [&str; 1] = ["grieger@emaengineer.com"];
+const SUPER_ADMIN_USER_EMAILS: [&str; 2] = ["grieger@emaengineer.com", "jbright@emaengineer.com"];
 
 const ADMIN_USER_EMAILS: [&str; 4] = [
     "grieger@emaengineer.com",

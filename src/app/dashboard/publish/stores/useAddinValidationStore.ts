@@ -52,18 +52,36 @@ export const useAddinValidationStore = create<AddinValidationStore>(
       const existingAddins = await get().existingAddinsInRegistry(false);
       if (existingAddins.length === 0) return false;
 
-      const existingAddin = existingAddins[0]; // Take the first match
-      const existingAddinParent = getParentDirectoryFromPath(
-        existingAddin.pathToAddinDllFolder ?? ""
-      );
-      const existingAddinParentNormalized = normalizePath(existingAddinParent);
       const destinationPathNormalized = normalizePath(
         destinationCategory?.fullPath ?? ""
       );
-      const result =
-        existingAddinParentNormalized === destinationPathNormalized;
-      console.log("result", result);
-      return result;
+
+      // Check if ANY existing addin is in the destination path
+      const hasExistingAddinInDestination = existingAddins.some(
+        (existingAddin) => {
+          const existingAddinParent = getParentDirectoryFromPath(
+            existingAddin.pathToAddinDllFolder ?? ""
+          );
+          const existingAddinParentNormalized =
+            normalizePath(existingAddinParent);
+          const isInDestination =
+            existingAddinParentNormalized === destinationPathNormalized;
+
+          console.log(`Checking addin: ${existingAddin.name}`);
+          console.log(`  Existing path: ${existingAddinParentNormalized}`);
+          console.log(`  Destination path: ${destinationPathNormalized}`);
+          console.log(`  Is in destination: ${isInDestination}`);
+
+          return isInDestination;
+        }
+      );
+
+      console.log(
+        `Found ${existingAddins.length} existing addins, ${
+          hasExistingAddinInDestination ? "one or more" : "none"
+        } in destination path`
+      );
+      return hasExistingAddinInDestination;
     },
 
     isAllAddinInfoFilled: () => {

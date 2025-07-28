@@ -11,6 +11,7 @@ export default function useUserPermissions() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserModel | undefined>(undefined);
   const userEmail = useConfigValue("userEmail");
+  const userName = useConfigValue("userName");
 
   const { registerUser, addAllowedAddinPaths } = getTauriCommands();
 
@@ -18,11 +19,14 @@ export default function useUserPermissions() {
     if (!userEmail) {
       throw new Error("User email is not set");
     }
+    if (!userName) {
+      throw new Error("User name is not set");
+    }
     let user: UserModel | undefined;
     try {
-      user = await registerUser(userEmail, discipline);
+      user = await registerUser(userEmail, userName, discipline);
     } catch (error) {
-      console.error("Failed to register user. Getting existing user:", error);
+      console.warn("Failed to register user. Getting existing user:", error);
       user = await getTauriCommands().getUser(userEmail);
     }
     if (!user) {

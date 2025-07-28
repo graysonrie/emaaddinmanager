@@ -25,6 +25,7 @@ export default function ManageDialog() {
     setUnregisteringUser,
     unregisteringUser,
   } = useManageDialogStore();
+
   const [canModify, setCanModify] = useState(false);
   const [canUnregister, setCanUnregister] = useState(false);
   const { isAdmin, amIAnAdmin } = useAuthStore();
@@ -33,13 +34,11 @@ export default function ManageDialog() {
     const checkAdmin = async () => {
       const selfAdminStatus = await amIAnAdmin();
       if (selfAdminStatus === "super") {
-        setCanModify(true);
         setCanUnregister(true);
-        return;
       }
-      setCanUnregister(false);
       const userAdminStatus = await isAdmin(userEmail);
       if (userAdminStatus === "admin" || userAdminStatus === "super") {
+        // First check if the viewing user is an admin
         setCanModify(false);
       } else {
         setCanModify(true);
@@ -72,23 +71,27 @@ export default function ManageDialog() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4">
-            {canModify ? (
-              <>
-                <AddinPermissionsList />
-                {canUnregister && (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setUnregisteringUser(userEmail)}
-                  >
-                    Unregister User
-                  </Button>
-                )}
-              </>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <p className="text-sm text-destructive">
-                  You do not have permission to modify this user
-                </p>
+            <div className="flex flex-col gap-4">
+              {canModify ? (
+                <>
+                  <AddinPermissionsList />
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-muted-foreground font-semibold">
+                    You cannot manage addin permissions for admins.
+                  </p>
+                </div>
+              )}
+            </div>
+            {canUnregister && (
+              <div className="flex justify-center">
+                <span
+                  className="text-destructive cursor-pointer hover:underline font-sans text-sm"
+                  onClick={() => setUnregisteringUser(userEmail)}
+                >
+                  Unregister User
+                </span>
               </div>
             )}
           </div>

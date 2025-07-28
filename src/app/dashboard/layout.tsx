@@ -11,6 +11,7 @@ import UpdaterPopup from "./components/updater-popup";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { toast, Toaster } from "sonner";
+import useUserStatsUpdater from "@/lib/user-stats/useUserStatsUpdater";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
 }) {
   const { isOpen } = useSidebarStore();
   const router = useRouter();
+  const updater = useUserStatsUpdater();
 
   const config = useConfig();
   useAddinUpdater({

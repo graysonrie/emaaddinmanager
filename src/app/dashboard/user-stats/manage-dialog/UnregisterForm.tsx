@@ -20,7 +20,8 @@ export default function UnregisterForm() {
     await unregisterUser(userEmail);
     setUnregisteringUser(undefined);
     setIsVisible(false);
-    await refresh();
+    // Refresh the user stats after 500ms
+    setTimeout(refresh, 500);
   };
 
   return (

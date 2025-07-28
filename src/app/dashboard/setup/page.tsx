@@ -105,7 +105,7 @@ export default function SetupPage() {
             transition={{ duration: 0.35, ease: "easeInOut" }}
             className="w-full"
           >
-            <PermissionsSetup />
+            <PermissionsSetup onComplete={() => setStep("done")} />
           </motion.div>
         )}
       </AnimatePresence>

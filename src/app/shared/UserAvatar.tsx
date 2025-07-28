@@ -104,14 +104,17 @@ export default function UserAvatar({
         </>
       )}
       {(adminStatus === "admin" || adminStatus === "super") && (
-        <p
-          className={cn(
-            "text-xs text-muted-foreground",
-            adminStatus == "super" && "rainbow-text font-bold"
-          )}
-        >
-          (Admin)
-        </p>
+        <>
+          <p
+            className={cn(
+              "text-xs text-muted-foreground",
+              adminStatus == "super" && "font-bold"
+            )}
+          >
+            (Admin)
+          </p>
+          <span className="pb-0.5">{adminStatus == "super" && "👑"}</span>
+        </>
       )}
     </div>
   );

@@ -35,10 +35,17 @@ export default function LibraryPage() {
   }, []);
   const { addins, installAddins, refreshRegistry, delistAddin } =
     useAddinRegistryStore();
-  const root = useMemo(
-    () => findCommonRoot(addins.map((a) => a.pathToAddinDllFolder)),
-    [addins]
-  );
+  const root = useMemo(() => {
+    if (addins.length === 0) {
+      console.log("No addins loaded yet");
+      return "";
+    }
+    const paths = addins.map((a) => a.pathToAddinDllFolder);
+    const commonRoot = findCommonRoot(paths);
+    console.log("Addin paths:", paths);
+    console.log("Calculated root:", commonRoot);
+    return commonRoot;
+  }, [addins]);
   const tree = useMemo(() => {
     const addinsWithTreePath: AddinWithTreePath[] = addins.map((addin) => ({
       ...addin,
@@ -108,6 +115,8 @@ export default function LibraryPage() {
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["Testing"],
     overrideShowHiddenFolders: isAdmin,
+    // Example: Auto-select a specific folder
+    // autoSelectPath: "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry\\Testing",
   };
 
   return (
@@ -129,6 +138,7 @@ export default function LibraryPage() {
                 onSelect={(addin) => setSelectedAddin(addin)}
                 nodeName="Addin"
                 rules={fileTreeRules}
+                treeRoot={root}
               />
             </div>
           </div>

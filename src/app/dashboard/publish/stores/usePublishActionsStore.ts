@@ -34,6 +34,10 @@ export const usePublishActionsStore = create<PublishActionsStore>(
         // Only export if build was successful
         startProcessing("Exporting addin...");
 
+        if (selectedProjectDlls == null) {
+          throw new Error("No project dlls selected");
+        }
+
         const exportErrorsList = await exportAddin(
           addinFileInfo,
           selectedProjectDlls.map((dll) => dll.dll.name),

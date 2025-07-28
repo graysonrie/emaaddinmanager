@@ -25,6 +25,7 @@ export default function useUserStats(): UserStatsState {
 
   const fetchUserStats = async () => {
     try {
+      console.log("Fetching user stats");
       const stats = await getAllUserStats();
       setUserStats(stats);
     } catch (err) {

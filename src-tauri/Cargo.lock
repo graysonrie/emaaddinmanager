@@ -3959,9 +3959,9 @@ dependencies = [
 
 [[package]]
 name = "revitcli"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9606d104094271f2cd8132d2c818d2e3eb82c0858347cfb2f00679d012255793"
+checksum = "5efdcfb00ae310872b8a58f93754feb9541a154f6aefc51a2d8ef237cd50e53c"
 dependencies = [
  "clap",
  "clipboard",

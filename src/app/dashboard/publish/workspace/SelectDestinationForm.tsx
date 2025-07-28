@@ -7,6 +7,7 @@ import FileTreeView from "@/components/file-tree";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CardTitle } from "@/components/ui/card";
 import { usePublishDestinationStore } from "../stores/usePublishDestinationStore";
+import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 
 interface CategoryWithTreePath extends CategoryModel {
   fileTreePath: string;
@@ -17,7 +18,9 @@ interface Props {
 }
 
 export default function SelectDestinationForm({ categories }: Props) {
-  const { setDestinationCategory } = usePublishDestinationStore();
+  const registryPath = useConfigValue("localAddinRegistryPath");
+  const { destinationCategory, setDestinationCategory } =
+    usePublishDestinationStore();
   const root = useMemo(() => {
     return categories.find((c) => c.name === c.fullPath)?.fullPath;
   }, [categories]);
@@ -46,7 +49,11 @@ export default function SelectDestinationForm({ categories }: Props) {
                 setDestinationCategory(category);
               }}
               nodeName="Category"
-              rules={{ onlyFolders: true, setFirstFolderAsRoot: true }}
+              rules={{
+                onlyFolders: true,
+                rootPath: registryPath,
+                autoSelectPath: destinationCategory?.fullPath,
+              }}
             />
           </div>
         </CardContent>

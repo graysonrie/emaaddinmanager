@@ -44,7 +44,11 @@ interface TauriCommands {
   checkForUpdatesManual: () => Promise<boolean>;
   isRevitRunning: () => Promise<boolean>;
   getPendingUpdatesInfo: () => Promise<string | undefined>;
-  registerUser: (userEmail: string, discipline: string) => Promise<UserModel>;
+  registerUser: (
+    userEmail: string,
+    userName: string,
+    discipline: string
+  ) => Promise<UserModel>;
   getUser: (userEmail: string) => Promise<UserModel | undefined>;
   addAllowedAddinPaths: (
     userEmail: string,
@@ -221,9 +225,14 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<string | undefined>("get_pending_updates_info");
   };
 
-  const registerUser = async (userEmail: string, userDiscipline: string) => {
+  const registerUser = async (
+    userEmail: string,
+    userName: string,
+    userDiscipline: string
+  ) => {
     return await invoke<UserModel>("register_user", {
       userEmail,
+      userName,
       userDiscipline,
     });
   };

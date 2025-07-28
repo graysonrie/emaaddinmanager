@@ -58,7 +58,7 @@ export default function ResultsPopup({
                     <div>
                       <DialogDescription>Errors:</DialogDescription>
                       <div className="flex flex-col gap-2 p-2">
-                        {errorsList.errors.map((error) => (
+                        {Array.from(new Set(errorsList.errors)).map((error) => (
                           <Card
                             key={error}
                             className="p-2 flex flex-row items-center gap-2 border-destructive/20 bg-destructive/10"
@@ -76,17 +76,19 @@ export default function ResultsPopup({
                     <div>
                       <DialogDescription>Warnings:</DialogDescription>
                       <div className="flex flex-col gap-2 p-2">
-                        {errorsList.warnings.map((warning) => (
-                          <Card
-                            key={warning}
-                            className="p-2 flex flex-row items-center gap-2 border-warning/20 bg-warning/10"
-                          >
-                            <FileWarning className="w-4 h-4 text-warning" />
-                            <DialogDescription className="text-sm text-warning">
-                              {warning}
-                            </DialogDescription>
-                          </Card>
-                        ))}
+                        {Array.from(new Set(errorsList.warnings)).map(
+                          (warning) => (
+                            <Card
+                              key={warning}
+                              className="p-2 flex flex-row items-center gap-2 border-warning/20 bg-warning/10"
+                            >
+                              <FileWarning className="w-4 h-4 text-warning" />
+                              <DialogDescription className="text-sm text-warning">
+                                {warning}
+                              </DialogDescription>
+                            </Card>
+                          )
+                        )}
                       </div>
                     </div>
                   )}

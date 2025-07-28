@@ -19,8 +19,7 @@ import AdvancedOptionsPopup from "../advanced-options";
 export default function Workspace() {
   const [pageTitle, setPageTitle] = useState("Publish Addin");
   const { categories } = useAddinRegistryStore();
-  const { destinationCategory, setDestinationCategory } =
-    usePublishDestinationStore();
+  const { destinationCategory } = usePublishDestinationStore();
 
   const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
 
