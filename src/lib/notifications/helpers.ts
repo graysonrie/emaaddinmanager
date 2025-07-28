@@ -5,6 +5,6 @@ export function deduplicateAddinUpdateNotifications(
 ): UpdateNotificationModel[] {
   return notifications.filter(
     (notification, index, self) =>
-      index === self.findIndex((t) => t.addinName === notification.addinName)
+      index === self.findIndex((t) => t.title === notification.title)
   );
 }
