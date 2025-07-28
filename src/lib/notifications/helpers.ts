@@ -8,3 +8,4 @@ export function deduplicateAddinUpdateNotifications(
       index === self.findIndex((t) => t.title === notification.title)
   );
 }
+
