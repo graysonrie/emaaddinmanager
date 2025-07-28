@@ -1,5 +1,4 @@
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import useUserStats from "@/lib/user-stats/useUserStats";
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import {
   Table,
@@ -15,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { deduplicateInstalledAddins } from "./helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useManageDialogStore } from "../manage-dialog/store";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 interface UserFacingStats {
   userEmail: string;
@@ -25,7 +25,7 @@ interface UserFacingStats {
 }
 
 export default function BasicUserStatsTable() {
-  const { userStats, loading, error, refresh } = useUserStats();
+  const { userStats, loading, error, refresh } = useUserStatsStore();
 
   const manageDialogStore = useManageDialogStore();
 

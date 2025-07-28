@@ -9,7 +9,7 @@ export default function useUserStatsUpdater() {
       try {
         await commands.updateUserStats();
       } catch (error) {
-        console.error("Failed to update user stats:", error);
+        console.warn("Failed to update user stats:", error);
       }
     };
 

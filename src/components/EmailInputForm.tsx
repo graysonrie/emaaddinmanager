@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
-import useUserStats from "@/lib/user-stats/useUserStats";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 interface EmailInputFormProps {
   initialEmail?: string;
@@ -26,7 +26,7 @@ export function EmailInputForm({
   const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { doesUserExist } = useUserStats(); // Extra validation logic to check if the user already exists
+  const { doesUserExist } = useUserStatsStore(); // Extra validation logic to check if the user already exists
 
   async function validateEmail(email: string): Promise<string | null> {
     const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

@@ -10,8 +10,15 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
 import ManageDialog from "./manage-dialog";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 export default function UserStatsPage() {
+  const { refresh } = useUserStatsStore();
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
   // Show main app content
   return (
     <PageWrapper>

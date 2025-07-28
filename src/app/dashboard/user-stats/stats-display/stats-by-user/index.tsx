@@ -1,4 +1,3 @@
-import useUserStats from "@/lib/user-stats/useUserStats";
 import {
   Download,
   Loader2,
@@ -17,9 +16,10 @@ import { deduplicateInstalledAddins } from "../helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useState } from "react";
 import { useManageDialogStore } from "../../manage-dialog/store";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 export default function StatsByUser() {
-  const { userStats, loading, error, refresh } = useUserStats();
+  const { userStats, loading, error, refresh } = useUserStatsStore();
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
 
   const manageDialogStore = useManageDialogStore();

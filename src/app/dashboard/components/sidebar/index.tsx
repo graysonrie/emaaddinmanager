@@ -146,7 +146,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-16  border-r flex flex-col items-center p-2 gap-2 shadow-sm h-full">
+    <div className="w-16  flex flex-col items-center p-2 gap-2 shadow-sm h-full">
       {buttons.map((button) => (
         <SidebarButton
           key={button.label}

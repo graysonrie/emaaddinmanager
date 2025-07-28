@@ -8,20 +8,19 @@ import { User } from "lucide-react";
 import { useManageDialogStore } from "./store";
 import { Button } from "@/components/ui/button";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
-import useUserStats from "@/lib/user-stats/useUserStats";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 
 export default function UnregisterForm() {
   const { userName, userEmail, setUnregisteringUser, setIsVisible } =
     useManageDialogStore();
   const { unregisterUser } = getTauriCommands();
-  const { refresh } = useUserStats();
+  const { refresh } = useUserStatsStore();
 
   const onUnregister = async () => {
     await unregisterUser(userEmail);
     setUnregisteringUser(undefined);
     setIsVisible(false);
-    // Refresh the user stats after 500ms
-    setTimeout(refresh, 500);
+    await refresh();
   };
 
   return (

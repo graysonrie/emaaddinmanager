@@ -73,7 +73,7 @@ export default function DashboardLayout({
       >
         <Sidebar />
       </motion.div>
-      <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque">{children}</main>
+      <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque rounded-tl-lg">{children}</main>
       <UpdaterPopup />
       <Toaster position="bottom-right" richColors />
     </div>

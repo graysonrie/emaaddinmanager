@@ -9,14 +9,24 @@ import { useEffect } from "react";
 import { AddinModel } from "@/lib/models/addin.model";
 import { usePublishDestinationStore } from "../stores/usePublishDestinationStore";
 import { getCategoryFromAddin } from "@/lib/utils";
+import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 
 export default function ConflictPage() {
   const { conflictingProjectInfo } = useConflictingProjectsState();
   const router = useRouter();
   const { setDestinationCategory } = usePublishDestinationStore();
+  const addinsRegistryPath = useConfigValue("localAddinRegistryPath");
 
   const getAddinDisplayName = () => {
     return conflictingProjectInfo.addin?.csharpProjectName;
+  };
+
+  const getAddinDisplayPath = (addin: AddinModel) => {
+    const path = addin.pathToAddinDllFolder;
+    if (addinsRegistryPath && path) {
+      return path.replace(addinsRegistryPath, "");
+    }
+    return path;
   };
 
   useEffect(() => {
@@ -57,7 +67,7 @@ export default function ConflictPage() {
                         onClick={() => handleSelectExistingProject(addin)}
                       >
                         <FolderOpenIcon />
-                        {addin.pathToAddinDllFolder}
+                        {getAddinDisplayPath(addin)}
                       </Button>
                     </div>
                   ))}

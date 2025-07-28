@@ -45,7 +45,7 @@ export default function ManageDialog() {
       }
     };
     checkAdmin();
-  }, [isAdmin]);
+  }, [isAdmin, userEmail]);
 
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
