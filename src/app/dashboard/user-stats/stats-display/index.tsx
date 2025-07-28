@@ -1,20 +1,5 @@
-import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import useUserStats from "@/lib/user-stats/useUserStats";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import UserAvatar from "@/app/shared/UserAvatar";
-import { Loader2 } from "lucide-react";
 import BasicUserStatsTable from "./BasicUserStatsTable";
 import StatsByUser from "./stats-by-user";
-import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 
 export default function StatsDisplay() {
   return (
