@@ -82,7 +82,9 @@ export default function BasicUserStatsTable() {
                   userEmail={stats.userEmail}
                   showFullname={true}
                   size="sm"
-                  onClick={() => handleUserAvatarClick(stats.userEmail, stats.userName)}
+                  onClick={() =>
+                    handleUserAvatarClick(stats.userEmail, stats.userName)
+                  }
                 />
               </TableCell>
               <TableCell>{stats.publishedAddins}</TableCell>

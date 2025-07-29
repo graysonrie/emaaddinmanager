@@ -23,10 +23,7 @@ pub fn install_addin(
     // Return the update notification model
     Ok(UpdateNotificationModel {
         title: format!("Updated {}", current_addin.name),
-        description: format!(
-            "The addin has been updated to version {}",
-            up_to_date_addin.version
-        ),
+        description: "The addin has been updated to the latest version".to_string(),
         notification_type: UpdateNotificationType::Install,
     })
 }

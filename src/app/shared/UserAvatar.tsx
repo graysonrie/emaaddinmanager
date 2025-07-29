@@ -44,7 +44,6 @@ export default function UserAvatar({
   useEffect(() => {
     const checkAdmin = async () => {
       const status = await useAuthStore.getState().isAdmin(userEmail);
-      console.log("admin status", status);
       setAdminStatus(status);
     };
     checkAdmin();

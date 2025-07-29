@@ -8,18 +8,43 @@ interface AddinUpdaterProps {
   onNewNotifications?: (notifications: UpdateNotificationModel[]) => void;
 }
 
+const DEBOUNCE_TIME = 1000;
+
 export function useAddinUpdater({
   onNewNotifications,
 }: AddinUpdaterProps = {}) {
   const unlistenRef = useRef<UnlistenFn | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const {
     updateNotifications,
     addUpdateNotifications,
     clearUpdateNotifications,
+    addPendingNotifications,
+    flushPendingNotifications,
+    clearPendingNotifications,
   } = useAddinUpdaterStore();
 
   const isOnNotificationsPage = pathname === "/dashboard/notifications";
+
+  // Function to start or restart the debounce timer
+  const startDebounceTimer = () => {
+    // Clear existing timer if any
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      const flushedNotifications = flushPendingNotifications();
+
+      // Show notifications if we're not on the notifications page
+      if (!isOnNotificationsPage && flushedNotifications.length > 0) {
+        onNewNotifications?.(flushedNotifications);
+      }
+
+      debounceTimerRef.current = null;
+    }, DEBOUNCE_TIME);
+  };
 
   useEffect(() => {
     if (unlistenRef.current) {
@@ -32,12 +57,12 @@ export function useAddinUpdater({
       "addin_updates_available",
       (event) => {
         console.log("Received addin updates:", event.payload);
-        addUpdateNotifications(event.payload);
 
-        // For now, no need to display extra notifications if we are already on the page
-        if (!isOnNotificationsPage) {
-          onNewNotifications?.(event.payload);
-        }
+        // Add to pending notifications instead of immediately adding to main list
+        addPendingNotifications(event.payload);
+
+        // Start or restart the debounce timer
+        startDebounceTimer();
       }
     );
 
@@ -53,6 +78,13 @@ export function useAddinUpdater({
         unlistenRef.current();
         unlistenRef.current = null;
       }
+      // Clear any pending timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      // Clear any pending notifications
+      clearPendingNotifications();
     };
   }, [isOnNotificationsPage]); // Add isOnNotificationsPage to dependencies
 

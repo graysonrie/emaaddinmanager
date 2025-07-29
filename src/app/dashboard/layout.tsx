@@ -41,10 +41,7 @@ export default function DashboardLayout({
   });
 
   useEffect(() => {
-    config.update(
-      "localAddinRegistryPath",
-      "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry"
-    );
+    config.update("localAddinRegistryPath", "S:\\BasesRevitAddinsRegistry");
 
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
@@ -73,7 +70,9 @@ export default function DashboardLayout({
       >
         <Sidebar />
       </motion.div>
-      <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque rounded-tl-lg">{children}</main>
+      <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque rounded-tl-lg">
+        {children}
+      </main>
       <UpdaterPopup />
       <Toaster position="bottom-right" richColors />
     </div>

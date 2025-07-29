@@ -18,7 +18,7 @@ pub fn initialize_app(handle: &AppHandle) {
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
 
         let stats_db_dir =
-            Path::new("C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry");
+            Path::new("S:\\BasesRevitAddinsRegistry");
 
         let addins_registry_service =
             initialize_addins_registry_service_local(Arc::clone(&local_db_service));
