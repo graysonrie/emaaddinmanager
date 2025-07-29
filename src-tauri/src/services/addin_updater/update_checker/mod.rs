@@ -23,6 +23,7 @@ use crate::services::{
     local_addins::service::LocalAddinsService,
 };
 
+#[derive(Debug)]
 pub enum UpdateResult {
     Updated,
     RevitIsOpen,
@@ -86,8 +87,10 @@ impl AddinUpdateChecker {
             .get_addins()
             .await
             .map_err(|e| format!("Registry error: {}", e))?;
+
         let current_local_addins = LocalAddinsService::get_local_addins()
             .map_err(|e| format!("Local addins error: {}", e))?;
+
         let addins_needing_updates =
             Self::detect_addins_needing_update(&addins, &current_local_addins)?;
 
@@ -119,11 +122,12 @@ impl AddinUpdateChecker {
                 &addins_needing_updates,
             )
             .await;
+            notifications::with(&self.app_handle).update_addin_pending(&addins_needing_updates);
             notifications::with(&self.app_handle).install_addin_pending(&addins_needing_installs);
             // notifications::with(&self.app_handle).pending_update(&addins_needing_updates);
             return Ok(UpdateResult::RevitIsOpen);
         }
-        Self::apply_updates(addins_needing_updates).await;
+        self.apply_updates(addins_needing_updates).await;
         // Apply all of the installs:
         for install in addins_needing_installs.iter() {
             install.execute().await.map_err(|e| e.to_string())?;
@@ -137,7 +141,12 @@ impl AddinUpdateChecker {
     pub async fn update_checker_loop(self) {
         loop {
             match self.check_and_apply_updates().await {
-                Ok(notifications) => {}
+                Ok(update_result) => {
+                    println!(
+                        "Update result from update checker loop: {:?}",
+                        update_result
+                    );
+                }
                 Err(e) => {
                     eprintln!("Error checking for updates: {}", e);
                 }
@@ -203,9 +212,7 @@ impl AddinUpdateChecker {
     }
 
     /// Applies updates for all addins that need them
-    async fn apply_updates(
-        addins_needing_updates: Vec<AddinNeedingUpdate>,
-    ) -> Vec<UpdateNotificationModel> {
+    async fn apply_updates(&self, addins_needing_updates: Vec<AddinNeedingUpdate>) {
         let mut notifications = Vec::new();
         for addin_needing_update in addins_needing_updates {
             let registry_addin = addin_needing_update.registry_addin;
@@ -218,6 +225,6 @@ impl AddinUpdateChecker {
                 }
             }
         }
-        notifications
+        notifications::with(&self.app_handle).emit_update(&notifications);
     }
 }

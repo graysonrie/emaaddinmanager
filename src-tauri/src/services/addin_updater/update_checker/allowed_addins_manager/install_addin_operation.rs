@@ -7,7 +7,6 @@ use crate::services::{
 
 pub enum Operation {
     Install,
-    Uninstall,
 }
 
 pub struct InstallAddinOperation {

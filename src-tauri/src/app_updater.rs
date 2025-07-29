@@ -1,5 +1,6 @@
 use tauri_plugin_updater::UpdaterExt;
 
+#[allow(dead_code)]
 pub async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     if let Some(update) = app.updater()?.check().await? {
         let mut downloaded = 0;

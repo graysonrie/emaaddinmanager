@@ -4,7 +4,6 @@ use tauri::AppHandle;
 
 use crate::{
     services::{
-        addin_updater::update_checker::notifications,
         addins_registry::{
             models::addin_model::AddinModel, services::AsyncAddinsRegistryServiceType,
         },

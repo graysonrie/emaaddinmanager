@@ -37,8 +37,6 @@ impl Notifier {
         }
     }
 
-
-
     pub fn install_addin_pending(&self, install_operations: &[InstallAddinOperation]) {
         let mut notifications = Vec::new();
 
@@ -49,11 +47,19 @@ impl Notifier {
                     description: "it will be installed once Revit is closed".to_string(),
                     notification_type: UpdateNotificationType::Warning,
                 },
-                Operation::Uninstall => UpdateNotificationModel {
-                    title: format!("{} needs modifications", operation.addin.name),
-                    description: "it will be modified once Revit is closed".to_string(),
-                    notification_type: UpdateNotificationType::Warning,
-                },
+            };
+            notifications.push(notification);
+        }
+        self.emit_update(&notifications);
+    }
+
+    pub fn update_addin_pending(&self, addins: &[AddinNeedingUpdate]) {
+        let mut notifications = Vec::new();
+        for addin in addins {
+            let notification = UpdateNotificationModel {
+                title: format!("{} is ready to be updated", addin.registry_addin.name),
+                description: "it will be updated once Revit is closed".to_string(),
+                notification_type: UpdateNotificationType::Warning,
             };
             notifications.push(notification);
         }

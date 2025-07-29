@@ -3,7 +3,6 @@ use tauri::AppHandle;
 
 use crate::services::{
     addin_updater::{
-        models::UpdateNotificationModel,
         update_checker::{AddinUpdateChecker, UpdateResult},
         *,
     },
@@ -15,10 +14,7 @@ use crate::services::{
 
 #[derive(Debug)]
 pub enum CheckForUpdatesError {
-    Registry(String),
-    LocalAddins(String),
     Update(String),
-    RevitRunning(String),
 }
 impl Display for CheckForUpdatesError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -42,11 +42,20 @@ function findNodeByPath<T extends FilePathNode>(
 
 function parseRootPath(rootPath?: string): string[] {
   if (!rootPath) return [];
-  // Handle both forward slashes and backslashes, and normalize to forward slashes
-  return rootPath
-    .replace(/\\/g, "/")
-    .split("/")
-    .filter((part) => part.trim() !== "");
+
+  // Handle Windows drive letter format properly
+  // Convert backslashes to forward slashes first
+  const normalizedPath = rootPath.replace(/\\/g, "/");
+
+  // Split by forward slashes
+  const parts = normalizedPath.split("/").filter((part) => part.trim() !== "");
+
+  // If the first part looks like a drive letter (e.g., "S:"), combine it with the next part
+  if (parts.length >= 2 && /^[A-Z]:$/.test(parts[0])) {
+    return [parts[0] + parts[1], ...parts.slice(2)];
+  }
+
+  return parts;
 }
 
 function findRelativePathFromRoot(
@@ -213,6 +222,8 @@ export default function FileTreeView<T extends FilePathNode>({
   // Parse root path (memoized to prevent recreation on every render)
   const rootPathParts = useMemo(() => {
     if (!rules?.rootPath) return [];
+
+    console.log("Rules root path:", rules.rootPath);
 
     // First try: search through the tree to find the path (most reliable)
     if (nodes.length > 0) {

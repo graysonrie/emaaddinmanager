@@ -42,8 +42,8 @@ export default function LibraryPage() {
     }
     const paths = addins.map((a) => a.pathToAddinDllFolder);
     const commonRoot = findCommonRoot(paths);
-    console.log("Addin paths:", paths);
-    console.log("Calculated root:", commonRoot);
+    // console.log("Addin paths:", paths);
+    // console.log("Calculated root:", commonRoot);
     return commonRoot;
   }, [addins]);
   const tree = useMemo(() => {
@@ -115,8 +115,6 @@ export default function LibraryPage() {
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["Testing"],
     overrideShowHiddenFolders: isAdmin,
-    // Example: Auto-select a specific folder
-    // autoSelectPath: "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry\\Testing",
   };
 
   return (
