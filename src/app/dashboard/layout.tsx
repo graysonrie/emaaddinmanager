@@ -60,8 +60,18 @@ export default function DashboardLayout({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  const handleContextMenu = (e: any) => {
+    const isDev = process.env.NODE_ENV === "development";
+    if (!isDev) {
+      e.preventDefault();
+    }
+  };
+
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div
+      className="flex h-full w-full overflow-hidden"
+      onContextMenu={handleContextMenu}
+    >
       <motion.div
         initial={{ width: isOpen ? 64 : 0 }}
         animate={{ width: isOpen ? 64 : 0 }}
