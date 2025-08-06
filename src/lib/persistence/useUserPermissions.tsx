@@ -4,7 +4,7 @@ import { UserModel } from "../models/user.model";
 import getTauriCommands from "../commands/getTauriCommands";
 import { useKeyValueSubscription } from "./useKeyValueSubscription";
 import { useConfigValue } from "./config/useConfigValue";
-import { DEFAULT_ADDIN_PERMISSIONS } from "@/lib/addins/addin-management/types";
+import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
 
 export default function useUserPermissions() {
   // If the user is undefined, it means that they do not exist
@@ -13,7 +13,7 @@ export default function useUserPermissions() {
   const userEmail = useConfigValue("userEmail");
   const userName = useConfigValue("userName");
 
-  const { registerUser, addAllowedAddinPaths } = getTauriCommands();
+  const { registerUser, setAllowedAddinPathsForUser } = getTauriCommands();
 
   const registerAndAddAllowedAddinPaths = async (discipline: string) => {
     if (!userEmail) {
@@ -32,15 +32,26 @@ export default function useUserPermissions() {
     if (!user) {
       throw new Error("Failed to register user");
     }
-    const permissions = DEFAULT_ADDIN_PERMISSIONS;
+    const permissions = AllPublicAddinPermissions();
     const permission = permissions.find(
       (permission) => permission.forDiscipline === discipline
     );
     if (!permission) {
       throw new Error("Permission not found");
     }
-    await addAllowedAddinPaths(userEmail, [permission.relativePathToAddin]);
+    await addAllowedAddinPaths(user, [permission.relativePathToAddin]);
     return user;
+  };
+
+  const addAllowedAddinPaths = async (
+    user: UserModel,
+    addinPaths: string[]
+  ) => {
+    const newUser = {
+      ...user,
+      allowedAddinPaths: [...user.allowedAddinPaths, ...addinPaths],
+    };
+    await setAllowedAddinPathsForUser(user.userEmail, addinPaths);
   };
 
   useEffect(() => {

@@ -55,8 +55,7 @@ pub fn run() {
             // Addin Permissions
             register_user,
             get_user,
-            add_allowed_addin_paths,
-            remove_allowed_addin_paths,
+            set_allowed_addin_paths,
             // Admin
             is_user_admin,
             is_user_super_admin,

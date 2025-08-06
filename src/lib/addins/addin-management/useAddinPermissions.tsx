@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
-import { AddinPermissionModel, DEFAULT_ADDIN_PERMISSIONS } from "./types";
+import { AddinPermissionModel, GLOBAL_DEFAULT_ADDIN_PERMISSIONS } from "./types";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 
 interface Props {
@@ -20,12 +20,12 @@ export default function useAddinPermissions({ userEmail }: Props) {
       const isAdminUser = await isAdmin(userEmail);
       if (isAdminUser === "admin" || isAdminUser === "super") {
         // If the user is an admin, show all addins
-        setAllowedAddins(DEFAULT_ADDIN_PERMISSIONS);
+        setAllowedAddins(GLOBAL_DEFAULT_ADDIN_PERMISSIONS);
       } else {
         setAllowedAddins(
           user.allowedAddinPaths
             .map((path) => {
-              const addin = DEFAULT_ADDIN_PERMISSIONS.find(
+              const addin = GLOBAL_DEFAULT_ADDIN_PERMISSIONS.find(
                 (addin) => addin.relativePathToAddin === path
               );
               if (!addin) {
@@ -48,18 +48,24 @@ export default function useAddinPermissions({ userEmail }: Props) {
     fetchUser();
   }, [userEmail]);
 
-  const addAllowedAddinPath = async (path: string) => {
-    console.log("Adding addin path", path);
-    await getTauriCommands().addAllowedAddinPaths(userEmail, [path]);
+  const setAllowedAddinPaths = async (paths: string[]) => {
+    console.log("Setting allowed addin paths", paths);
+    await getTauriCommands().setAllowedAddinPathsForUser(userEmail, paths);
     await fetchUser();
   };
 
-  const removeAllowedAddinPath = async (path: string) => {
-    console.log("Removing addin path", path);
-    await getTauriCommands().removeAllowedAddinPaths(userEmail, [path]);
-    // Refresh the state after removing
-    await fetchUser();
-  };
+  // const addAllowedAddinPath = async (path: string) => {
+  //   console.log("Adding addin path", path);
+  //   await getTauriCommands().addAllowedAddinPaths(userEmail, [path]);
+  //   await fetchUser();
+  // };
+
+  // const removeAllowedAddinPath = async (path: string) => {
+  //   console.log("Removing addin path", path);
+  //   await getTauriCommands().removeAllowedAddinPaths(userEmail, [path]);
+  //   // Refresh the state after removing
+  //   await fetchUser();
+  // };
 
   const isAllowedAddinPath = (path: string) => {
     return allowedAddins.some((addin) => addin.relativePathToAddin === path);
@@ -68,8 +74,7 @@ export default function useAddinPermissions({ userEmail }: Props) {
   return {
     allowedAddins,
     hasUserRegistered,
-    addAllowedAddinPath,
-    removeAllowedAddinPath,
     isAllowedAddinPath,
+    setAllowedAddinPaths,
   };
 }

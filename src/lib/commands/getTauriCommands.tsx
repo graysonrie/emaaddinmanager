@@ -50,11 +50,7 @@ interface TauriCommands {
     discipline: string
   ) => Promise<UserModel>;
   getUser: (userEmail: string) => Promise<UserModel | undefined>;
-  addAllowedAddinPaths: (
-    userEmail: string,
-    addinPaths: string[]
-  ) => Promise<void>;
-  removeAllowedAddinPaths: (
+  setAllowedAddinPathsForUser: (
     userEmail: string,
     addinPaths: string[]
   ) => Promise<void>;
@@ -241,21 +237,11 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<UserModel | undefined>("get_user", { userEmail });
   };
 
-  const addAllowedAddinPaths = async (
+  const setAllowedAddinPathsForUser = async (
     userEmail: string,
     addinPaths: string[]
   ) => {
-    return await invoke<void>("add_allowed_addin_paths", {
-      userEmail,
-      addinPaths,
-    });
-  };
-
-  const removeAllowedAddinPaths = async (
-    userEmail: string,
-    addinPaths: string[]
-  ) => {
-    return await invoke<void>("remove_allowed_addin_paths", {
+    return await invoke<void>("set_allowed_addin_paths", {
       userEmail,
       addinPaths,
     });
@@ -307,8 +293,7 @@ export default function getTauriCommands(): TauriCommands {
     getPendingUpdatesInfo,
     registerUser,
     getUser,
-    addAllowedAddinPaths,
-    removeAllowedAddinPaths,
+    setAllowedAddinPathsForUser,
     isUserAdmin,
     isUserSuperAdmin,
     isOtherUserAdmin,

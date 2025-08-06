@@ -58,7 +58,7 @@ impl UserAddinsTable {
         Ok(user)
     }
 
-    pub async fn add_allowed_addin_paths(
+    pub async fn set_allowed_addin_paths(
         &self,
         user_email: String,
         paths: Vec<String>,
@@ -66,16 +66,10 @@ impl UserAddinsTable {
         let user = self.get_user(user_email.clone()).await?;
         match user {
             Some(user) => {
-                let addin_paths = user.allowed_addin_paths.clone();
                 let mut active_user = user.into_active_model();
 
-                // Safely deserialize, defaulting to empty Vec if not present or wrong type
-                let allowed_addin_paths: Vec<String> =
-                    serde_json::from_value(addin_paths).unwrap_or_else(|_| Vec::new());
-
-                // Combine and deduplicate
-                let mut new_allowed_addin_paths = allowed_addin_paths;
-                new_allowed_addin_paths.extend(paths);
+                // Sort and deduplicate the new paths
+                let mut new_allowed_addin_paths = paths;
                 new_allowed_addin_paths.sort();
                 new_allowed_addin_paths.dedup();
 
@@ -83,39 +77,6 @@ impl UserAddinsTable {
                 active_user.allowed_addin_paths =
                     Set(serde_json::to_value(new_allowed_addin_paths)
                         .map_err(|e| UserAddinsError::SerializationError(e.to_string()))?);
-
-                active_user
-                    .update(self.db.as_ref())
-                    .await
-                    .map_err(UserAddinsError::DbError)?;
-
-                Ok(())
-            }
-            None => Err(UserAddinsError::UserNotFound),
-        }
-    }
-
-    pub async fn remove_allowed_addin_paths(
-        &self,
-        user_email: String,
-        paths: Vec<String>,
-    ) -> Result<(), UserAddinsError> {
-        let user = self.get_user(user_email.clone()).await?;
-        match user {
-            Some(user) => {
-                let addin_paths = user.allowed_addin_paths.clone();
-                let mut active_user = user.into_active_model();
-
-                // Deserialize current allowed paths
-                let mut allowed_addin_paths: Vec<String> =
-                    serde_json::from_value(addin_paths).unwrap_or_else(|_| Vec::new());
-
-                // Remove any paths that match those in the input
-                allowed_addin_paths.retain(|p| !paths.contains(p));
-
-                // Serialize and update
-                active_user.allowed_addin_paths = Set(serde_json::to_value(allowed_addin_paths)
-                    .map_err(|e| UserAddinsError::SerializationError(e.to_string()))?);
 
                 active_user
                     .update(self.db.as_ref())

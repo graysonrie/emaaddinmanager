@@ -1,19 +1,67 @@
-import { MessageCircleWarning, X } from "lucide-react";
+import { MessageCircleWarning } from "lucide-react";
 import { useManageDialogStore } from "../store";
+import { useEffect, useState } from "react";
 
 import useAddinPermissions from "../../../../../lib/addins/addin-management/useAddinPermissions";
 import { Button } from "@/components/ui/button";
 import AddinPermission from "./AddinPermission";
-import { DEFAULT_ADDIN_PERMISSIONS } from "../../../../../lib/addins/addin-management/types";
+import { GLOBAL_DEFAULT_ADDIN_PERMISSIONS } from "../../../../../lib/addins/addin-management/types";
+import getTauriCommands from "../../../../../lib/commands/getTauriCommands";
 
 export default function AddinPermissionsList() {
-  const { userEmail } = useManageDialogStore();
+  const {
+    userEmail,
+    setTempAllowedAddinPaths,
+    tempAllowedAddinPaths,
+    resetTempPermissions,
+  } = useManageDialogStore();
   const { allowedAddins, hasUserRegistered } = useAddinPermissions({
     userEmail,
   });
-  const addinPermission = DEFAULT_ADDIN_PERMISSIONS;
+  const addinPermission = GLOBAL_DEFAULT_ADDIN_PERMISSIONS;
+  const [isSaving, setIsSaving] = useState(false);
 
   const manageDialog = useManageDialogStore();
+
+  // Load user's current permissions into temporary state on mount
+  useEffect(() => {
+    if (hasUserRegistered && allowedAddins.length > 0) {
+      const currentPaths = allowedAddins.map(
+        (addin) => addin.relativePathToAddin
+      );
+      setTempAllowedAddinPaths(currentPaths);
+    } else if (hasUserRegistered) {
+      // User is registered but has no permissions yet
+      setTempAllowedAddinPaths([]);
+    } else {
+      resetTempPermissions();
+    }
+  }, [
+    hasUserRegistered,
+    allowedAddins,
+    setTempAllowedAddinPaths,
+    resetTempPermissions,
+  ]);
+
+  const handleComplete = async () => {
+    if (hasUserRegistered) {
+      setIsSaving(true);
+      try {
+        await getTauriCommands().setAllowedAddinPathsForUser(
+          userEmail,
+          tempAllowedAddinPaths
+        );
+        manageDialog.setIsVisible(false);
+      } catch (error) {
+        console.error("Failed to save addin permissions:", error);
+        // You might want to show an error message to the user here
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      manageDialog.setIsVisible(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -41,9 +89,10 @@ export default function AddinPermissionsList() {
       <Button
         variant="outline"
         className="w-full"
-        onClick={() => manageDialog.setIsVisible(false)}
+        onClick={handleComplete}
+        disabled={isSaving}
       >
-        Complete
+        {isSaving ? "Saving..." : "Complete"}
       </Button>
     </div>
   );

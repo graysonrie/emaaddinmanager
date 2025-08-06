@@ -50,29 +50,19 @@ impl AddinPermissionsService {
         Ok(user_model)
     }
 
-    pub async fn add_allowed_addin_paths(
+    pub async fn set_allowed_addin_paths(
         &self,
         user_email: String,
         addin_paths: Vec<String>,
     ) -> Result<(), String> {
         let table = self.get_table();
         table
-            .add_allowed_addin_paths(user_email, addin_paths)
+            .set_allowed_addin_paths(user_email, addin_paths)
             .await
             .map_err(|e| e.to_string())
     }
 
-    pub async fn remove_allowed_addin_paths(
-        &self,
-        user_email: String,
-        addin_paths: Vec<String>,
-    ) -> Result<(), String> {
-        let table = self.get_table();
-        table
-            .remove_allowed_addin_paths(user_email, addin_paths)
-            .await
-            .map_err(|e| e.to_string())
-    }
+
 
     fn get_table(&self) -> &UserAddinsTable {
         self.local_stats.stats_db.user_addins_table()

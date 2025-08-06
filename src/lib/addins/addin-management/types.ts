@@ -8,10 +8,13 @@ export interface AddinPermissionModel {
 }
 
 export function AllPublicAddinPermissions(): AddinPermissionModel[] {
-  return DEFAULT_ADDIN_PERMISSIONS.filter((permission) => permission.isPublic);
+  return GLOBAL_DEFAULT_ADDIN_PERMISSIONS.filter(
+    (permission) => permission.isPublic
+  );
 }
 
-export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
+// ! Prefer using AllPublicAddinPermissions() instead of this constant
+export const GLOBAL_DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
   {
     relativePathToAddin: "All Versions/EMABASES",
     displayName: "EMA Bases",
@@ -69,7 +72,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     isPublic: true,
   },
   {
-    relativePathToAddin: "All Versions/Misc/Tab Colorizer",
+    relativePathToAddin: "All Versions/Misc/TabColorizer",
     displayName: "Tab Colorizer",
     forDiscipline: "Technology",
     emoji: "🏙️",

@@ -64,23 +64,12 @@ pub async fn get_user(
 }
 
 #[tauri::command]
-pub async fn add_allowed_addin_paths(
+pub async fn set_allowed_addin_paths(
     addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
     user_email: String,
     addin_paths: Vec<String>,
 ) -> Result<(), String> {
     addin_permissions_service
-        .add_allowed_addin_paths(user_email, addin_paths)
-        .await
-}
-
-#[tauri::command]
-pub async fn remove_allowed_addin_paths(
-    addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
-    user_email: String,
-    addin_paths: Vec<String>,
-) -> Result<(), String> {
-    addin_permissions_service
-        .remove_allowed_addin_paths(user_email, addin_paths)
+        .set_allowed_addin_paths(user_email, addin_paths)
         .await
 }
