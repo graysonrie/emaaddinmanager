@@ -23,15 +23,17 @@ export default function useAddinPermissions({ userEmail }: Props) {
         setAllowedAddins(DEFAULT_ADDIN_PERMISSIONS);
       } else {
         setAllowedAddins(
-          user.allowedAddinPaths.map((path) => {
-            const addin = DEFAULT_ADDIN_PERMISSIONS.find(
-              (addin) => addin.relativePathToAddin === path
-            );
-            if (!addin) {
-              throw new Error("Addin not found");
-            }
-            return addin;
-          })
+          user.allowedAddinPaths
+            .map((path) => {
+              const addin = DEFAULT_ADDIN_PERMISSIONS.find(
+                (addin) => addin.relativePathToAddin === path
+              );
+              if (!addin) {
+                return undefined;
+              }
+              return addin;
+            })
+            .filter((addin) => addin !== undefined)
         );
       }
 

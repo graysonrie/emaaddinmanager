@@ -4,6 +4,11 @@ export interface AddinPermissionModel {
   forDiscipline: string;
   emoji: string;
   image?: string;
+  isPublic: boolean;
+}
+
+export function AllPublicAddinPermissions(): AddinPermissionModel[] {
+  return DEFAULT_ADDIN_PERMISSIONS.filter((permission) => permission.isPublic);
 }
 
 export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
@@ -13,6 +18,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Bases",
     emoji: "🏠",
     image: "/images/bg1.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMAELECTRICAL",
@@ -20,6 +26,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Electrical",
     emoji: "⚡",
     image: "/images/bg2.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMALIGHTING",
@@ -27,6 +34,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Lighting",
     emoji: "💡",
     image: "/images/bg3.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMAMECHANICAL",
@@ -34,6 +42,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Mechanical",
     emoji: "⚙️",
     image: "/images/bg4.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMAPLUMBING",
@@ -41,6 +50,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Plumbing",
     emoji: "💧",
     image: "/images/bg5.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMATECHNOLOGY",
@@ -48,6 +58,7 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Technology",
     emoji: "🤖",
     image: "/images/bg6.jpg",
+    isPublic: true,
   },
   {
     relativePathToAddin: "All Versions/EMASHREVEPORT",
@@ -55,5 +66,14 @@ export const DEFAULT_ADDIN_PERMISSIONS: AddinPermissionModel[] = [
     forDiscipline: "Shreveport",
     emoji: "🏙️",
     image: "/images/bg7.jpg",
+    isPublic: true,
+  },
+  {
+    relativePathToAddin: "All Versions/Misc/Tab Colorizer",
+    displayName: "Tab Colorizer",
+    forDiscipline: "Technology",
+    emoji: "🏙️",
+    image: "/images/paintbrush-logo.png",
+    isPublic: false,
   },
 ];
