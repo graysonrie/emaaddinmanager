@@ -15,7 +15,8 @@ pub fn install_addin(
     current_addin: &AddinModel,
 ) -> Result<UpdateNotificationModel, CheckForUpdatesError> {
     // Copy DLL files from registry addin to local addin
-    helpers::copy_dll_files(up_to_date_addin, current_addin)?;
+    // !Updated to prefer copying all files instead of just DLLs
+    helpers::copy_all_files(up_to_date_addin, current_addin)?;
 
     // Copy XML file from registry addin to local addin
     helpers::copy_xml_file(up_to_date_addin, current_addin)?;

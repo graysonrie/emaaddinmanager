@@ -190,13 +190,12 @@ impl AddinUpdateChecker {
                     helpers::get_addin_dll_folder_name(addin).unwrap_or_else(|_| String::new());
                 registry_addin_dll_name == current_local_addin_dll_name
             }) {
-                let registry_addin_dll_modification_time =
-                    helpers::get_addin_dll_modification_time(corresponding_registry_addin)
-                        .map_err(|e| {
-                            format!("Failed to get registry addin modification time: {}", e)
-                        })?;
+                let registry_addin_dll_modification_time = helpers::get_addin_modification_time(
+                    corresponding_registry_addin,
+                )
+                .map_err(|e| format!("Failed to get registry addin modification time: {}", e))?;
                 let current_local_addin_dll_modification_time =
-                    helpers::get_addin_dll_modification_time(current_local_addin).map_err(|e| {
+                    helpers::get_addin_modification_time(current_local_addin).map_err(|e| {
                         format!("Failed to get local addin modification time: {}", e)
                     })?;
                 if registry_addin_dll_modification_time > current_local_addin_dll_modification_time
