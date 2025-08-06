@@ -43,6 +43,7 @@ export default function UpdaterPopup() {
     };
     checkForUpdates();
   }, []);
+  
 
   const handleUpdate = async () => {
     if (!update) return;
