@@ -87,12 +87,12 @@ export default function AddinPermissionsList() {
         </div>
       )}
       <Button
-        variant="outline"
+        variant="default"
         className="w-full"
         onClick={handleComplete}
         disabled={isSaving}
       >
-        {isSaving ? "Saving..." : "Complete"}
+        {isSaving ? "Saving..." : "Save Changes"}
       </Button>
     </div>
   );

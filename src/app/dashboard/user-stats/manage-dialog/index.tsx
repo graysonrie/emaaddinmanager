@@ -52,7 +52,7 @@ export default function ManageDialog() {
       {unregisteringUser ? (
         <UnregisterForm />
       ) : (
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] flex flex-col thin-scrollbar">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="w-4 h-4" />
@@ -65,12 +65,11 @@ export default function ManageDialog() {
               Manage the addins that this user has access to
             </DialogDescription>
             <DialogDescription>
-              Toggling on an add-in will automatically install it for them.
-              Toggling off an add-in will cause it to get uninstalled the next
-              time the user opens this app.
+              Toggling on an add-in will automatically install it for them when
+              they open the app.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 overflow-y-auto">
             <div className="flex flex-col gap-4">
               {canModify ? (
                 <>
