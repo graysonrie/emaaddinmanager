@@ -17,8 +17,7 @@ export default function useAddinPackage({ addin }: useAddinPackageProps) {
 
   const { amIAnAdmin } = useAuthStore();
 
-  const { createPackageForRegistryAddin, getPackageInfoForRegistryAddin } =
-    getTauriCommands();
+  const { getPackageInfoForRegistryAddin } = getTauriCommands();
 
   const checkIfCanPackage = async () => {
     const adminStatus = await amIAnAdmin();

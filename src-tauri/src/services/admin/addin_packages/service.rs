@@ -38,7 +38,7 @@ impl AddinPackagesService {
         let packages_path = self.get_addin_packages_path().await?;
 
         // Create the addin package directory
-        let addin_package_dir = packages_path.join(&addin.name);
+        let addin_package_dir = packages_path.join(&request.display_name);
         fs::create_dir_all(&addin_package_dir)
             .map_err(|e| format!("Failed to create package directory: {}", e))?;
 
@@ -160,16 +160,26 @@ impl AddinPackagesService {
         &self,
         addin: &AddinModel,
     ) -> Result<Option<AddinPackageInfoModel>, String> {
-        let packages_path = self.get_addin_packages_path().await?;
-        let addin_package_dir = packages_path.join(&addin.name);
-        let json_path = addin_package_dir.join(JSON_FILE_NAME);
-        if !json_path.exists() {
-            return Ok(None);
+        let all_packages = self.get_all_addin_packages().await?;
+        let package = all_packages.iter().find(|p| {
+            let package_addin_name = p
+                .relative_path_to_addin
+                .split('/')
+                .next_back()
+                .unwrap_or_default();
+            let normalized_addin_name = addin.path_to_addin_dll_folder.replace('\\', "/");
+            let addin_name = normalized_addin_name
+                .split('/')
+                .next_back()
+                .unwrap_or_default();
+
+            // println!("Comparing {} to {}", package_addin_name, addin_name);
+            package_addin_name == addin_name
+        });
+        if let Some(package) = package {
+            return Ok(Some(package.clone()));
         }
-        let text = fs::read_to_string(json_path).map_err(|e| e.to_string())?;
-        let json_info: AddinPackageInfoModel =
-            serde_json::from_str(&text).map_err(|e| e.to_string())?;
-        Ok(Some(json_info))
+        Ok(None)
     }
 
     pub async fn load_image_data_for_package(
@@ -177,6 +187,7 @@ impl AddinPackagesService {
         package: &AddinPackageInfoModel,
     ) -> Result<(Vec<u8>, String), String> {
         let packages_path = self.get_addin_packages_path().await?;
+
         let addin_package_dir = packages_path.join(&package.display_name);
         let image_path = addin_package_dir.join(&package.relative_path_to_image);
 

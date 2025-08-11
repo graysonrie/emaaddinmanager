@@ -9,6 +9,7 @@ interface AddinPermissionProps {
 
 export default function AddinPermission({ permission }: AddinPermissionProps) {
   const addinPath = permission.relativePathToAddin;
+  const addinName = permission.displayName;
   const { isTempAllowedAddinPath, toggleTempAddinPermission } =
     useManageDialogStore();
 
@@ -25,7 +26,7 @@ export default function AddinPermission({ permission }: AddinPermissionProps) {
     >
       <div className="flex flex-row gap-2">
         <Blocks className="w-4 h-4" />
-        <p className="text-sm font-sans">{addinPath}</p>
+        <p className="text-sm font-sans">{addinName}</p>
       </div>
       <Switch checked={isAllowed} onCheckedChange={handleToggle} className="pointer-events-none"/>
     </div>
