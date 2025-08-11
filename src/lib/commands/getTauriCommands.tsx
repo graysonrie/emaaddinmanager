@@ -11,6 +11,8 @@ import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.mo
 import { UserStatsModel } from "../models/user-stats.model";
 import { UpdateNotificationModel } from "../models/update-notification.model";
 import { UserModel } from "../models/user.model";
+import { CreateAddinPackageRequestModel } from "../models/create-addin-package-request.model";
+import { AddinPackageInfoModel } from "../models/addin-package-info.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -61,6 +63,19 @@ interface TauriCommands {
   isOtherUserSuperAdmin: (userEmail: string) => Promise<boolean>;
   /** Remove the user from the stats db so that they do not appear at all on the stats page. This is only available to admins. */
   unregisterUser: (userEmail: string) => Promise<void>;
+  createPackageForRegistryAddin: (
+    addin: AddinModel,
+    request: CreateAddinPackageRequestModel
+  ) => Promise<void>;
+  getAllAddinPackages: () => Promise<AddinPackageInfoModel[]>;
+  getPackageInfoForRegistryAddin: (
+    addin: AddinModel
+  ) => Promise<AddinPackageInfoModel | undefined>;
+  checkFileExists: (filePath: string) => Promise<boolean>;
+  loadImageDataForPackage: (
+    pkg: AddinPackageInfoModel
+  ) => Promise<[number[], string]>;
+  openHelpFileForPackage: (pkg: AddinPackageInfoModel) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -267,6 +282,41 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("unregister_user", { userEmail });
   };
 
+  const createPackageForRegistryAddin = async (
+    addin: AddinModel,
+    request: CreateAddinPackageRequestModel
+  ) => {
+    return await invoke<void>("create_package_for_registry_addin", {
+      addin,
+      request,
+    });
+  };
+
+  const getAllAddinPackages = async () => {
+    return await invoke<AddinPackageInfoModel[]>("get_all_addin_packages");
+  };
+
+  const getPackageInfoForRegistryAddin = async (addin: AddinModel) => {
+    return await invoke<AddinPackageInfoModel | undefined>(
+      "get_package_info_for_registry_addin",
+      { addin }
+    );
+  };
+
+  const checkFileExists = async (filePath: string) => {
+    return await invoke<boolean>("check_file_exists", { filePath });
+  };
+
+  const openHelpFileForPackage = async (pkg: AddinPackageInfoModel) => {
+    return await invoke<void>("open_help_file_for_package", { package: pkg });
+  };
+
+  const loadImageDataForPackage = async (pkg: AddinPackageInfoModel) => {
+    return await invoke<[number[], string]>("load_image_data_for_package", {
+      package: pkg,
+    });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -299,5 +349,11 @@ export default function getTauriCommands(): TauriCommands {
     isOtherUserAdmin,
     isOtherUserSuperAdmin,
     unregisterUser,
+    createPackageForRegistryAddin,
+    getAllAddinPackages,
+    getPackageInfoForRegistryAddin,
+    checkFileExists,
+    loadImageDataForPackage,
+    openHelpFileForPackage,
   };
 }

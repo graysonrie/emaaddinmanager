@@ -113,8 +113,7 @@ export default function LibraryPage() {
   }, []);
 
   const fileTreeRules: FileTreeRules = {
-    hideFoldersWithName: ["Testing"],
-    overrideShowHiddenFolders: isAdmin,
+    hideFoldersWithName: ["AddinPackages"],
   };
 
   return (

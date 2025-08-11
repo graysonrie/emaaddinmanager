@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import useAddinPermissions from "../../../../../lib/addins/addin-management/useAddinPermissions";
 import { Button } from "@/components/ui/button";
 import AddinPermission from "./AddinPermission";
-import { GLOBAL_DEFAULT_ADDIN_PERMISSIONS } from "../../../../../lib/addins/addin-management/types";
 import getTauriCommands from "../../../../../lib/commands/getTauriCommands";
 
 export default function AddinPermissionsList() {
@@ -15,13 +14,22 @@ export default function AddinPermissionsList() {
     tempAllowedAddinPaths,
     resetTempPermissions,
   } = useManageDialogStore();
-  const { allowedAddins, hasUserRegistered } = useAddinPermissions({
-    userEmail,
-  });
-  const addinPermission = GLOBAL_DEFAULT_ADDIN_PERMISSIONS;
+  const { allowedAddins, hasUserRegistered, allAvailableAddins } =
+    useAddinPermissions({
+      userEmail,
+    });
   const [isSaving, setIsSaving] = useState(false);
 
   const manageDialog = useManageDialogStore();
+
+  // Initialize store with userEmail and load data
+  useEffect(() => {
+    if (userEmail) {
+      // The initialize function is no longer available from the hook,
+      // so we'll rely on the hook's default behavior or manual re-fetching
+      // if needed. For now, we'll just ensure the userEmail is set.
+    }
+  }, [userEmail]);
 
   // Load user's current permissions into temporary state on mount
   useEffect(() => {
@@ -69,7 +77,7 @@ export default function AddinPermissionsList() {
         <>
           <p className="text-sm font-bold font-sans">Allowed Addins</p>
           <div className="flex flex-col gap-2">
-            {addinPermission.map((permission) => (
+            {allAvailableAddins.map((permission) => (
               <AddinPermission
                 key={permission.relativePathToAddin}
                 permission={permission}

@@ -1,6 +1,7 @@
 use services::addin_updater::tauri_exports::*;
 use services::addins_registry::tauri_exports::*;
 use services::admin::addin_exporter::tauri_exports::*;
+use services::admin::addin_packages::tauri_exports::*;
 use services::admin::addin_permissions::tauri_exports::*;
 use services::admin::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
@@ -61,7 +62,14 @@ pub fn run() {
             is_user_super_admin,
             is_other_user_admin,
             is_other_user_super_admin,
-            unregister_user
+            unregister_user,
+            // Admin - Addin packages
+            create_package_for_registry_addin,
+            get_all_addin_packages,
+            get_package_info_for_registry_addin,
+            check_file_exists,
+            load_image_data_for_package,
+            open_help_file_for_package,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

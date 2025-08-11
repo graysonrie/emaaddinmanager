@@ -14,7 +14,7 @@ pub struct AppSaveService {
 
 impl AppSaveService {
     pub fn new(save_dir: AppSavePath) -> Self {
-        let save_path = AppSaveService::get_save_path(save_dir);
+        let save_path = AppSaveService::get_save_path_internal(save_dir);
         if !save_path.exists() {
             fs::create_dir_all(save_path.clone()).expect("could not create App directory");
         }
@@ -26,7 +26,12 @@ impl AppSaveService {
         create_file(&self.save_dir, path)
     }
 
-    fn get_save_path(save_dir: AppSavePath) -> PathBuf {
+    pub fn get_save_path(&self) -> PathBuf {
+        self.save_dir.clone()
+    }
+
+    /// Get the save path for the app from the AppData directory
+    fn get_save_path_internal(save_dir: AppSavePath) -> PathBuf {
         let save_path = match save_dir {
             AppSavePath::AppData => data_dir().expect("Could not find AppData directory"),
             AppSavePath::Other(path) => path,

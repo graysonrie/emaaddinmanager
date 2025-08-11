@@ -32,13 +32,16 @@ export default function useUserPermissions() {
     if (!user) {
       throw new Error("Failed to register user");
     }
-    const permissions = AllPublicAddinPermissions();
+
+    // Get permissions from packages
+    const permissions = await AllPublicAddinPermissions();
     const permission = permissions.find(
       (permission) => permission.forDiscipline === discipline
     );
     if (!permission) {
-      throw new Error("Permission not found");
+      throw new Error(`No permission found for discipline: ${discipline}`);
     }
+
     await addAllowedAddinPaths(user, [permission.relativePathToAddin]);
     return user;
   };

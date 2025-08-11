@@ -14,6 +14,13 @@ pub const ADDINS_TO_INSTALL: &str = "addinsToInstall";
 // A list of all of the addins to uninstall
 pub const ADDINS_TO_UNINSTALL: &str = "addinsToUninstall";
 
+pub async fn get_addins_registry_path(local_db: Arc<LocalDbService>) -> Result<String, String> {
+    let path = KvStoreValue::<String>::new_default(LOCAL_ADDIN_REGISTRY_PATH, local_db.clone())
+        .get_data_updated()
+        .await?;
+    Ok(path)
+}
+
 /// Get the user email from the local database
 pub async fn get_user_email(local_db: Arc<LocalDbService>) -> Result<String, String> {
     let user_email = KvStoreValue::<String>::new_default(USER_EMAIL, local_db.clone())

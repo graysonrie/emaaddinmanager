@@ -1,20 +1,19 @@
 "use client";
-import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { useState, useEffect } from "react";
 import AddinBadge from "./AddinBadge";
+import { Loader2 } from "lucide-react";
+import PongGame from "../pong-game";
+import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
+import { AddinPermissionModel } from "@/lib/addins/addin-management/types";
 
-export default function AddinBadgesDisplay() {
-  const userEmail = useConfigValue("userEmail");
+interface Props {
+  allowedAddins: AddinPermissionModel[];
+}
 
-  const { allowedAddins } = useAddinPermissions({
-    userEmail: userEmail ?? "",
-  });
-
+export default function AddinBadgesDisplay({ allowedAddins }: Props) {
   return (
     <div className="w-full h-full flex flex-col p-6">
-
-
       <div className="flex-1 flex justify-center pb-8">
         <div
           className="w-full max-w-6xl"
@@ -27,7 +26,10 @@ export default function AddinBadgesDisplay() {
           }}
         >
           {allowedAddins.map((addin) => (
-            <AddinBadge key={addin.relativePathToAddin} addinPermission={addin} />
+            <AddinBadge
+              key={addin.relativePathToAddin}
+              addinPermission={addin}
+            />
           ))}
         </div>
       </div>
