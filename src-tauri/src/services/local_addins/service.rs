@@ -1,12 +1,22 @@
+use tauri::AppHandle;
+
 use crate::services::addins_registry::models::addin_model::AddinModel;
 use crate::services::addins_registry::models::addin_xml_model::RevitAddIns;
+use crate::services::local_addins::events::AddinInstallProgressEvent;
 use crate::utils;
 use std::fs;
 use std::path::Path;
+use std::sync::Mutex;
 
-pub struct LocalAddinsService {}
+pub struct LocalAddinsService {
+    app_handle: AppHandle,
+}
 
 impl LocalAddinsService {
+    pub fn new(app_handle: AppHandle) -> Self {
+        Self { app_handle }
+    }
+
     /// Typically C:\Users\<username>\AppData\Roaming\Autodesk\Revit\Addins\2024
     pub fn path_to_local_addins_folder() -> Result<String, Box<dyn std::error::Error>> {
         let data_roaming = dirs::data_dir().ok_or("Could not get data roaming directory")?;
@@ -182,40 +192,68 @@ impl LocalAddinsService {
         Self::is_addin_installed_locally(name, vendor, addin_type)
     }
 
-    pub fn install_addin(addin: &AddinModel, for_revit_versions: &[String]) -> Result<(), String> {
+    pub fn install_addin(
+        &self,
+        addin: &AddinModel,
+        for_revit_versions: &[String],
+    ) -> Result<(), String> {
         let base_path = Self::path_to_local_addins_folder().map_err(|e| e.to_string())?;
 
         use rayon::prelude::*;
 
-        for_revit_versions
-            .par_iter()
-            .try_for_each(|version| {
-                let version_path = Path::new(&base_path).join(version);
+        let progress = Mutex::new(0);
+        let progress_value_per_version = 100 / for_revit_versions.len() as i32;
 
-                // Ensure the version directory exists
-                fs::create_dir_all(&version_path).map_err(|e| e.to_string())?;
+        let emit_progress_event = |progress| {
+            if let Err(e) = super::events::emit_progress_event(
+                self.app_handle.clone(),
+                AddinInstallProgressEvent {
+                    progress,
+                    addin_name: addin.name.clone(),
+                    description: format!("{} is being installed...", addin.name),
+                },
+            ) {
+                println!("Warning: error emitting progress event: {}", e);
+            }
+        };
+        // emit the initial event
+        emit_progress_event(0);
 
-                // Copy the .addin file
-                let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
-                let addin_xml_dst = version_path.join(
-                    addin_xml_src
-                        .file_name()
-                        .ok_or("Invalid addin XML file name")?,
-                );
-                fs::copy(addin_xml_src, &addin_xml_dst).map_err(|e| e.to_string())?;
+        let result = for_revit_versions.par_iter().try_for_each(|version| {
+            let version_path = Path::new(&base_path).join(version);
 
-                // Copy the DLL folder (recursively)
-                let dll_src = Path::new(&addin.path_to_addin_dll_folder);
-                let dll_dst =
-                    version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
-                if dll_src.exists() && dll_src.is_dir() {
-                    utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
-                }
+            // Ensure the version directory exists
+            fs::create_dir_all(&version_path).map_err(|e| e.to_string())?;
 
-                Ok::<(), String>(())
-            })
-            .map_err(|e| e.to_string())?;
-        Ok(())
+            // Copy the .addin file
+            let addin_xml_src = Path::new(&addin.path_to_addin_xml_file);
+            let addin_xml_dst = version_path.join(
+                addin_xml_src
+                    .file_name()
+                    .ok_or("Invalid addin XML file name")?,
+            );
+            fs::copy(addin_xml_src, &addin_xml_dst).map_err(|e| e.to_string())?;
+
+            // Bump up the progress:
+            let mut progress = progress.lock().map_err(|e| e.to_string())?;
+            *progress += progress_value_per_version;
+            emit_progress_event(*progress);
+
+            // Copy the DLL folder (recursively)
+            let dll_src = Path::new(&addin.path_to_addin_dll_folder);
+            let dll_dst = version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
+            if dll_src.exists() && dll_src.is_dir() {
+                utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
+            }
+
+            Ok::<(), String>(())
+        });
+
+        // Always emit the final progress event, regardless of success or failure
+        emit_progress_event(100);
+
+        // Return the result
+        result.map_err(|e| e.to_string())
     }
 
     pub fn uninstall_addin(

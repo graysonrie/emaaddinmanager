@@ -19,15 +19,20 @@ use crate::{
 
 pub struct LocalAddinsRegistryService {
     registry_location: KvStoreValue<String>,
+    local_addins_service: Arc<LocalAddinsService>,
 }
 
 impl LocalAddinsRegistryService {
-    pub fn new(local_db: Arc<LocalDbService>) -> Self {
+    pub fn new(
+        local_db: Arc<LocalDbService>,
+        local_addins_service: Arc<LocalAddinsService>,
+    ) -> Self {
         Self {
             registry_location: KvStoreValue::new_default(
                 LOCAL_ADDIN_REGISTRY_PATH,
                 local_db.clone(),
             ),
+            local_addins_service,
         }
     }
 }
@@ -75,7 +80,8 @@ impl AddinsRegistry for LocalAddinsRegistryService {
         for_revit_versions: Vec<String>,
     ) -> Fut<Result<(), super::InstallAddinError>> {
         Box::pin(async move {
-            LocalAddinsService::install_addin(&addin, &for_revit_versions)
+            self.local_addins_service
+                .install_addin(&addin, &for_revit_versions)
                 .map_err(|e| InstallAddinError::InstallationError(e.to_string()))?;
             Ok(())
         })

@@ -10,6 +10,7 @@ use crate::services::{
         addin_permissions::service::AddinPermissionsService, service::AdminService,
     },
     app_save::service::{AppSavePath, AppSaveService},
+    local_addins::service::LocalAddinsService,
     local_db::service::LocalDbService,
     user_stats::LocalUserStatsService,
 };
@@ -22,8 +23,12 @@ pub fn initialize_app(handle: &AppHandle) {
 
         let stats_db_dir = Path::new("S:\\BasesRevitAddinsRegistry");
 
-        let addins_registry_service =
-            initialize_addins_registry_service_local(Arc::clone(&local_db_service));
+        let local_addins_service = initialize_local_addins_service(handle.clone());
+
+        let addins_registry_service = initialize_addins_registry_service_local(
+            Arc::clone(&local_db_service),
+            Arc::clone(&local_addins_service),
+        );
         let user_stats_service = initialize_user_stats_service_local(
             Arc::clone(&local_db_service),
             Arc::clone(&addins_registry_service),
@@ -61,10 +66,15 @@ fn initialize_app_save_service(save_dir: AppSavePath) -> Arc<AppSaveService> {
     Arc::new(AppSaveService::new(save_dir))
 }
 
+fn initialize_local_addins_service(app_handle: AppHandle) -> Arc<LocalAddinsService> {
+    Arc::new(LocalAddinsService::new(app_handle))
+}
+
 fn initialize_addins_registry_service_local(
     db: Arc<LocalDbService>,
+    local_addins_serice: Arc<LocalAddinsService>,
 ) -> Arc<LocalAddinsRegistryService> {
-    Arc::new(LocalAddinsRegistryService::new(db))
+    Arc::new(LocalAddinsRegistryService::new(db, local_addins_serice))
 }
 
 fn initialize_addin_updater_service(

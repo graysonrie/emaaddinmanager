@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
 import UpdaterPopup from "./components/updater-popup";
+import InstallingAddinsOverlay from "./components/installing-addins-overlay";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { toast, Toaster } from "sonner";
@@ -84,6 +85,7 @@ export default function DashboardLayout({
         {children}
       </main>
       <UpdaterPopup />
+      <InstallingAddinsOverlay />
       <Toaster position="bottom-right" richColors />
     </div>
   );
