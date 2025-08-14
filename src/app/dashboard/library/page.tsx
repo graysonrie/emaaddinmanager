@@ -113,7 +113,7 @@ export default function LibraryPage() {
   }, []);
 
   const fileTreeRules: FileTreeRules = {
-    hideFoldersWithName: ["AddinPackages"],
+    hideFoldersWithName: ["AddinPackages", "DevResources"],
   };
 
   return (

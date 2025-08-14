@@ -13,6 +13,7 @@ import { UpdateNotificationModel } from "../models/update-notification.model";
 import { UserModel } from "../models/user.model";
 import { CreateAddinPackageRequestModel } from "../models/create-addin-package-request.model";
 import { AddinPackageInfoModel } from "../models/addin-package-info.model";
+import { VsTemplateModel } from "../models/vs-template.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -76,6 +77,10 @@ interface TauriCommands {
     pkg: AddinPackageInfoModel
   ) => Promise<[number[], string]>;
   openHelpFileForPackage: (pkg: AddinPackageInfoModel) => Promise<void>;
+  getDevVisualStudioTemplates: () => Promise<VsTemplateModel[]>;
+  installDevVisualStudioTemplates: (
+    templates: VsTemplateModel[]
+  ) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -317,6 +322,18 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const getDevVisualStudioTemplates = async () => {
+    return await invoke<VsTemplateModel[]>("get_dev_visual_studio_templates");
+  };
+
+  const installDevVisualStudioTemplates = async (
+    templates: VsTemplateModel[]
+  ) => {
+    return await invoke<void>("install_dev_visual_studio_templates", {
+      templates,
+    });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -355,5 +372,7 @@ export default function getTauriCommands(): TauriCommands {
     checkFileExists,
     loadImageDataForPackage,
     openHelpFileForPackage,
+    getDevVisualStudioTemplates,
+    installDevVisualStudioTemplates,
   };
 }

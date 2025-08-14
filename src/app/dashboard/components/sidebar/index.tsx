@@ -9,6 +9,8 @@ import {
   PackageIcon,
   SettingsIcon,
   Upload,
+  File,
+  Wrench,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -143,10 +145,22 @@ export default function Sidebar() {
       link: "/dashboard/publish",
       onNavigate: reset,
     },
+    {
+      icon: <Wrench />,
+      label: "Resources",
+      link: "/dashboard/dev/resources",
+      onNavigate: reset,
+    },
   ];
 
+  // Calculate total buttons and determine gap
+  const totalButtons = buttons.length + (isAdmin ? adminButtons.length : 0);
+  const gapClass = totalButtons > 5 ? "gap-1" : "gap-2";
+
   return (
-    <div className="w-16  flex flex-col items-center p-2 gap-2 shadow-sm h-full">
+    <div
+      className={`w-16 flex flex-col items-center p-2 ${gapClass} shadow-sm h-full`}
+    >
       {buttons.map((button) => (
         <SidebarButton
           key={button.label}

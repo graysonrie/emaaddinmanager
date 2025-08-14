@@ -50,7 +50,7 @@ export default function SelectDestinationForm({ categories }: Props) {
               }}
               nodeName="Category"
               rules={{
-                hideFoldersWithName: ["AddinPackages"],
+                hideFoldersWithName: ["AddinPackages", "DevResources"],
                 onlyFolders: true,
                 rootPath: registryPath,
                 autoSelectPath: destinationCategory?.fullPath,

@@ -54,7 +54,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "App v__VERSION__"
-          releaseBody: "Fixed app from freezing if you install multiple addins at once"
+          releaseBody: "Added Visual Studio Templates and Code Snippets"
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

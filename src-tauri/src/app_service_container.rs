@@ -10,6 +10,7 @@ use crate::services::{
         addin_permissions::service::AddinPermissionsService, service::AdminService,
     },
     app_save::service::{AppSavePath, AppSaveService},
+    dev_resources::DevResourcesService,
     local_addins::service::LocalAddinsService,
     local_db::service::LocalDbService,
     user_stats::LocalUserStatsService,
@@ -42,6 +43,7 @@ pub fn initialize_app(handle: &AppHandle) {
             Arc::clone(&local_db_service),
             Arc::clone(&app_save_service),
         );
+        let dev_resources_service = initialize_dev_resources_service(Arc::clone(&local_db_service));
 
         let addin_updater_service = initialize_addin_updater_service(
             Arc::clone(&addins_registry_service),
@@ -59,6 +61,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&addin_permissions_service));
         handle.manage(Arc::clone(&admin_service));
         handle.manage(Arc::clone(&packages_service));
+        handle.manage(Arc::clone(&dev_resources_service));
     });
 }
 
@@ -123,4 +126,8 @@ fn initialize_addin_packages_service(
     app_save_service: Arc<AppSaveService>,
 ) -> Arc<AddinPackagesService> {
     Arc::new(AddinPackagesService::new(local_db, app_save_service))
+}
+
+fn initialize_dev_resources_service(local_db: Arc<LocalDbService>) -> Arc<DevResourcesService> {
+    Arc::new(DevResourcesService::new(local_db))
 }

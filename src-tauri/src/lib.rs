@@ -4,6 +4,7 @@ use services::admin::addin_exporter::tauri_exports::*;
 use services::admin::addin_packages::tauri_exports::*;
 use services::admin::addin_permissions::tauri_exports::*;
 use services::admin::tauri_exports::*;
+use services::dev_resources::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
@@ -70,6 +71,9 @@ pub fn run() {
             check_file_exists,
             load_image_data_for_package,
             open_help_file_for_package,
+            // Dev resources:
+            get_dev_visual_studio_templates,
+            install_dev_visual_studio_templates
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
