@@ -199,8 +199,6 @@ impl LocalAddinsService {
     ) -> Result<(), String> {
         let base_path = Self::path_to_local_addins_folder().map_err(|e| e.to_string())?;
 
-        use rayon::prelude::*;
-
         let progress = Mutex::new(0);
         let progress_value_per_version = 100 / for_revit_versions.len() as i32;
 
@@ -219,7 +217,10 @@ impl LocalAddinsService {
         // emit the initial event
         emit_progress_event(0);
 
-        let result = for_revit_versions.par_iter().try_for_each(|version| {
+        // ! Used to by rayon par_iter but it is removed since it would cause trouble when installing multiple
+        // ! addins at once, also in the app it didn't actually seem to run in parallel anyway
+
+        let result = for_revit_versions.iter().try_for_each(|version| {
             let version_path = Path::new(&base_path).join(version);
 
             // Ensure the version directory exists

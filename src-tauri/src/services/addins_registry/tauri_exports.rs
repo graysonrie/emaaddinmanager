@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use crate::services::{
-    admin::addin_exporter::models::category_model::CategoryModel,
     addins_registry::{
         models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
         services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
+    admin::addin_exporter::models::category_model::CategoryModel,
 };
 use futures::stream::{FuturesUnordered, StreamExt};
 use tauri::{AppHandle, Emitter, State};
@@ -36,6 +36,7 @@ pub async fn install_addins(
             let addin = install_request.addin;
             let for_revit_versions = install_request.for_revit_versions;
             let addin_id = addin.addin_id.clone();
+            println!("Installing {}", &addin.name);
             addins_registry_service
                 .install_addin(addin, for_revit_versions)
                 .await

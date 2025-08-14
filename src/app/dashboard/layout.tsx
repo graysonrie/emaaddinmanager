@@ -41,8 +41,14 @@ export default function DashboardLayout({
     },
   });
 
+  // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry 
+  // Real registry: S:\\BasesRevitAddinsRegistry
+
   useEffect(() => {
-    config.update("localAddinRegistryPath", "S:\\BasesRevitAddinsRegistry");
+    config.update(
+      "localAddinRegistryPath",
+      "S:\\BasesRevitAddinsRegistry"
+    );
 
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {

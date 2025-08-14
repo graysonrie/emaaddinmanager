@@ -54,7 +54,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "App v__VERSION__"
-          releaseBody: "Added progress bars for installing addins"
+          releaseBody: "Fixed app from freezing if you install multiple addins at once"
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
