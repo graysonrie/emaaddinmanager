@@ -22,6 +22,7 @@ pub fn initialize_app(handle: &AppHandle) {
         let app_save_service = initialize_app_save_service(AppSavePath::AppData);
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
 
+        // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry
         let stats_db_dir = Path::new("S:\\BasesRevitAddinsRegistry");
 
         let local_addins_service = initialize_local_addins_service(handle.clone());

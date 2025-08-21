@@ -29,6 +29,13 @@ export function normalizePath(path: string) {
   return removeDoubleBackslashes(path).replace(/\\/g, "/");
 }
 
+export function removeTrailingSlash(path: string) {
+  if (path.startsWith("\\") || path.startsWith("/")) {
+    return path.substring(1);
+  }
+  return path;
+}
+
 /**
  * Gets the category from the addin
  * @param addin - The addin

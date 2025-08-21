@@ -6,12 +6,21 @@ import { Loader2 } from "lucide-react";
 import PongGame from "../pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import { AddinPermissionModel } from "@/lib/addins/addin-management/types";
+import AboutAddinModal from "../about-addin-modal";
+import { useAboutAddinModalStore } from "../about-addin-modal/store";
 
 interface Props {
   allowedAddins: AddinPermissionModel[];
 }
 
 export default function AddinBadgesDisplay({ allowedAddins }: Props) {
+  const { isOpen, setIsOpen, setPermissionModel } = useAboutAddinModalStore();
+
+  const handleAddinBadgeClick = (addin: AddinPermissionModel) => {
+    setIsOpen(true);
+    setPermissionModel(addin);
+  };
+
   return (
     <div className="w-full h-full flex flex-col p-6">
       <div className="flex-1 flex justify-center pb-8">
@@ -29,10 +38,13 @@ export default function AddinBadgesDisplay({ allowedAddins }: Props) {
             <AddinBadge
               key={addin.relativePathToAddin}
               addinPermission={addin}
+              onClick={() => handleAddinBadgeClick(addin)}
             />
           ))}
         </div>
       </div>
+
+      <AboutAddinModal />
     </div>
   );
 }

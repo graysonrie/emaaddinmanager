@@ -10,12 +10,13 @@ use crate::services::dev_resources::{
 pub async fn get_dev_visual_studio_templates(
     dev_service: State<'_, Arc<DevResourcesService>>,
 ) -> Result<Vec<FrontendVsTemplateModel>, String> {
-    let models = dev_service.get_visual_studio_templates().await?;
+    let vstemplates = dev_service.get_vs_template_manager();
+    let models = vstemplates.get_visual_studio_templates().await?;
     let futures = models
         .into_iter()
         .map(|model| async {
-            let image_data = dev_service.load_image_data_for_template(&model).await?;
-            let is_installed = dev_service.is_template_installed(&model)?;
+            let image_data = vstemplates.load_image_data_for_template(&model).await?;
+            let is_installed = vstemplates.is_template_installed(&model)?;
             Ok(FrontendVsTemplateModel {
                 version: model.version,
                 display_name: model.display_name,
@@ -39,7 +40,8 @@ pub async fn install_dev_visual_studio_templates(
     dev_service: State<'_, Arc<DevResourcesService>>,
     templates: Vec<FrontendVsTemplateModel>,
 ) -> Result<(), String> {
-    dev_service
+    let vstemplates = dev_service.get_vs_template_manager();
+    vstemplates
         .install_visual_studio_templates(&templates)
         .await
         .map_err(|e| e.to_string())

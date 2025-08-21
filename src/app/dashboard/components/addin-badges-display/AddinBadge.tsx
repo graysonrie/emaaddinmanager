@@ -8,9 +8,13 @@ import { useState, useEffect } from "react";
 
 interface AddinBadgeProps {
   addinPermission: AddinPermissionModel;
+  onClick?: () => void;
 }
 
-export default function AddinBadge({ addinPermission }: AddinBadgeProps) {
+export default function AddinBadge({
+  addinPermission,
+  onClick,
+}: AddinBadgeProps) {
   // Extract the addin name from the path (last part after the last slash)
   const addinName = addinPermission.displayName;
   const [imageData, setImageData] = useState<string | null>(null);
@@ -72,6 +76,7 @@ export default function AddinBadge({ addinPermission }: AddinBadgeProps) {
   return (
     <Card
       className={`h-64 hover:shadow-lg transition-all duration-200 hover:scale-[1.02] cursor-pointer border-2 hover:border-primary/20 w-96 relative overflow-hidden !rounded-xl`}
+      onClick={onClick}
     >
       {/* Background image container */}
       {addinImage && (

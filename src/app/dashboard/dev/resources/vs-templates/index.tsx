@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Infinity, Loader2 } from "lucide-react";
 import useDevVsTemplates from "./useDevVsTemplates";
 import VisualStudioTemplate from "./VisualStudioTemplate";
+import Image from "next/image";
 
 export default function DevVsTemplates() {
   const {
@@ -30,11 +31,18 @@ export default function DevVsTemplates() {
 
   return (
     <div className="space-y-6 pb-6">
-      <div className="flex items-center justify-between flex-shrink-0">
+      <div className="flex items-center justify-between flex-shrink-0 ">
         <div>
           <div className="flex items-center gap-2">
-            <Infinity className="w-6 h-6 text-purple-500" />
-            <h2 className="text-2xl font-semibold">Visual Studio Templates</h2>
+            <Image
+              src="/images/visualstudio22.png"
+              alt="Visual Studio Templates"
+              width={32}
+              height={32}
+            />
+            <h2 className="text-2xl font-semibold pb-1">
+              Visual Studio Templates
+            </h2>
           </div>
           <p className="text-muted-foreground mt-2">
             Select and install development templates for your projects

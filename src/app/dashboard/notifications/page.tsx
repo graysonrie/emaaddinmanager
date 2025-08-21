@@ -7,10 +7,36 @@ import { CheckForUpdatesButton } from "./CheckForUpdatesButton";
 import { RevitStatusIndicator } from "./RevitStatusIndicator";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { Info } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 export default function NotificationsPage() {
   const { updateNotifications, clearUpdateNotifications } = useAddinUpdater();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const autoCheck = searchParams.get("autoCheck");
+
+  // Auto-trigger updates check when navigating from AboutAddinModal
+  useEffect(() => {
+    if (autoCheck === "true") {
+      const triggerAutoCheck = async () => {
+        try {
+          console.log("Auto-triggering updates check from AboutAddinModal");
+          await getTauriCommands().checkForUpdatesManual();
+
+          // Clean up the URL by removing the query parameter
+          // router.replace("dashboard/notifications");
+        } catch (error) {
+          console.warn("Failed to auto-trigger updates check:", error);
+          // Still clean up the URL even if the check fails
+          // router.replace("dashboard/notifications");
+        }
+      };
+
+      triggerAutoCheck();
+    }
+  }, [autoCheck, router]);
 
   return (
     <PageWrapper>

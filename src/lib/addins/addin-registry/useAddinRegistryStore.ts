@@ -36,7 +36,7 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
 
   loadRegistryData: async () => {
     const { getAddins, getCategories } = useTauriCommands();
-    const path = await get().localRegistryPath;
+    const path = await getConfigValue("localAddinRegistryPath");
 
     if (!path) {
       set({
@@ -72,7 +72,7 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   },
 
   refreshRegistry: async () => {
-    const localRegistryPath = await get().localRegistryPath;
+    const localRegistryPath = await getConfigValue("localAddinRegistryPath");
     console.log(
       "refreshRegistry called, localRegistryPath:",
       localRegistryPath
