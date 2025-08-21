@@ -35,7 +35,13 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
       console.log("Fetching user stats");
       set({ loading: true, error: null });
       const stats = await getAllUserStats();
-      set({ userStats: stats, loading: false });
+
+      // Sort stats alphabetically by userName
+      const sortedStats = stats.sort((a, b) =>
+        a.userName.localeCompare(b.userName)
+      );
+
+      set({ userStats: sortedStats, loading: false });
       console.log("Got user stats");
     } catch (err) {
       console.warn("Error fetching user stats", err);
