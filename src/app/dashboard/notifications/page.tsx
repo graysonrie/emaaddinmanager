@@ -8,10 +8,11 @@ import { RevitStatusIndicator } from "./RevitStatusIndicator";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { Info } from "lucide-react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
 
-export default function NotificationsPage() {
+// Separate component that uses useSearchParams
+function NotificationsContent() {
   const { updateNotifications, clearUpdateNotifications } = useAddinUpdater();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -93,5 +94,26 @@ export default function NotificationsPage() {
         </div>
       </div>
     </PageWrapper>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function NotificationsPage() {
+  return (
+    <Suspense
+      fallback={
+        <PageWrapper>
+          <div className="flex justify-center h-full">
+            <div className="w-full max-w-4xl flex flex-col gap-6 p-6">
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            </div>
+          </div>
+        </PageWrapper>
+      }
+    >
+      <NotificationsContent />
+    </Suspense>
   );
 }
