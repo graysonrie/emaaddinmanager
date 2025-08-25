@@ -11,7 +11,6 @@ pub struct CodeSnippetModel {
     pub code: String,
     pub description: String,
     pub language: String,
-    pub category: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -23,5 +22,12 @@ pub struct FrontendCodeSnippetModel {
     pub code: String,
     pub description: String,
     pub language: String,
-    pub category: String,
+    pub nested_paths: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CodeSnippetsAndGroupsModel {
+    pub code_snippets: Vec<FrontendCodeSnippetModel>,
+    pub groups: Vec<String>,
 }

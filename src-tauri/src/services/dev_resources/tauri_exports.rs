@@ -3,7 +3,8 @@ use std::sync::Arc;
 use tauri::State;
 
 use crate::services::dev_resources::{
-    vs_templates::models::FrontendVsTemplateModel, DevResourcesService,
+    code_snippets::models::{CodeSnippetsAndGroupsModel, FrontendCodeSnippetModel}, vs_templates::models::FrontendVsTemplateModel,
+    DevResourcesService,
 };
 
 #[tauri::command]
@@ -45,4 +46,21 @@ pub async fn install_dev_visual_studio_templates(
         .install_visual_studio_templates(&templates)
         .await
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn get_all_dev_code_snippets(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+) -> Result<CodeSnippetsAndGroupsModel, String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.get_all_code_snippets().await
+}
+
+#[tauri::command]
+pub async fn add_dev_code_snippet(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+    snippet: FrontendCodeSnippetModel,
+) -> Result<(), String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.add_code_snippet(snippet).await
 }

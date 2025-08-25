@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { KvSubscriptionModel } from "../models/kv-subscription-model";
 import { AddinModel } from "@/lib/models/addin.model";
@@ -9,11 +8,12 @@ import { CategoryModel } from "../models/category.model";
 import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
 import { UserStatsModel } from "../models/user-stats.model";
-import { UpdateNotificationModel } from "../models/update-notification.model";
 import { UserModel } from "../models/user.model";
 import { CreateAddinPackageRequestModel } from "../models/create-addin-package-request.model";
 import { AddinPackageInfoModel } from "../models/addin-package-info.model";
 import { VsTemplateModel } from "../models/vs-template.model";
+import { CodeSnippetModel } from "../models/code-snippet.model";
+import { CodeSnippetAndGroupsModel } from "../models/code-snippet-and-groups.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -81,6 +81,8 @@ interface TauriCommands {
   installDevVisualStudioTemplates: (
     templates: VsTemplateModel[]
   ) => Promise<void>;
+  getAllDevCodeSnippets: () => Promise<CodeSnippetAndGroupsModel>;
+  addDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -334,6 +336,14 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const getAllDevCodeSnippets = async () => {
+    return await invoke<CodeSnippetAndGroupsModel>("get_all_dev_code_snippets");
+  };
+
+  const addDevCodeSnippet = async (snippet: CodeSnippetModel) => {
+    return await invoke<void>("add_dev_code_snippet", { snippet });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -374,5 +384,7 @@ export default function getTauriCommands(): TauriCommands {
     openHelpFileForPackage,
     getDevVisualStudioTemplates,
     installDevVisualStudioTemplates,
+    getAllDevCodeSnippets,
+    addDevCodeSnippet,
   };
 }

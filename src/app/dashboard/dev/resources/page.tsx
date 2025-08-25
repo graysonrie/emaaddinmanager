@@ -2,6 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageWrapper from "@/components/PageWrapper";
 import DevVsTemplates from "./vs-templates";
+import DevCodeSnippets from "./code-snippets";
 
 export default function ResourcesPage() {
   return (
@@ -18,7 +19,7 @@ export default function ResourcesPage() {
 
         {/* Navigation Tabs - Fixed */}
         <div className="flex-shrink-0 p-2 max-w-4xl mx-auto w-full">
-          <Tabs defaultValue="templates" className="w-full">
+          <Tabs defaultValue="templates" className="w-full h">
             <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
               <TabsTrigger value="templates">VS Templates</TabsTrigger>
               <TabsTrigger value="snippets">Code Snippets</TabsTrigger>
@@ -31,15 +32,12 @@ export default function ResourcesPage() {
                 <DevVsTemplates />
               </TabsContent>
 
-              <TabsContent value="snippets" className="mt-0">
-                <div className="text-center py-12">
-                  <div className="text-muted-foreground">
-                    <p className="text-lg font-medium">Code Snippets</p>
-                    <p className="text-sm mt-2">
-                      Coming soon - reusable code snippets for common tasks
-                    </p>
-                  </div>
-                </div>
+              <TabsContent
+                value="snippets"
+                //! Arbitrary height fix:
+                className="mt-0 flex h-[calc(100vh-200px)]"
+              >
+                <DevCodeSnippets />
               </TabsContent>
 
               <TabsContent value="tools" className="mt-0">

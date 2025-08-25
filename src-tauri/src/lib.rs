@@ -73,7 +73,9 @@ pub fn run() {
             open_help_file_for_package,
             // Dev resources:
             get_dev_visual_studio_templates,
-            install_dev_visual_studio_templates
+            install_dev_visual_studio_templates,
+            get_all_dev_code_snippets,
+            add_dev_code_snippet,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
