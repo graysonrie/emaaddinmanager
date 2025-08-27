@@ -19,6 +19,7 @@ import PongGame from "./components/pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import AboutAddinModal from "./components/about-addin-modal";
 
+
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete, config } = useConfigInitialization();
@@ -104,6 +105,7 @@ export default function Home() {
             </>
           )}
         </div>
+        
       </div>
     </PageWrapper>
   );

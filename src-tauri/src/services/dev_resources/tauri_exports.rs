@@ -3,7 +3,8 @@ use std::sync::Arc;
 use tauri::State;
 
 use crate::services::dev_resources::{
-    code_snippets::models::{CodeSnippetsAndGroupsModel, FrontendCodeSnippetModel}, vs_templates::models::FrontendVsTemplateModel,
+    code_snippets::models::{CodeSnippetsAndGroupsModel, FrontendCodeSnippetModel},
+    vs_templates::models::FrontendVsTemplateModel,
     DevResourcesService,
 };
 
@@ -63,4 +64,13 @@ pub async fn add_dev_code_snippet(
 ) -> Result<(), String> {
     let snippets = dev_service.get_code_snippets_manager();
     snippets.add_code_snippet(snippet).await
+}
+
+#[tauri::command]
+pub async fn create_dev_code_snippet_group(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+    group_path: String,
+) -> Result<(), String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.create_group_directory(group_path).await
 }

@@ -76,6 +76,7 @@ pub fn run() {
             install_dev_visual_studio_templates,
             get_all_dev_code_snippets,
             add_dev_code_snippet,
+            create_dev_code_snippet_group,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

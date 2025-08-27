@@ -83,6 +83,7 @@ interface TauriCommands {
   ) => Promise<void>;
   getAllDevCodeSnippets: () => Promise<CodeSnippetAndGroupsModel>;
   addDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
+  createDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -344,6 +345,10 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("add_dev_code_snippet", { snippet });
   };
 
+  const createDevCodeSnippetGroup = async (groupPath: string) => {
+    return await invoke<void>("create_dev_code_snippet_group", { groupPath });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -386,5 +391,6 @@ export default function getTauriCommands(): TauriCommands {
     installDevVisualStudioTemplates,
     getAllDevCodeSnippets,
     addDevCodeSnippet,
+    createDevCodeSnippetGroup,
   };
 }

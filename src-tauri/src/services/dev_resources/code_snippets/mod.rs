@@ -130,6 +130,14 @@ impl DevCodeSnippetsManager {
         Ok(())
     }
 
+    /// group_path is the path to the group directory, i.e. "MyGroup" or "MyGroup/MySubGroup"
+    pub async fn create_group_directory(&self, group_path: String) -> Result<(), String> {
+        let snippets_dir = self.get_app_code_snippets_path().await?;
+        let group_dir = snippets_dir.join(group_path);
+        std::fs::create_dir_all(&group_dir).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
     pub async fn add_code_snippet(&self, model: FrontendCodeSnippetModel) -> Result<(), String> {
         // 'path' will not include the filename, it just includes directories (if any)
         let dir = Path::new(&model.nested_paths);

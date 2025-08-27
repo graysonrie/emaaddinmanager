@@ -5,9 +5,9 @@ interface Props {
   language: Language;
 }
 
-function CSharpCodeBlock({ code, language }: Props) {
+export default function CodeBlock({ code, language }: Props) {
   return (
-    <ShikiHighlighter language={language} theme="github-dark">
+    <ShikiHighlighter language={language} theme="dark-plus">
       {code.trim()}
     </ShikiHighlighter>
   );
