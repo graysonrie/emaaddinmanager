@@ -12,7 +12,7 @@ import CodeBlock from "../code/CodeBlock";
 import { Textarea } from "@/components/ui/textarea";
 import LanguageSelect from "./LanguageSelect";
 import { PopoverAnchor } from "@radix-ui/react-popover";
-import CodeSnippetFileView from "../CodeSnippetFileView";
+import CodeSnippetFileView from "../file-viewer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -53,8 +53,11 @@ export default function CreateNewCodeSnippetModal() {
 
   const handleSubmit = async () => {
     try {
-      const { createSnippet } = useCreateNewCodeSnippetStore.getState();
+      const { createSnippet, reset } = useCreateNewCodeSnippetStore.getState();
+      const { refresh } = useCodeSnippetsStore.getState();
       await createSnippet();
+      await refresh();
+      reset();
       setIsOpen(false);
     } catch (error) {
       setSubmitError(error as string);

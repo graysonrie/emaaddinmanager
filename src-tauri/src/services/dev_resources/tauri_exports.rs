@@ -74,3 +74,31 @@ pub async fn create_dev_code_snippet_group(
     let snippets = dev_service.get_code_snippets_manager();
     snippets.create_group_directory(group_path).await
 }
+
+#[tauri::command]
+pub async fn remove_dev_code_snippet(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+    snippet: FrontendCodeSnippetModel,
+) -> Result<(), String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.remove_code_snippet(snippet).await
+}
+
+#[tauri::command]
+pub async fn remove_dev_code_snippet_group(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+    group_path: String,
+) -> Result<(), String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.remove_group(group_path).await
+}
+
+#[tauri::command]
+pub async fn edit_dev_code_snippet(
+    dev_service: State<'_, Arc<DevResourcesService>>,
+    old_snippet: FrontendCodeSnippetModel,
+    new_snippet: FrontendCodeSnippetModel,
+) -> Result<(), String> {
+    let snippets = dev_service.get_code_snippets_manager();
+    snippets.edit_code_snippet(old_snippet, new_snippet).await
+}

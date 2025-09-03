@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useCodeSnippetsStore } from "./useCodeSnippetsStore";
-import CodeSnippetFileView from "./CodeSnippetFileView";
+import CodeSnippetFileView from "./file-viewer";
 import CodeSnippetViewer from "./CodeSnippetViewer";
 import { useFileViewerStore } from "./useFileViewerStore";
 import CodeSnippetsToolbar from "./CodeSnippetsToolbar";

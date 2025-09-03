@@ -77,6 +77,9 @@ pub fn run() {
             get_all_dev_code_snippets,
             add_dev_code_snippet,
             create_dev_code_snippet_group,
+            remove_dev_code_snippet,
+            remove_dev_code_snippet_group,
+            edit_dev_code_snippet,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

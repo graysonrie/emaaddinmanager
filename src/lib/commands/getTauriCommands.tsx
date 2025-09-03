@@ -84,6 +84,12 @@ interface TauriCommands {
   getAllDevCodeSnippets: () => Promise<CodeSnippetAndGroupsModel>;
   addDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
   createDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
+  removeDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
+  editDevCodeSnippet: (
+    oldSnippet: CodeSnippetModel,
+    newSnippet: CodeSnippetModel
+  ) => Promise<void>;
+  removeDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -349,6 +355,24 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("create_dev_code_snippet_group", { groupPath });
   };
 
+  const editDevCodeSnippet = async (
+    oldSnippet: CodeSnippetModel,
+    newSnippet: CodeSnippetModel
+  ) => {
+    return await invoke<void>("edit_dev_code_snippet", {
+      oldSnippet,
+      newSnippet,
+    });
+  };
+
+  const removeDevCodeSnippet = async (snippet: CodeSnippetModel) => {
+    return await invoke<void>("remove_dev_code_snippet", { snippet });
+  };
+
+  const removeDevCodeSnippetGroup = async (groupPath: string) => {
+    return await invoke<void>("remove_dev_code_snippet_group", { groupPath });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -392,5 +416,8 @@ export default function getTauriCommands(): TauriCommands {
     getAllDevCodeSnippets,
     addDevCodeSnippet,
     createDevCodeSnippetGroup,
+    removeDevCodeSnippet,
+    editDevCodeSnippet,
+    removeDevCodeSnippetGroup,
   };
 }

@@ -172,6 +172,35 @@ impl DevCodeSnippetsManager {
         Ok(())
     }
 
+    pub async fn remove_group(&self, group_path: String) -> Result<(), String> {
+        let snippets_dir = self.get_app_code_snippets_path().await?;
+        let group_dir = snippets_dir.join(group_path);
+        fs::remove_dir_all(group_dir).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    pub async fn remove_code_snippet(&self, model: FrontendCodeSnippetModel) -> Result<(), String> {
+        let snippets_dir = self.get_app_code_snippets_path().await?;
+        let dir = Path::new(&model.nested_paths);
+        let snippet_path = snippets_dir.join(dir);
+        fs::remove_file(snippet_path).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    pub async fn edit_code_snippet(
+        &self,
+        old_model: FrontendCodeSnippetModel,
+        new_model: FrontendCodeSnippetModel,
+    ) -> Result<(), String> {
+        // First, remove the old file
+        self.remove_code_snippet(old_model).await?;
+
+        // Then, add the new file with updated content
+        self.add_code_snippet(new_model).await?;
+
+        Ok(())
+    }
+
     async fn get_app_code_snippets_path(&self) -> Result<PathBuf, String> {
         let local_db_path = keys::get_addins_registry_path(self.local_db.clone()).await?;
         let local_db_path = Path::new(&local_db_path);

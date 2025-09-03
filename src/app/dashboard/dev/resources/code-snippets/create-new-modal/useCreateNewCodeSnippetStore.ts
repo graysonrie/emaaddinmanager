@@ -20,6 +20,8 @@ interface Store {
   setSelectedFolder: (val: string | null) => void;
   createGroup: (groupPath: string) => Promise<void>;
   createSnippet:()=>Promise<void>;
+
+  reset: () => void;
 }
 
 export const useCreateNewCodeSnippetStore = create<Store>((set, get) => {
@@ -83,6 +85,20 @@ export const useCreateNewCodeSnippetStore = create<Store>((set, get) => {
         name: get().name,
         description: get().description,
         nestedPaths: selectedFolder,
+      });
+    },
+    reset: () => {
+      set({
+        code: "",
+        language: "c#",
+        name: "",
+        description: "",
+      });
+      set({
+        selectedFolder: null,
+      });
+      set({
+        phase: "code",
       });
     },
   };

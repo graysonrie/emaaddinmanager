@@ -1,4 +1,4 @@
-import { useCodeSnippetsStore } from "./useCodeSnippetsStore";
+import { useCodeSnippetsStore } from "../useCodeSnippetsStore";
 import { useState, useMemo, useRef } from "react";
 import {
   ChevronRight,
@@ -154,9 +154,9 @@ export default function CodeSnippetFileView({
       fileName: string,
       snippet: CodeSnippetModel | undefined
     ) => {
-      console.log("filePath", filePath);
-      console.log("fileName", fileName);
-      console.log("snippet", snippet);
+      // console.log("filePath", filePath);
+      // console.log("fileName", fileName);
+      // console.log("snippet", snippet);
 
       if (!selectFolder) {
         const displayName = getDisplayName(fileName);
@@ -185,8 +185,8 @@ export default function CodeSnippetFileView({
             children: [],
             snippet,
           };
-          console.log("parentPath", parentPath);
-          console.log("nodeMap", nodeMap);
+          // console.log("parentPath", parentPath);
+          // console.log("nodeMap", nodeMap);
 
           // Try to find the parent folder (normalized key)
           const parent = parentPath ? nodeMap.get(parentPath) : null;
@@ -212,7 +212,7 @@ export default function CodeSnippetFileView({
       });
 
     // Process all snippets
-    console.log("Number of snippets", snippets.length);
+    // console.log("Number of snippets", snippets.length);
     snippets.forEach((snippet) => {
       if (snippet.nestedPaths) {
         // Clean the nested path and ensure the folder exists
@@ -450,11 +450,6 @@ export default function CodeSnippetFileView({
           <h3 className="text-lg font-semibold">
             {selectFolder ? "Select Folder" : "Code Snippets"}
           </h3>
-          <p className="text-sm text-muted-foreground">
-            {selectFolder
-              ? "Click to select a folder, double-click to expand"
-              : `${snippets.length} snippets in ${groups.length} groups`}
-          </p>
         </div>
       )}
 
