@@ -1,5 +1,6 @@
 "use client";
 import {
+  Bug,
   CheckCircle2,
   Download,
   FileWarning,
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { useEffect, useState } from "react";
+import { useReportAddinErrorModalStore } from "./report-error/report-error-modal-store";
 
 export default function AboutAddinModal() {
   const {
@@ -31,6 +33,8 @@ export default function AboutAddinModal() {
     addinModel,
     hasFullyLoaded,
   } = useAboutAddinModalStore();
+
+  const { setIsOpen: setErrorIsOpen } = useReportAddinErrorModalStore();
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
@@ -45,6 +49,11 @@ export default function AboutAddinModal() {
   const addinInstallClicked = () => {
     setIsOpen(false);
     router.replace("dashboard/notifications?autoCheck=true");
+  };
+
+  const bugReportClicked = () => {
+    setIsOpen(false);
+    setErrorIsOpen(true);
   };
 
   const getIsCurrentlyInstalled = () => {
@@ -137,6 +146,14 @@ export default function AboutAddinModal() {
                 {getIsCurrentlyInstalled()}
               </div>
             )}
+
+            {/* <div
+              className="flex items-center gap-2 justify-center text-sm text-muted-foreground hover:underline cursor-pointer"
+              onClick={bugReportClicked}
+            >
+              <Bug className="w-4 h-4 shrink-0" />
+              <p>Report a bug</p>
+            </div> */}
           </>
         )}
       </DialogContent>

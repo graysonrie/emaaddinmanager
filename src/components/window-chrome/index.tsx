@@ -52,7 +52,9 @@ export function WindowChrome() {
         <AppLogo />
       </div>
 
-      <UserAvatar userName={userName} userEmail={userEmail ?? ""} />
+      {userName && userEmail && (
+        <UserAvatar userName={userName} userEmail={userEmail ?? ""} />
+      )}
 
       <div className="flex items-center space-x-1">
         <Button

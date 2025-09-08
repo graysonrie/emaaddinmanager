@@ -95,7 +95,8 @@ export default function UserAvatar({
           <p
             className={cn(
               "font-sans text-sm text-foreground",
-              onClick && "hover:text-blue-500"
+              onClick && "hover:text-blue-500", 
+              size === "lg" && "text-lg font-bold"
             )}
           >
             {displayName}

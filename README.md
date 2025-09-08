@@ -11,3 +11,11 @@ Todo:
 - Add a new way to add new categories to the registry when in the app
 
 water bucket release
+
+
+### notes for addin creator:
+
+new project --> enter project name -->
+
+button to create new pushbutton -->
+select icon

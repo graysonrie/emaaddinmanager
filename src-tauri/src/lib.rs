@@ -7,6 +7,7 @@ use services::admin::tauri_exports::*;
 use services::dev_resources::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
+use services::user_startup::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
 use tauri::Manager;
 
@@ -80,6 +81,8 @@ pub fn run() {
             remove_dev_code_snippet,
             remove_dev_code_snippet_group,
             edit_dev_code_snippet,
+            // User startup
+            ensure_connected_to_server,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

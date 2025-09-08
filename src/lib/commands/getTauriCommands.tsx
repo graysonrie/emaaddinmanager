@@ -90,6 +90,8 @@ interface TauriCommands {
     newSnippet: CodeSnippetModel
   ) => Promise<void>;
   removeDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
+  /** Throws an error if the server is not connected */
+  ensureConnectedToServer: () => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -373,6 +375,10 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("remove_dev_code_snippet_group", { groupPath });
   };
 
+  const ensureConnectedToServer = async () => {
+    return await invoke<void>("ensure_connected_to_server");
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -419,5 +425,6 @@ export default function getTauriCommands(): TauriCommands {
     removeDevCodeSnippet,
     editDevCodeSnippet,
     removeDevCodeSnippetGroup,
+    ensureConnectedToServer,
   };
 }

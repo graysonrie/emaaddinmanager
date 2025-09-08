@@ -2,18 +2,21 @@ use std::{path::Path, sync::Arc};
 
 use tauri::{AppHandle, Manager};
 
-use crate::services::{
-    addin_updater::service::AddinUpdaterService,
-    addins_registry::services::local_registry::LocalAddinsRegistryService,
-    admin::{
-        addin_packages::service::AddinPackagesService,
-        addin_permissions::service::AddinPermissionsService, service::AdminService,
+use crate::{
+    constants::ADDINS_REGISTRY_PATH,
+    services::{
+        addin_updater::service::AddinUpdaterService,
+        addins_registry::services::local_registry::LocalAddinsRegistryService,
+        admin::{
+            addin_packages::service::AddinPackagesService,
+            addin_permissions::service::AddinPermissionsService, service::AdminService,
+        },
+        app_save::service::{AppSavePath, AppSaveService},
+        dev_resources::DevResourcesService,
+        local_addins::service::LocalAddinsService,
+        local_db::service::LocalDbService,
+        user_stats::LocalUserStatsService,
     },
-    app_save::service::{AppSavePath, AppSaveService},
-    dev_resources::DevResourcesService,
-    local_addins::service::LocalAddinsService,
-    local_db::service::LocalDbService,
-    user_stats::LocalUserStatsService,
 };
 
 pub fn initialize_app(handle: &AppHandle) {
@@ -23,7 +26,7 @@ pub fn initialize_app(handle: &AppHandle) {
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
 
         // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry
-        let stats_db_dir = Path::new("S:\\BasesRevitAddinsRegistry");
+        let stats_db_dir = Path::new(ADDINS_REGISTRY_PATH);
 
         let local_addins_service = initialize_local_addins_service(handle.clone());
 
