@@ -22,7 +22,7 @@ export default function Home() {
         await ensureConnectedToServer();
         // throw new Error("Failed to connect to server");
         console.log("Connected to server");
-        router.push("/dashboard");
+        router.push("/login");
       } catch (error) {
         console.warn("Failed to connect to server", error);
         setError({
