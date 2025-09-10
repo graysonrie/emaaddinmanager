@@ -17,6 +17,7 @@ import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useState } from "react";
 import { useManageDialogStore } from "../../manage-dialog/store";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
+import InstalledAddinsCardContent from "../../components/InstalledAddinsCardContent";
 
 export default function StatsByUser() {
   const { userStats, loading, error, refresh } = useUserStatsStore();
@@ -105,58 +106,10 @@ export default function StatsByUser() {
               </CardHeader>
 
               {isExpanded && (
-                <CardContent className="pt-0 pb-2">
-                  <div className="flex flex-col gap-4">
-                    {userStats.publishedAddins.length > 0 && (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-row gap-2 items-center">
-                          <Upload className="w-4 h-4 flex-shrink-0" />
-                          <div className="flex flex-row gap-2 items-center">
-                            <p className="text-sm font-bold font-sans">
-                              Published Addins
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              ({userStats.publishedAddins.length})
-                            </p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                          {userStats.publishedAddins.map((addin) => {
-                            return (
-                              <AddinCard
-                                addinInfo={addin}
-                                key={addin.addin.name}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-row gap-2 items-center">
-                        <Download className="w-4 h-4 flex-shrink-0" />
-                        <div className="flex flex-row gap-2 items-center">
-                          <p className="text-sm font-bold font-sans">
-                            Installed Addins
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            ({deduplicatedInstalledAddins.length})
-                          </p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                        {deduplicatedInstalledAddins.map((addin) => {
-                          return (
-                            <AddinCard
-                              addinInfo={addin}
-                              key={addin.addin.name}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
+                <InstalledAddinsCardContent
+                  selectedUserStats={userStats}
+                  deduplicatedInstalledAddins={deduplicatedInstalledAddins}
+                />
               )}
             </Card>
           </div>

@@ -60,8 +60,10 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
           "Refreshing local addin information for project:",
           projectDir
         );
-        const addinFileInfo = await tauri.getAddinFileInfo(projectDir);
+        let addinFileInfo = await tauri.getAddinFileInfo(projectDir);
         console.log("Addin file info found for project:", projectDir);
+        // increment the addin version
+        addinFileInfo.addinVersion = (parseInt(addinFileInfo.addinVersion) + 1).toString();
         // const dlls = await tauri.getAllProjectDlls(projectDir);
         set({ addinFileInfo });
       } catch (err) {

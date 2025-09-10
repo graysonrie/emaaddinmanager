@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SimplifiedAddinInfoModel } from "@/lib/models/simplified-addin-info.model";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
+import { useMemo } from "react";
 
 interface Props {
   addinFileInfo: SimplifiedAddinInfoModel;
@@ -29,6 +30,8 @@ export default function AddinInfoForm({
       email: userEmail,
     });
   };
+
+
 
   const userEmail = useKeyValueSubscription<string>("userEmail");
 
@@ -76,6 +79,13 @@ export default function AddinInfoForm({
             }
             rows={3}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Version</Label>
+          <label id="email" className="text-sm text-muted-foreground">
+            {addinFileInfo.addinVersion}
+          </label>
         </div>
       </CardContent>
     </Card>

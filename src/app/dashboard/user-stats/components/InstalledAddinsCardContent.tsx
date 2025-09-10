@@ -1,15 +1,20 @@
 import { CardContent } from "@/components/ui/card";
-import { InstalledAddinModel, UserStatsModel } from "@/lib/models/user-stats.model";
+import {
+  InstalledAddinModel,
+  UserStatsModel,
+} from "@/lib/models/user-stats.model";
 import { Download, Upload } from "lucide-react";
 import AddinCard from "../stats-display/stats-by-user/AddinCard";
 
-
 interface Props {
-    selectedUserStats: UserStatsModel;
-    deduplicatedInstalledAddins: InstalledAddinModel[];
+  selectedUserStats: UserStatsModel;
+  deduplicatedInstalledAddins: InstalledAddinModel[];
 }
 
-export default function InstalledAddinsCardContent({ selectedUserStats, deduplicatedInstalledAddins }: Props) {
+export default function InstalledAddinsCardContent({
+  selectedUserStats,
+  deduplicatedInstalledAddins,
+}: Props) {
   return (
     <CardContent className="pt-0 pb-2">
       <div className="flex flex-col gap-4">
@@ -24,7 +29,7 @@ export default function InstalledAddinsCardContent({ selectedUserStats, deduplic
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(8rem,12rem))] gap-2 justify-center">
               {selectedUserStats.publishedAddins.map((addin) => {
                 return <AddinCard addinInfo={addin} key={addin.addin.name} />;
               })}
@@ -41,7 +46,7 @@ export default function InstalledAddinsCardContent({ selectedUserStats, deduplic
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(8rem,12rem))] gap-2 justify-center">
             {deduplicatedInstalledAddins.map((addin) => {
               return <AddinCard addinInfo={addin} key={addin.addin.name} />;
             })}

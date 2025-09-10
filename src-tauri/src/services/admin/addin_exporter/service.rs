@@ -39,6 +39,7 @@ impl AddinExporterService {
             vendor_id: addin_file_info.vendor_id,
             vendor_description: addin_file_info.description,
             vendor_email: addin_file_info.email,
+            addin_version: Some(addin_file_info.addin_version),
         };
 
         let path = revitcli::create_addin_file_for_project(project_dir, addin_file_info)
@@ -113,6 +114,9 @@ impl From<AddinFileInfo> for SimplifiedAddinInfoModel {
             email: addin_file_info.vendor_email,
             // TODO: This is a hack to get the C# project name from the assembly name.
             csharp_project_name: get_csharp_project_name_from_assembly(&addin_file_info.assembly),
+            addin_version: addin_file_info
+                .addin_version
+                .unwrap_or_else(|| "0".to_string()),
         }
     }
 }

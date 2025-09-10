@@ -43,7 +43,7 @@ impl AddinModel {
             path_to_addin_dll_folder: dll_folder_path,
             name: xml_addin.name.clone().unwrap_or_default(),
             addin_id: xml_addin.addin_id.clone().unwrap_or_default(),
-            version: "1.0.0".to_string(), // Default version, could be extracted from XML if available
+            version: xml_addin.addin_version.clone().unwrap_or("0".to_string()), // Default version, could be extracted from XML if available
             vendor: xml_addin.vendor_id.clone().unwrap_or_default(),
             email: xml_addin.vendor_email.clone().unwrap_or_default(),
             addin_type: xml_addin.addin_type.clone().unwrap_or_default(),

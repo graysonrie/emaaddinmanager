@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { UserStatsModel } from "../models/user-stats.model";
 import getTauriCommands from "../commands/getTauriCommands";
+import { useAddinRegistryStore } from "../addins/addin-registry/useAddinRegistryStore";
 
 interface UserStatsStore {
   // State
@@ -51,6 +52,9 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
 
   const refresh = async () => {
     await fetchUserStats();
+    // Update the addin registry
+    const addins = useAddinRegistryStore.getState();
+    await addins.refreshRegistry();
   };
 
   const createUserStatsAction = async () => {
