@@ -1790,6 +1790,13 @@
     "@tauri-apps/cli-win32-ia32-msvc" "2.6.0"
     "@tauri-apps/cli-win32-x64-msvc" "2.6.0"
 
+"@tauri-apps/plugin-autostart@~2":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-autostart/-/plugin-autostart-2.5.0.tgz#e2911fa68b7e4560198fd1b53434d7ffc11d0d85"
+  integrity sha512-smSt0vydfVB950AeYRbO2S/c01SZrgMVg4FOrFLQLom0R0amsu/8zYaxgttriBdxcofjBZuHv4hmROBQIBVXmA==
+  dependencies:
+    "@tauri-apps/api" "^2.6.0"
+
 "@tauri-apps/plugin-dialog@~2":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@tauri-apps/plugin-dialog/-/plugin-dialog-2.3.0.tgz#123d2cd3d98467b9b115d23ad71eef469d6ead35"

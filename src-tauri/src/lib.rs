@@ -10,6 +10,7 @@ use services::local_db::tables::app_kv_store::tauri_exports::*;
 use services::user_startup::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
 use tauri::Manager;
+use tauri_plugin_autostart::ManagerExt;
 
 mod app_service_container;
 mod app_updater;
@@ -24,6 +25,12 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(
+            tauri_plugin_autostart::Builder::new()
+                .args(["--autostart"])
+                .app_name("EmaAddinLauncher")
+                .build(),
+        )
         .invoke_handler(tauri::generate_handler![
             // Local DB
             kv_store_set,
@@ -92,6 +99,20 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            let autostart = app.autolaunch();
+            // Enable autostart
+            let _ = autostart.enable();
+            // Check enable state
+            println!(
+                "registered for autostart? {}",
+                autostart.is_enabled().unwrap_or_else(|err| {
+                    println!("Warning: error enabling autostart: {err}");
+                    false
+                })
+            );
+            utils::autostart::minimize_if_autostart(&app.handle());
+
             // Prefer checking for updates on startup in the frontend
             // let handle = app.handle().clone();
             // tauri::async_runtime::spawn(async move {

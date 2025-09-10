@@ -24,7 +24,7 @@ pub struct AddIn {
     /// The type of addin (Application, Command, etc.)
     #[serde(rename = "@Type")]
     pub addin_type: Option<String>,
-    pub addin_version:Option<String>
+    pub addin_version: Option<String>,
 }
 
 /// Represents the root RevitAddIns element containing all addins

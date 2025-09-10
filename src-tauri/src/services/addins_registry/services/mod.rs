@@ -3,8 +3,8 @@ use std::sync::Arc;
 use crate::{
     constants::Fut,
     services::{
-        admin::addin_exporter::models::category_model::CategoryModel,
         addins_registry::models::addin_model::AddinModel,
+        admin::addin_exporter::models::category_model::CategoryModel,
     },
 };
 mod enums;

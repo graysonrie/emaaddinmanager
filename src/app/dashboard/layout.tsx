@@ -45,7 +45,7 @@ export default function DashboardLayout({
   // Real registry: S:\\BasesRevitAddinsRegistry
 
   useEffect(() => {
-    config.update("localAddinRegistryPath", "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry");
+    config.update("localAddinRegistryPath", "S:\\BasesRevitAddinsRegistry");
     console.log("Updating addin registry path in config");
 
     const handler = (e: KeyboardEvent) => {
@@ -88,7 +88,6 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque rounded-tl-lg">
         {children}
       </main>
-      <UpdaterPopup />
       <InstallingAddinsOverlay />
       <Toaster position="bottom-right" richColors />
     </div>

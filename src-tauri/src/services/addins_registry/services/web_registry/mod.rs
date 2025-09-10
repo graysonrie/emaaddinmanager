@@ -1,8 +1,8 @@
 use super::*;
 
 use crate::services::{
-    admin::addin_exporter::models::category_model::CategoryModel,
     addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
+    admin::addin_exporter::models::category_model::CategoryModel,
 };
 pub struct WebAddinsRegistryService {}
 

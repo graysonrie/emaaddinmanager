@@ -1,6 +1,7 @@
 use rayon::prelude::*;
 use std::fs;
 use std::path::Path;
+pub mod autostart;
 
 pub fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
     fs::create_dir_all(dst)?;

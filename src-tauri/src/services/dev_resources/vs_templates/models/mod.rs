@@ -19,7 +19,7 @@ pub struct VsTemplateModel {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
- pub struct FrontendVsTemplateModel {
+pub struct FrontendVsTemplateModel {
     pub version: String,
     pub display_name: String,
     pub description: String,

@@ -62,8 +62,6 @@ impl AddinPermissionsService {
             .map_err(|e| e.to_string())
     }
 
-
-
     fn get_table(&self) -> &UserAddinsTable {
         self.local_stats.stats_db.user_addins_table()
     }

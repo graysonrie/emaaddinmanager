@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub enum UpdateNotificationType {
     Info,
     Install,
-    Warning
+    Warning,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

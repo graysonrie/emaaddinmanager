@@ -17,5 +17,4 @@ impl<T> EmitMetadataModel<T> {
             metadata_array: Vec::new(),
         }
     }
-
 }

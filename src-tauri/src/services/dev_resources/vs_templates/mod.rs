@@ -9,7 +9,6 @@ use crate::services::{
     config::keys, dev_resources::vs_templates::models::*, local_db::service::LocalDbService,
 };
 
-
 #[derive(Debug)]
 pub enum TemplateInstallError {
     VsTemplatesFolderDoesNotExist,
@@ -28,7 +27,7 @@ pub struct DevVsTemplatesManager {
     local_db: Arc<LocalDbService>,
 }
 
-impl DevVsTemplatesManager{
+impl DevVsTemplatesManager {
     pub fn new(local_db: Arc<LocalDbService>) -> Self {
         Self { local_db }
     }

@@ -44,5 +44,4 @@ impl InstallAddinOperation {
         notifications::with(&self.app_handle).allowed_addin_installed(&registry_addin);
         Ok(())
     }
-
 }
