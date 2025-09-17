@@ -19,7 +19,8 @@ export default function Home() {
   useEffect(() => {
     const checkConnectedToServer = async () => {
       try {
-        await ensureConnectedToServer();
+        // ignore for now
+        // await ensureConnectedToServer();
         // throw new Error("Failed to connect to server");
         console.log("Connected to server");
         router.push("/login");
