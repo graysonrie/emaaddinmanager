@@ -3,13 +3,16 @@ use std::{fs, path::Path, sync::Arc};
 use sea_orm::DatabaseConnection;
 use sqlx::sqlite::SqlitePool;
 pub mod user_addins;
+pub mod user_metadata;
 pub mod user_stats;
 use user_addins::UserAddinsTable;
+use user_metadata::UserMetadataTable;
 use user_stats::UserStatsTable;
 
 pub struct LocalStatsDbHandler {
     user_stats_table: UserStatsTable,
     user_addins_table: UserAddinsTable,
+    user_metadata_table:UserMetadataTable,
 }
 
 impl LocalStatsDbHandler {
@@ -27,9 +30,11 @@ impl LocalStatsDbHandler {
             Arc::new(SqlitePool::connect(&db_url).await.unwrap().into());
         let user_stats_table = UserStatsTable::new_async(db.clone()).await;
         let user_addins_table = UserAddinsTable::new_async(db.clone()).await;
+        let user_metadata_table = UserMetadataTable::new_async(db.clone()).await;
         Self {
             user_stats_table,
             user_addins_table,
+            user_metadata_table
         }
     }
 
@@ -39,5 +44,9 @@ impl LocalStatsDbHandler {
 
     pub fn user_addins_table(&self) -> &UserAddinsTable {
         &self.user_addins_table
+    }
+
+    pub fn user_metadata_table(&self) -> &UserMetadataTable {
+        &self.user_metadata_table
     }
 }

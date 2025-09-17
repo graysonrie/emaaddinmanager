@@ -11,6 +11,7 @@ use crate::db::utils::generate_table_lenient;
 
 pub mod user_addins_table;
 pub mod user_stats_table;
+pub mod user_metadata_table;
 mod utils;
 
 pub async fn initialize(dir: &Path) {
@@ -37,5 +38,6 @@ async fn create_db_file(dir: &Path) -> PathBuf {
 async fn create_tables(db: Arc<DatabaseConnection>) {
     generate_table_lenient(&db, user_stats_table::user::Entity).await;
     generate_table_lenient(&db, user_addins_table::user::Entity).await;
+    generate_table_lenient(&db, user_metadata_table::user_metadata::Entity).await;
     println!("Tables created");
 }

@@ -3,7 +3,7 @@ use std::{path::Path, sync::Arc};
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    constants::ADDINS_REGISTRY_PATH,
+    constants::{ADDINS_REGISTRY_PATH, TEST_ADDINS_REGISTRY_PATH},
     services::{
         addin_updater::service::AddinUpdaterService,
         addins_registry::services::local_registry::LocalAddinsRegistryService,
@@ -15,7 +15,7 @@ use crate::{
         dev_resources::DevResourcesService,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
-        user_stats::LocalUserStatsService,
+        user_stats::{metadata::service::UserMetadataService, LocalUserStatsService},
     },
 };
 
@@ -56,6 +56,10 @@ pub fn initialize_app(handle: &AppHandle) {
             Arc::clone(&local_db_service),
             Arc::clone(&admin_service),
         );
+        let user_metadata_service = initialize_user_metadata_service(
+            Arc::clone(&local_db_service),
+            Arc::clone(&user_stats_service),
+        );
 
         handle.manage(Arc::clone(&local_db_service));
         handle.manage(Arc::clone(&app_save_service));
@@ -66,6 +70,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&admin_service));
         handle.manage(Arc::clone(&packages_service));
         handle.manage(Arc::clone(&dev_resources_service));
+        handle.manage(Arc::clone(&user_metadata_service));
     });
 }
 
@@ -134,4 +139,11 @@ fn initialize_addin_packages_service(
 
 fn initialize_dev_resources_service(local_db: Arc<LocalDbService>) -> Arc<DevResourcesService> {
     Arc::new(DevResourcesService::new(local_db))
+}
+
+fn initialize_user_metadata_service(
+    local_db: Arc<LocalDbService>,
+    user_stats: Arc<LocalUserStatsService>,
+) -> Arc<UserMetadataService> {
+    Arc::new(UserMetadataService::new(local_db, user_stats))
 }

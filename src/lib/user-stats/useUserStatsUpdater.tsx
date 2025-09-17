@@ -8,6 +8,8 @@ export default function useUserStatsUpdater() {
     const updateUserStats = async () => {
       try {
         await commands.updateUserStats();
+        // Update the metadata for the user as well:
+        await commands.updateUserAppVersionMetadata();
         console.log("Updated user stats");
       } catch (error) {
         console.warn("Failed to update user stats:", error);

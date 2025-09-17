@@ -83,7 +83,7 @@ export default function Home() {
   // Show main app content
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-4 max-w-screen-lg w-full h-full mx-auto thin-scrollbar items-center justify-center">
+      <div className="flex flex-col gap-4 w-full h-full mx-auto thin-scrollbar items-center justify-center">
         <div className="flex flex-col gap-2 w-full h-full p-6">
           {isLoadingAddins ? (
             <div className="flex items-center justify-center h-full w-full flex-col gap-4">

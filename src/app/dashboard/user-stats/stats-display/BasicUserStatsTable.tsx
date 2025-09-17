@@ -15,6 +15,8 @@ import { deduplicateInstalledAddins } from "./helpers";
 import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useManageDialogStore } from "../manage-dialog/store";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
+import getMetadataBodyOrDefault from "@/lib/user-stats/user-stats-util";
+import { MetadataBody } from "@/lib/models/user-metadata.model";
 
 interface UserFacingStats {
   userEmail: string;
@@ -22,6 +24,7 @@ interface UserFacingStats {
   publishedAddins: number;
   installedAddins: number;
   disciplines: string[];
+  metadataBody: MetadataBody;
 }
 
 export default function BasicUserStatsTable() {
@@ -45,6 +48,7 @@ export default function BasicUserStatsTable() {
         publishedAddins: stats.publishedAddins.length,
         installedAddins: deduplicatedInstalledAddins.length,
         disciplines: stats.disciplines,
+        metadataBody: getMetadataBodyOrDefault(stats.metadata),
       };
       return userFacingStats;
     });
@@ -64,20 +68,21 @@ export default function BasicUserStatsTable() {
     );
 
   return (
-    <div className="flex flex-row gap-4 w-full items-center h-full justify-center thin-scrollbar overflow-x-auto">
+    <div className="flex flex-row gap-4 font-sans w-full items-center h-full justify-center thin-scrollbar overflow-x-auto">
       <Table className="min-w-max">
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Addins Published</TableHead>
             <TableHead>Addins Installed</TableHead>
+            <TableHead>App Version</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {userFacingStats?.map((stats) => (
             <TableRow key={stats.userEmail}>
               <TableCell>
-                <UserAvatar
+                <UserAvatar 
                   userName={stats.userName}
                   userEmail={stats.userEmail}
                   showFullname={true}
@@ -89,6 +94,7 @@ export default function BasicUserStatsTable() {
               </TableCell>
               <TableCell>{stats.publishedAddins}</TableCell>
               <TableCell>{stats.installedAddins}</TableCell>
+              <TableCell>{stats.metadataBody.appVersion}</TableCell>
             </TableRow>
           ))}
         </TableBody>

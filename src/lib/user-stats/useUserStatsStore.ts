@@ -2,10 +2,15 @@ import { create } from "zustand";
 import { UserStatsModel } from "../models/user-stats.model";
 import getTauriCommands from "../commands/getTauriCommands";
 import { useAddinRegistryStore } from "../addins/addin-registry/useAddinRegistryStore";
+import { UserMetadataModel } from "../models/user-metadata.model";
+
+export interface UserStatsWithMetadata extends UserStatsModel {
+  metadata: UserMetadataModel | undefined;
+}
 
 interface UserStatsStore {
   // State
-  userStats: UserStatsModel[];
+  userStats: UserStatsWithMetadata[];
   loading: boolean;
   error: string | null;
 
@@ -29,6 +34,7 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
     changeUserStatsEmail,
     changeUserStatsName,
     unregisterUser,
+    getUserMetadataMany,
   } = getTauriCommands();
 
   const fetchUserStats = async () => {
@@ -42,7 +48,15 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
         a.userName.localeCompare(b.userName)
       );
 
-      set({ userStats: sortedStats, loading: false });
+      const metadata = await getUserMetadataMany(
+        sortedStats.map((stat) => stat.userEmail)
+      );
+      const statsWithMetadata = sortedStats.map((stat) => ({
+        ...stat,
+        metadata: metadata.find((meta) => meta.userEmail === stat.userEmail),
+      }));
+
+      set({ userStats: statsWithMetadata, loading: false });
       console.log("Got user stats");
     } catch (err) {
       console.warn("Error fetching user stats", err);

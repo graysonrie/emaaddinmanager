@@ -14,6 +14,7 @@ import { AddinPackageInfoModel } from "../models/addin-package-info.model";
 import { VsTemplateModel } from "../models/vs-template.model";
 import { CodeSnippetModel } from "../models/code-snippet.model";
 import { CodeSnippetAndGroupsModel } from "../models/code-snippet-and-groups.model";
+import { UserMetadataModel } from "../models/user-metadata.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -92,6 +93,9 @@ interface TauriCommands {
   removeDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
   /** Throws an error if the server is not connected */
   ensureConnectedToServer: () => Promise<void>;
+  updateUserAppVersionMetadata: () => Promise<void>;
+  getUserMetadata: (userEmail: string) => Promise<UserMetadataModel>;
+  getUserMetadataMany: (userEmails: string[]) => Promise<UserMetadataModel[]>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -379,6 +383,20 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("ensure_connected_to_server");
   };
 
+  const updateUserAppVersionMetadata = async () => {
+    return await invoke<void>("update_user_app_version_metadata");
+  };
+
+  const getUserMetadata = async (userEmail: string) => {
+    return await invoke<UserMetadataModel>("get_user_metadata", { userEmail });
+  };
+
+  const getUserMetadataMany = async (userEmails: string[]) => {
+    return await invoke<UserMetadataModel[]>("get_user_metadata_many", {
+      userEmails,
+    });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -426,5 +444,8 @@ export default function getTauriCommands(): TauriCommands {
     editDevCodeSnippet,
     removeDevCodeSnippetGroup,
     ensureConnectedToServer,
+    updateUserAppVersionMetadata,
+    getUserMetadata,
+    getUserMetadataMany,
   };
 }

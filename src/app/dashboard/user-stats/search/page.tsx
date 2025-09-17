@@ -7,7 +7,7 @@ import { useConfigInitialization } from "@/lib/persistence/useConfigInitializati
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Loader2, Search } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
-import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
+import { UserStatsWithMetadata, useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserStatsModel } from "@/lib/models/user-stats.model";
@@ -30,7 +30,7 @@ export default function UserStatsSearchPage() {
     setSearchInput,
   } = useUserStatsSearchStore();
 
-  const onStatClick = (userStats: UserStatsModel) => {
+  const onStatClick = (userStats: UserStatsWithMetadata) => {
     setSelectedUserStats(userStats);
   };
 

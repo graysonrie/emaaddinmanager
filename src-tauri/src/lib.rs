@@ -8,6 +8,7 @@ use services::dev_resources::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
 use services::user_startup::tauri_exports::*;
+use services::user_stats::metadata::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
@@ -90,6 +91,10 @@ pub fn run() {
             edit_dev_code_snippet,
             // User startup
             ensure_connected_to_server,
+            // Metadata:
+            update_user_app_version_metadata,
+            get_user_metadata,
+            get_user_metadata_many,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -111,7 +116,7 @@ pub fn run() {
                     false
                 })
             );
-            utils::autostart::minimize_if_autostart(&app.handle());
+            utils::autostart::minimize_if_autostart(app.handle());
 
             // Prefer checking for updates on startup in the frontend
             // let handle = app.handle().clone();
