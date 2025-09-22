@@ -18,9 +18,11 @@ import { useAuthStore } from "@/lib/auth/useAuthStore";
 import PongGame from "./components/pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import AboutAddinModal from "./components/about-addin-modal";
-
+import { Button } from "@/components/ui/button";
+import useServerRequests from "@/lib/server/useServerRequests";
 
 export default function Home() {
+  const { request } = useServerRequests();
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete, config } = useConfigInitialization();
   const { user, isLoading: isUserLoading } = useUserPermissions();
@@ -83,7 +85,7 @@ export default function Home() {
   // Show main app content
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-4 max-w-screen-lg w-full h-full mx-auto thin-scrollbar items-center justify-center">
+      <div className="flex flex-col gap-4 w-full h-full mx-auto thin-scrollbar items-center justify-center">
         <div className="flex flex-col gap-2 w-full h-full p-6">
           {isLoadingAddins ? (
             <div className="flex items-center justify-center h-full w-full flex-col gap-4">
@@ -95,6 +97,14 @@ export default function Home() {
             </div>
           ) : (
             <>
+              <Button
+                onClick={async () => {
+                  const response = await request("USER_PROFILE", "GET");
+                  console.log(response);
+                }}
+              >
+                Test Request
+              </Button>
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-1">Your Addins</h2>
                 <p className="text-muted-foreground mb-4">{description}</p>
@@ -105,7 +115,6 @@ export default function Home() {
             </>
           )}
         </div>
-        
       </div>
     </PageWrapper>
   );

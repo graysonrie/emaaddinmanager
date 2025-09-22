@@ -1,6 +1,5 @@
-
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5043";
 
 // Debug logging
 console.log("Environment variables:", {
@@ -10,6 +9,7 @@ console.log("Environment variables:", {
 });
 
 export const SERVER_ENDPOINTS = {
-  LOGIN: `${API_BASE_URL}/login`,
-  EXCHANGE_TOKEN: `${API_BASE_URL}/login/exchange-token`,
+  LOGIN: `${API_BASE_URL}/api/auth/login`,
+  USER_PROFILE: `${API_BASE_URL}/api/user/profile`,
+  DEBUG_TOKEN: `${API_BASE_URL}/api/debug-token`,
 };

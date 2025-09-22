@@ -1,19 +1,16 @@
 "use client";
 import { API_BASE_URL, SERVER_ENDPOINTS } from "@/lib/server";
 import { useEffect, useState } from "react";
-import {
-  start,
-  cancel,
-  onUrl,
-  onInvalidUrl,
-} from "@fabianlars/tauri-plugin-oauth";
+import { start, cancel, onUrl } from "@fabianlars/tauri-plugin-oauth";
 import { Button } from "@/components/ui/button";
-import getTauriCommands from "@/lib/commands/getTauriCommands";
 import { redirect, useRouter } from "next/navigation";
+import useConfig from "@/lib/persistence/config/useConfig";
 
 export default function LoginPage() {
   const router = useRouter();
   const [port, setPort] = useState(7000);
+
+  const { update } = useConfig();
   const startOAuthServer = async () => {
     try {
       const port = await start({ ports: [7000] });
@@ -25,10 +22,9 @@ export default function LoginPage() {
         console.log("Received OAuth URL:", url);
 
         try {
-          // Extract authorization code from URL
+          // Extract token directly from URL (new approach)
           const urlObj = new URL(url);
-          const code = urlObj.searchParams.get("code");
-          const state = urlObj.searchParams.get("state");
+          const token = urlObj.searchParams.get("token");
           const error = urlObj.searchParams.get("error");
 
           if (error) {
@@ -36,36 +32,40 @@ export default function LoginPage() {
             return;
           }
 
-          if (code && state) {
-            // Exchange code for tokens
-            const response = await fetch(SERVER_ENDPOINTS.EXCHANGE_TOKEN, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ code, port, state }),
-            });
+          if (token) {
+            console.log("Received token:", token);
 
-            if (response.ok) {
-              const tokenData = await response.json();
+            // Store the token directly (no exchange needed)
+            await update("accessToken", token);
 
-              console.log("tokenData", tokenData);
+            // Optional: You might want to get user info with this token
+            try {
+              const userInfoResponse = await fetch(`${API_BASE_URL}/userinfo`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              });
 
-              // Store tokens securely in your key-value store
-              const { kvStoreSet } = getTauriCommands();
-              await kvStoreSet("accessToken", tokenData.access_token);
-              await kvStoreSet("refreshToken", tokenData.refresh_token);
-
-              console.log("Authentication successful");
-              // Redirect to dashboard or next step
-              router.replace("/dashboard");
-            } else {
-              console.error("Failed to exchange code for tokens");
+              if (userInfoResponse.ok) {
+                const userInfo = await userInfoResponse.json();
+                console.log("User info:", userInfo);
+                // Store additional user info if needed
+                await update("userInfo", userInfo);
+              }
+            } catch (userInfoError) {
+              console.warn("Could not fetch user info:", userInfoError);
             }
+
+            console.log("Authentication successful");
+            // Redirect to dashboard or next step
+            router.replace("/dashboard");
           } else {
-            console.error("No code or state found");
-            console.log("Code:", code);
-            console.log("State:", state);
+            console.error("No token found in URL");
+            console.log(
+              "Available URL params:",
+              Array.from(urlObj.searchParams.entries())
+            );
           }
         } catch (error) {
           console.error("Error processing OAuth callback:", error);
@@ -75,6 +75,7 @@ export default function LoginPage() {
       console.error("Error starting OAuth server:", error);
     }
   };
+
   // Don't forget to stop the server when you're done
   async function stopOAuthServer() {
     try {
@@ -84,13 +85,15 @@ export default function LoginPage() {
       console.error("Error stopping OAuth server:", error);
     }
   }
+
   async function openLoginWindow() {
-    const loginUrl = `${SERVER_ENDPOINTS.LOGIN}?tauri_port=${port}`;
+    // Updated to use the new login endpoint
+    const loginUrl = `${API_BASE_URL}/api/auth/login`;
     window.open(loginUrl, "_blank");
   }
+
   useEffect(() => {
     const start = async () => {
-      // await stopOAuthServer();
       await startOAuthServer();
     };
     start();
@@ -98,6 +101,7 @@ export default function LoginPage() {
       stopOAuthServer();
     };
   }, []);
+
   return (
     <div>
       <Button onClick={openLoginWindow}>log in</Button>
