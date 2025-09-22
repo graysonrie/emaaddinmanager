@@ -22,9 +22,8 @@ export default function LoginPage() {
         console.log("Received OAuth URL:", url);
 
         try {
-          // Extract token directly from URL (new approach)
           const urlObj = new URL(url);
-          const token = urlObj.searchParams.get("token");
+          const success = urlObj.searchParams.get("success");
           const error = urlObj.searchParams.get("error");
 
           if (error) {
@@ -32,26 +31,32 @@ export default function LoginPage() {
             return;
           }
 
-          if (token) {
-            console.log("Received token:", token);
+          if (success === "true") {
+            console.log("OAuth authentication successful");
 
-            // Store the token directly (no exchange needed)
-            await update("accessToken", token);
-
-            // Optional: You might want to get user info with this token
+            // Test if we can make authenticated requests with cookies
             try {
-              const userInfoResponse = await fetch(`${API_BASE_URL}/userinfo`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              });
+              const userInfoResponse = await fetch(
+                `${API_BASE_URL}/api/user/profile`,
+                {
+                  method: "GET",
+                  credentials: "include",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
 
               if (userInfoResponse.ok) {
                 const userInfo = await userInfoResponse.json();
                 console.log("User info:", userInfo);
-                // Store additional user info if needed
+                // Store user info for local use
                 await update("userInfo", userInfo);
+              } else {
+                console.warn(
+                  "Could not fetch user info:",
+                  userInfoResponse.status
+                );
               }
             } catch (userInfoError) {
               console.warn("Could not fetch user info:", userInfoError);
@@ -61,7 +66,7 @@ export default function LoginPage() {
             // Redirect to dashboard or next step
             router.replace("/dashboard");
           } else {
-            console.error("No token found in URL");
+            console.error("OAuth authentication failed");
             console.log(
               "Available URL params:",
               Array.from(urlObj.searchParams.entries())

@@ -67,10 +67,10 @@ export default function useServerRequests() {
       const response = await fetch(SERVER_ENDPOINTS[endpoint], {
         method,
         headers: {
-          Credentials: "include",
           Accept: "application/json",
           ...(body ? { "Content-Type": "application/json" } : {}),
         },
+        credentials: "include",
         body: body ? JSON.stringify(body) : undefined,
       });
 
