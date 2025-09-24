@@ -5,10 +5,13 @@ import { start, cancel, onUrl } from "@fabianlars/tauri-plugin-oauth";
 import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
 import useConfig from "@/lib/persistence/config/useConfig";
+import { Icon } from "@iconify/react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
   const [port, setPort] = useState(7000);
+  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
 
   const { update } = useConfig();
   const startOAuthServer = async () => {
@@ -33,6 +36,12 @@ export default function LoginPage() {
 
           if (success === "true") {
             console.log("OAuth authentication successful");
+
+            // Close the popup window if it exists
+            if (popupWindow && !popupWindow.closed) {
+              popupWindow.close();
+              setPopupWindow(null);
+            }
 
             // Test if we can make authenticated requests with cookies
             try {
@@ -87,14 +96,20 @@ export default function LoginPage() {
       await cancel(port);
       console.log("OAuth server stopped");
     } catch (error) {
-      console.error("Error stopping OAuth server:", error);
+      console.warn("Error stopping OAuth server:", error);
     }
   }
 
   async function openLoginWindow() {
     // Updated to use the new login endpoint
     const loginUrl = `${API_BASE_URL}/api/auth/login`;
-    window.open(loginUrl, "_blank");
+    // Open window with specific dimensions and store reference
+    const popup = window.open(
+      loginUrl,
+      "_blank",
+      "width=800,height=600,scrollbars=yes,resizable=yes"
+    );
+    setPopupWindow(popup);
   }
 
   useEffect(() => {
@@ -104,12 +119,34 @@ export default function LoginPage() {
     start();
     return () => {
       stopOAuthServer();
+      // Close popup window if it's still open
+      if (popupWindow && !popupWindow.closed) {
+        popupWindow.close();
+      }
     };
-  }, []);
+  }, [popupWindow]);
 
   return (
-    <div>
-      <Button onClick={openLoginWindow}>log in</Button>
+    <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
+      <div className="flex flex-col gap-2 items-center justify-center">
+        <Image
+          src="/images/emavector.svg"
+          alt="Logo"
+          width={200}
+          height={200}
+        />
+        <p className="text-2xl font-bold text-primary font-sans">
+          Addin Launcher
+        </p>
+      </div>
+      <Button
+        onClick={openLoginWindow}
+        className="flex items-center gap-2 cursor-pointer text-primary"
+        variant="outline"
+      >
+        <Icon icon="mdi:microsoft" />
+        <p className="text-md font-sans">Log in with Microsoft</p>
+      </Button>
     </div>
   );
 }

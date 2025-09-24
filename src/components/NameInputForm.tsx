@@ -8,6 +8,7 @@ import { Mail, User } from "lucide-react";
 interface NameInputFormProps {
   initialName?: string;
   onSubmit: (name: string) => Promise<void>;
+  onChange?: (name: string) => void;
   submitLabel?: string;
   disabled?: boolean;
   //** If false, the label and iconwill not be shown */
@@ -17,6 +18,7 @@ interface NameInputFormProps {
 export function NameInputForm({
   initialName = "",
   onSubmit,
+  onChange,
   submitLabel = "Submit",
   disabled = false,
   showLabel = true,
@@ -38,6 +40,7 @@ export function NameInputForm({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     setError(validateName(e.target.value));
+    onChange?.(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -19,15 +19,14 @@ import PongGame from "./components/pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import AboutAddinModal from "./components/about-addin-modal";
 import { Button } from "@/components/ui/button";
-import useServerRequests from "@/lib/server/useServerRequests";
+import { serverRequest } from "@/lib/server/server-request";
 
 export default function Home() {
-  const { request } = useServerRequests();
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete, config } = useConfigInitialization();
   const { user, isLoading: isUserLoading } = useUserPermissions();
   const { isLoading: isLoadingAddins, allowedAddins } = useAddinPermissions({
-    userEmail: user?.userEmail ?? "",
+    userEmail: user?.email ?? "",
   });
   const { amIAnAdmin } = useAuthStore();
   const router = useRouter();
@@ -66,7 +65,7 @@ export default function Home() {
   }, [amIAnAdmin, setDescription]);
 
   // Show loading state while checking initialization or user
-  if (!isInitialized || isUserLoading) {
+  if (!isInitialized || isUserLoading || isLoadingAddins) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex items-center gap-2">
@@ -87,33 +86,23 @@ export default function Home() {
     <PageWrapper>
       <div className="flex flex-col gap-4 w-full h-full mx-auto thin-scrollbar items-center justify-center">
         <div className="flex flex-col gap-2 w-full h-full p-6">
-          {isLoadingAddins ? (
-            <div className="flex items-center justify-center h-full w-full flex-col gap-4">
-              <div className="flex flex-col gap-2 items-center justify-center">
-                <Loader2 className="w-10 h-10 animate-spin" />
-                <h2 className="font-sans">Loading your addins...</h2>
-              </div>
-              <PongGame />
+          <>
+            <Button
+              onClick={async () => {
+                const response = await serverRequest("USER_ME", "GET");
+                console.log(response);
+              }}
+            >
+              Test Request
+            </Button>
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-1">Your Addins</h2>
+              <p className="text-muted-foreground mb-4">{description}</p>
             </div>
-          ) : (
-            <>
-              <Button
-                onClick={async () => {
-                  const response = await request("USER_PROFILE", "GET");
-                  console.log(response);
-                }}
-              >
-                Test Request
-              </Button>
-              <div className="text-center">
-                <h2 className="text-2xl font-bold mb-1">Your Addins</h2>
-                <p className="text-muted-foreground mb-4">{description}</p>
-              </div>
-              <div className="flex flex-col gap-4 overflow-y-auto thin-scrollbar">
-                <AddinBadgesDisplay allowedAddins={allowedAddins} />
-              </div>
-            </>
-          )}
+            <div className="flex flex-col gap-4 overflow-y-auto thin-scrollbar">
+              <AddinBadgesDisplay allowedAddins={allowedAddins} />
+            </div>
+          </>
         </div>
       </div>
     </PageWrapper>

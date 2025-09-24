@@ -1,64 +1,68 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import { useRouter } from "next/navigation";
 import { EmailSetup } from "./EmailSetup";
-import { UserSettings } from "../settings/UserSettings";
 import { EMA_DOMAIN } from "@/types/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { NameSetup } from "./NameSetup";
 import { useSidebarStore } from "../components/sidebar/store";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { SUCCESS_DELAY } from "./constants";
-import { DisciplineSetup } from "./DisciplineSetup";
-import getTauriCommands from "@/lib/commands/getTauriCommands";
-import { UserModel } from "@/lib/models/user.model";
 import PermissionsSetup from "./PermissionsSetup";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
+import { useSetupStore } from "./hooks/useSetupStore";
+import useSetupSubmit from "./hooks/useSetupSubmit";
+import SetupError from "./SetupError";
 
 export default function SetupPage() {
-  const userEmail = useKeyValueSubscription<string>("userEmail");
-  const userName = useKeyValueSubscription<string>("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
-  const [step, setStep] = useState<"email" | "name" | "permissions" | "done">(
-    "email"
-  );
-  const { user, isLoading } = useUserPermissions();
+  const { user, isLoading, registerUser, registerAdminUser } =
+    useUserPermissions();
+  const userName = user?.name;
+  const disciplines = user?.disciplines;
   const router = useRouter();
+
+  const { step, setStep, error, setError } = useSetupStore();
+  const { submit } = useSetupSubmit();
 
   useEffect(() => {
     console.log("SetupPage: useEffect triggered with:", {
-      userEmail,
       userName,
       user,
     });
+    const hasDisciplines = disciplines && disciplines.length > 0;
 
-    if (!userEmail) {
-      console.log("SetupPage: No userEmail, setting step to email");
-      setIsOpen(false);
-      setStep("email");
-    } else if (!userName) {
+    if (!userName) {
       console.log("SetupPage: No userName, setting step to name");
       setIsOpen(false);
       setStep("name");
-    } else if (!user && !isLoading) {
+    } else if (!hasDisciplines) {
       console.log(
         "SetupPage: user is falsy (user doesn't exist), setting step to permissions"
       );
       setStep("permissions");
-    } else if (userEmail && userName && user) {
+    } else if (userName && hasDisciplines) {
       console.log("SetupPage: All conditions met, setting step to done");
       setStep("done");
     }
-  }, [userEmail, userName, user, setIsOpen, isLoading]);
+  }, [userName, user, setIsOpen, isLoading]);
 
   useEffect(() => {
     if (step === "done") {
-      setTimeout(() => {
-        router.replace("/dashboard");
-      }, SUCCESS_DELAY);
-      return;
+      const run = async () => {
+        // Try to register the user
+        try {
+          await submit();
+          setTimeout(() => {
+            router.replace("/dashboard");
+          }, SUCCESS_DELAY);
+        } catch (error) {
+          console.warn("SetupPage: Error submitting setup:", error);
+          setError("Could not register user. Please try again.");
+        }
+      };
+      run();
     }
   }, [step, router]);
 
@@ -69,32 +73,30 @@ export default function SetupPage() {
       className="flex h-full items-center justify-center p-8 pb-20 sm:p-20"
     >
       <AnimatePresence mode="wait">
-        {step === "email" && (
+        {error ? (
           <motion.div
-            key="email"
+            key="error"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -40 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
             className="w-full"
           >
-            <EmailSetup
-              onComplete={() => setStep("name")}
-              mustUseDomain={EMA_DOMAIN}
-            />
+            <SetupError />
           </motion.div>
-        )}
-        {step === "name" && (
-          <motion.div
-            key="name"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="w-full"
-          >
-            <NameSetup onComplete={() => setStep("permissions")} />
-          </motion.div>
+        ) : (
+          step === "name" && (
+            <motion.div
+              key="name"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.35, ease: "easeInOut" }}
+              className="w-full"
+            >
+              <NameSetup onComplete={() => setStep("permissions")} />
+            </motion.div>
+          )
         )}
         {step === "permissions" && (
           <motion.div

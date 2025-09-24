@@ -45,7 +45,7 @@ export default function DashboardLayout({
   // Real registry: S:\\BasesRevitAddinsRegistry
 
   useEffect(() => {
-    config.update("localAddinRegistryPath", "S:\\BasesRevitAddinsRegistry");
+    config.update("localAddinRegistryPath", "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry");
     console.log("Updating addin registry path in config");
 
     const handler = (e: KeyboardEvent) => {

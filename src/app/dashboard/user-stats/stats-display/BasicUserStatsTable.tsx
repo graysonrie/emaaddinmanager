@@ -25,7 +25,7 @@ interface UserFacingStats {
 }
 
 export default function BasicUserStatsTable() {
-  const { userStats, loading, error, refresh } = useUserStatsStore();
+  const { userStats, loading, error } = useUserStatsStore();
 
   const manageDialogStore = useManageDialogStore();
 
