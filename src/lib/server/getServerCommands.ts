@@ -5,6 +5,8 @@ import {
 import * as Requests from "./user/requests";
 import { serverRequest } from "./server-request";
 import { SERVER_ENDPOINTS } from ".";
+import { AddinModel } from "../models/addin.model";
+import { CategoryModel } from "../models/category.model";
 
 interface ServerCommands {
   getUserClaims: () => Promise<object>;
@@ -22,6 +24,9 @@ interface ServerCommands {
   deleteUser: (request: Requests.DeleteUserRequestModel) => Promise<void>;
   getRole: () => Promise<UserRole>;
   getRoleFromEmail: (email: string) => Promise<UserRole>;
+
+  getAddins: () => Promise<AddinModel[]>;
+  getCategories: () => Promise<CategoryModel[]>;
 }
 
 export default function getServerCommands(): ServerCommands {
@@ -82,6 +87,14 @@ export default function getServerCommands(): ServerCommands {
     );
     return role as UserRole;
   };
+  const getAddins = async () => {
+    console.warn("getAddins not implemented");
+    return [];
+  };
+  const getCategories = async () => {
+    console.warn("getCategories not implemented");
+    return [];
+  };
   return {
     getUserClaims,
     getUsers,
@@ -92,5 +105,7 @@ export default function getServerCommands(): ServerCommands {
     deleteUser,
     getRole,
     getRoleFromEmail,
+    getAddins,
+    getCategories,
   };
 }

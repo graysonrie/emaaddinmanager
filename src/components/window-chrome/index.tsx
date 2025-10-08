@@ -4,23 +4,12 @@ import { Button } from "../ui/button";
 import { Minus, X, Square } from "lucide-react";
 import { AppLogo } from "./AppLogo";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import UserAvatar from "@/app/shared/UserAvatar";
+import useUserProfile from "@/lib/server/user/hooks/useUserProfile";
 
 export function WindowChrome() {
-  const userName = useKeyValueSubscription<string>("userName");
-  const userEmail = useKeyValueSubscription<string>("userEmail");
-
-  const userFirstName = useMemo(() => {
-    return userName?.split(" ")[0];
-  }, [userName]);
-
-  const userNameInitials = useMemo(() => {
-    return userName
-      ?.split(" ")
-      .map((name) => name[0])
-      .join("");
-  }, [userName]);
+  const { user, isLoading } = useUserProfile();
 
   const handleMinimize = () => {
     getCurrentWindow().minimize();
@@ -52,9 +41,7 @@ export function WindowChrome() {
         <AppLogo />
       </div>
 
-      {userName && userEmail && (
-        <UserAvatar userName={userName} userEmail={userEmail ?? ""} />
-      )}
+      {user && <UserAvatar userName={user.name} userEmail={user.email} />}
 
       <div className="flex items-center space-x-1">
         <Button

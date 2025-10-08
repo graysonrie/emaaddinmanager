@@ -4,6 +4,7 @@ import useConfig from "../../persistence/config/useConfig";
 import { AddinModel } from "../../models/addin.model";
 import { CategoryModel } from "../../models/category.model";
 import { getConfigValue } from "@/lib/persistence/config/getConfigValue";
+import getServerCommands from "@/lib/server/getServerCommands";
 
 interface AddinRegistryStore {
   addins: AddinModel[];
@@ -35,7 +36,7 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
   localRegistryPath: getConfigValue("localAddinRegistryPath"),
 
   loadRegistryData: async () => {
-    const { getAddins, getCategories } = useTauriCommands();
+    const { getAddins, getCategories } = getServerCommands();
     const path = await getConfigValue("localAddinRegistryPath");
 
     if (!path) {
@@ -51,11 +52,11 @@ export const useAddinRegistryStore = create<AddinRegistryStore>((set, get) => ({
 
     try {
       // Load addins
-      const addins = await getAddins(path);
+      const addins = await getAddins();
       console.log("Addins loaded from store:", addins.length);
 
       // Load categories
-      const categories = await getCategories(path);
+      const categories = await getCategories();
 
       set({ addins, categories });
     } catch (error) {
