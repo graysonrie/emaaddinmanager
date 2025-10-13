@@ -7,8 +7,13 @@ import { serverRequest } from "./server-request";
 import { SERVER_ENDPOINTS } from ".";
 import { AddinModel } from "../models/addin.model";
 import { CategoryModel } from "../models/category.model";
+import { AddinResponseModel } from "./addins/responses/addin-response.model";
+import { PublishAddinRequest } from "./addins/requests/publish-addin-request.model";
+import { DownloadAddinRequest } from "./addins/requests/download-addin-request";
+import { DeleteAddinRequest } from "./addins/requests/delete-addin-request";
 
 interface ServerCommands {
+  // Routes from UserController
   getUserClaims: () => Promise<object>;
   getUsers: () => Promise<UserResponseModel[]>;
   getSelf: () => Promise<UserResponseModel>;
@@ -25,8 +30,14 @@ interface ServerCommands {
   getRole: () => Promise<UserRole>;
   getRoleFromEmail: (email: string) => Promise<UserRole>;
 
-  getAddins: () => Promise<AddinModel[]>;
-  getCategories: () => Promise<CategoryModel[]>;
+  // Routes from AddinsController
+  getAllAddins: () => Promise<AddinResponseModel[]>;
+  getMyAddins: () => Promise<AddinResponseModel[]>;
+
+  // Routes from AddinsPublishController
+  publishAddin: (request: PublishAddinRequest) => Promise<AddinResponseModel>;
+  downloadAddin: (request: DownloadAddinRequest) => Promise<void>;
+  deleteAddin: (request: DeleteAddinRequest) => Promise<void>;
 }
 
 export default function getServerCommands(): ServerCommands {
@@ -87,14 +98,7 @@ export default function getServerCommands(): ServerCommands {
     );
     return role as UserRole;
   };
-  const getAddins = async () => {
-    console.warn("getAddins not implemented");
-    return [];
-  };
-  const getCategories = async () => {
-    console.warn("getCategories not implemented");
-    return [];
-  };
+
   return {
     getUserClaims,
     getUsers,
@@ -105,7 +109,5 @@ export default function getServerCommands(): ServerCommands {
     deleteUser,
     getRole,
     getRoleFromEmail,
-    getAddins,
-    getCategories,
   };
 }
