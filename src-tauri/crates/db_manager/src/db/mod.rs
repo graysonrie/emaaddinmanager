@@ -12,6 +12,7 @@ use crate::db::utils::generate_table_lenient;
 pub mod user_addins_table;
 pub mod user_stats_table;
 pub mod user_metadata_table;
+pub mod addin_issues_table;
 mod utils;
 
 pub async fn initialize(dir: &Path) {
