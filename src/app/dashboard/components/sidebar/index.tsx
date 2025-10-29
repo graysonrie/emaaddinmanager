@@ -18,7 +18,6 @@ import { useNotificationsStore } from "@/lib/notifications/useNotificationsStore
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
-import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdaterStore";
 
 interface SidebarButtonProps {
@@ -80,7 +79,6 @@ export default function Sidebar() {
     useAddinUpdaterStore();
   const authStore = useAuthStore();
   const [isAdmin, setIsAdmin] = useState(false);
-  const { reset } = useLocalAddinExporterStore();
 
   const hasUnreadNotifications =
     updateNotifications.length > 0 && !hasUserCheckedNotifications;
@@ -143,13 +141,11 @@ export default function Sidebar() {
       icon: <Upload />,
       label: "Publish",
       link: "/dashboard/publish",
-      onNavigate: reset,
     },
     {
       icon: <Wrench />,
       label: "Resources",
       link: "/dashboard/dev/resources",
-      onNavigate: reset,
     },
   ];
 
@@ -178,7 +174,6 @@ export default function Sidebar() {
               label={button.label}
               link={button.link}
               isActive={pathname === button.link}
-              onNavigate={button.onNavigate}
             />
           ))}
         </>

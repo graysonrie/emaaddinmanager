@@ -1,6 +1,6 @@
 "use client";
 import { API_BASE_URL, SERVER_ENDPOINTS } from "@/lib/server";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { start, cancel, onUrl } from "@fabianlars/tauri-plugin-oauth";
 import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
@@ -11,7 +11,9 @@ import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [port, setPort] = useState(7000);
-  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+
+  const popupWindowRef = useRef<Window | null>(null);
+  const firstOpen = useRef(true);
 
   const { update } = useConfig();
   const startOAuthServer = async () => {
@@ -37,16 +39,20 @@ export default function LoginPage() {
           if (success === "true") {
             console.log("OAuth authentication successful");
 
+            const popupWindow = popupWindowRef.current;
+
             // Close the popup window if it exists
             if (popupWindow && !popupWindow.closed) {
               popupWindow.close();
-              setPopupWindow(null);
+              popupWindowRef.current = null;
             }
 
             // Test if we can make authenticated requests with cookies
             try {
+              setError(undefined);
+              setShowRetry(false);
               const userInfoResponse = await fetch(
-                `${API_BASE_URL}/api/user/profile`,
+                `${API_BASE_URL}/api/user/me`,
                 {
                   method: "GET",
                   credentials: "include",
@@ -61,19 +67,24 @@ export default function LoginPage() {
                 console.log("User info:", userInfo);
                 // Store user info for local use
                 await update("userInfo", userInfo);
+
+                console.log("Authentication successful");
+                // Redirect to dashboard or next step
+                stopOAuthServer();
+                router.replace("/dashboard");
               } else {
                 console.warn(
                   "Could not fetch user info:",
                   userInfoResponse.status
                 );
+                setShowRetry(true);
+                setError("Error logging in");
               }
             } catch (userInfoError) {
               console.warn("Could not fetch user info:", userInfoError);
+              setShowRetry(true);
+              setError("Error logging in");
             }
-
-            console.log("Authentication successful");
-            // Redirect to dashboard or next step
-            router.replace("/dashboard");
           } else {
             console.error("OAuth authentication failed");
             console.log(
@@ -92,6 +103,13 @@ export default function LoginPage() {
 
   // Don't forget to stop the server when you're done
   async function stopOAuthServer() {
+    if (popupWindowRef.current) {
+      popupWindowRef.current.close();
+      popupWindowRef.current = null;
+      console.log("closed popup window");
+    } else {
+      console.log("Coundnt close popup cause it does not exist");
+    }
     try {
       await cancel(port);
       console.log("OAuth server stopped");
@@ -101,30 +119,31 @@ export default function LoginPage() {
   }
 
   async function openLoginWindow() {
-    // Updated to use the new login endpoint
-    const loginUrl = `${API_BASE_URL}/api/auth/login`;
-    // Open window with specific dimensions and store reference
-    const popup = window.open(
-      loginUrl,
-      "_blank",
-      "width=800,height=600,scrollbars=yes,resizable=yes"
-    );
-    setPopupWindow(popup);
+    if (!popupWindowRef.current) {
+      // Updated to use the new login endpoint
+      const loginUrl = `${API_BASE_URL}/api/auth/login`;
+      // Open window with specific dimensions and store reference
+      const popup = window.open(
+        loginUrl,
+        "_blank",
+        "width=800,height=600,scrollbars=yes,resizable=yes"
+      );
+      popupWindowRef.current = popup;
+    }
   }
 
+  const [showRetry, setShowRetry] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>(undefined);
   useEffect(() => {
-    const start = async () => {
-      await startOAuthServer();
-    };
-    start();
-    return () => {
-      stopOAuthServer();
-      // Close popup window if it's still open
-      if (popupWindow && !popupWindow.closed) {
-        popupWindow.close();
-      }
-    };
-  }, [popupWindow]);
+    if (firstOpen.current) {
+      const start = async () => {
+        await startOAuthServer();
+      };
+      start();
+      openLoginWindow();
+      firstOpen.current = false;
+    }
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center h-full w-full">
@@ -139,14 +158,16 @@ export default function LoginPage() {
           Addin Launcher
         </p>
       </div>
-      <Button
-        onClick={openLoginWindow}
-        className="flex items-center gap-2 cursor-pointer text-primary"
-        variant="outline"
-      >
-        <Icon icon="mdi:microsoft" />
-        <p className="text-md font-sans">Log in with Microsoft</p>
-      </Button>
+      {showRetry && (
+        <Button
+          onClick={openLoginWindow}
+          className="flex items-center gap-2 cursor-pointer text-primary"
+          variant="outline"
+        >
+          <Icon icon="mdi:microsoft" />
+          <p className="text-md font-sans">Retry</p>
+        </Button>
+      )}
     </div>
   );
 }

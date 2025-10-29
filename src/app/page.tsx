@@ -1,3 +1,5 @@
+/// Unimportant file for now since it just handles a redirect
+
 "use client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";

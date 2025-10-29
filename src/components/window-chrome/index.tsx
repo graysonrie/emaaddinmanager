@@ -6,11 +6,8 @@ import { AppLogo } from "./AppLogo";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { useEffect, useMemo } from "react";
 import UserAvatar from "@/app/shared/UserAvatar";
-import useUserProfile from "@/lib/server/user/hooks/useUserProfile";
 
 export function WindowChrome() {
-  const { user, isLoading } = useUserProfile();
-
   const handleMinimize = () => {
     getCurrentWindow().minimize();
   };
@@ -41,7 +38,7 @@ export function WindowChrome() {
         <AppLogo />
       </div>
 
-      {user && <UserAvatar userName={user.name} userEmail={user.email} />}
+      {/* {user && <UserAvatar userName={user.name} userEmail={user.email} />} */}
 
       <div className="flex items-center space-x-1">
         <Button
