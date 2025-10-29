@@ -2,13 +2,17 @@ use std::sync::Arc;
 
 use crate::services::{config::keys, local_db::service::LocalDbService};
 
-const SUPER_ADMIN_USER_EMAILS: [&str; 2] = ["grieger@emaengineer.com", "jbright@emaengineer.com"];
+const SUPER_ADMIN_USER_EMAILS: [&str; 3] = [
+    "grieger@emaengineer.com",
+    "jbright@emaengineer.com",
+    "skhadka@emaengineer.com",
+];
 
 const ADMIN_USER_EMAILS: [&str; 4] = [
     "grieger@emaengineer.com",
-    "skhadka@emaengineer.com",
     "jbright@emaengineer.com",
     "lcasey@emaengineer.com",
+    "skhadka@emaengineer.com",
 ];
 
 pub struct AdminService {
