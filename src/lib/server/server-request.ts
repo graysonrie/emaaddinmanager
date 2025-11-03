@@ -2,13 +2,14 @@
 import { SERVER_ENDPOINTS } from ".";
 
 export async function serverRequest<T>(
-  endpoint: keyof typeof SERVER_ENDPOINTS,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+  endpoint: string,
+  method: "GET" | "POST" | "PUT" | "DELETE",
   body?: any,
   retry = true
 ): Promise<T> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5043";
   try {
-    const url = SERVER_ENDPOINTS[endpoint];
+    const url = `${baseUrl}/${endpoint}`;
 
     const response = await fetch(url, {
       method,

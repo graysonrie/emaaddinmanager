@@ -5,7 +5,7 @@ import { useSidebarStore } from "./components/sidebar/store";
 
 import PageWrapper from "@/components/PageWrapper";
 import Link from "next/link";
-import useUserInfoChecker from "@/lib/server/user/hooks/useUserInfoChecker";
+import useUserInfoChecker from "@/lib/server/hooks/user/useUserInfoChecker";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();

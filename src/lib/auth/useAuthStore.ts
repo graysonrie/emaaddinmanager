@@ -1,45 +1,44 @@
 import { create } from "zustand";
 import getTauriCommands from "../commands/getTauriCommands";
-import getServerCommands from "../server/getServerCommands";
-
-type AdminStatus = "none" | "admin" | "super";
+import getServerCommands, { UserRole } from "../server/getServerCommands";
 
 interface Store {
-  amIAnAdmin: () => Promise<AdminStatus>;
-  isAdmin: (email: string) => Promise<AdminStatus>;
+  amIAnAdmin: () => Promise<UserRole>;
+  isAdmin: (email: string) => Promise<UserRole>;
 }
 
 export const useAuthStore = create<Store>(() => ({
   amIAnAdmin: async () => {
-    const { getRole } = getServerCommands();
+    const { getUserRole } = getServerCommands();
     try {
-      const role = await getRole();
-      if (role === "superAdmin") {
-        return "super";
+      const role = await getUserRole();
+      console.log("user role", role);
+      if (role === "SuperAdmin") {
+        return "SuperAdmin";
       }
-      if (role === "admin") {
-        return "admin";
+      if (role === "Admin") {
+        return "Admin";
       }
-      return "none";
+      return "User";
     } catch (e) {
       console.warn("err when checking amIAnAdmin:", e);
-      return "none";
+      return "User";
     }
   },
   isAdmin: async (email: string) => {
-    const { getRoleFromEmail } = getServerCommands();
+    const { getUserRoleFromEmail } = getServerCommands();
     try {
-      const role = await getRoleFromEmail(email);
-      if (role === "superAdmin") {
-        return "super";
+      const role = await getUserRoleFromEmail({ email });
+      if (role === "SuperAdmin") {
+        return "SuperAdmin";
       }
-      if (role === "admin") {
-        return "admin";
+      if (role === "Admin") {
+        return "Admin";
       }
-      return "none";
+      return "User";
     } catch (e) {
       console.warn("err when checking isAdmin:", e);
-      return "none";
+      return "User";
     }
   },
 }));

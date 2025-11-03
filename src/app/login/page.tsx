@@ -11,6 +11,7 @@ import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [port, setPort] = useState(7000);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const popupWindowRef = useRef<Window | null>(null);
   const firstOpen = useRef(true);
@@ -134,14 +135,50 @@ export default function LoginPage() {
 
   const [showRetry, setShowRetry] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
+
+  // Check if user is already authenticated before opening login window
+  const checkAuthentication = async () => {
+    try {
+      const userInfoResponse = await fetch(`${API_BASE_URL}/api/user/me`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (userInfoResponse.ok) {
+        const userInfo = await userInfoResponse.json();
+        console.log("User already authenticated:", userInfo);
+        // Store user info for local use
+        await update("userInfo", userInfo);
+        // Redirect to dashboard immediately without opening login window
+        router.replace("/dashboard");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log("User not authenticated, will show login window");
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (firstOpen.current) {
-      const start = async () => {
-        await startOAuthServer();
+      const initialize = async () => {
+        setIsCheckingAuth(true);
+        const isAuthenticated = await checkAuthentication();
+
+        if (!isAuthenticated) {
+          // Only start OAuth server and open login window if not authenticated
+          await startOAuthServer();
+          openLoginWindow();
+        }
+
+        setIsCheckingAuth(false);
+        firstOpen.current = false;
       };
-      start();
-      openLoginWindow();
-      firstOpen.current = false;
+      initialize();
     }
   }, []);
 

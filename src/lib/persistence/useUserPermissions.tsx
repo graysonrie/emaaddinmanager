@@ -7,7 +7,7 @@ import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
 import {
   UserResponseModel,
   UserRole,
-} from "../server/user/responses/user-response.model";
+} from "../server/hooks/user/responses/user-response.model";
 import getServerCommands from "../server/getServerCommands";
 
 export default function useUserPermissions() {

@@ -87,7 +87,7 @@ export default function Sidebar() {
   useEffect(() => {
     const checkAdminStatus = async () => {
       const adminResult = await authStore.amIAnAdmin();
-      if (adminResult == "admin" || adminResult == "super") {
+      if (adminResult == "Admin" || adminResult == "SuperAdmin") {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
