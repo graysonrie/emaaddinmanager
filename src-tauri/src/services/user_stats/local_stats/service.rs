@@ -33,6 +33,7 @@ impl LocalUserStatsService {
         let table = self.stats_db.user_stats_table();
         table.get_all_user_stats().await.map_err(|e| e.to_string())
     }
+    
 
     /// Refreshes the user stats for the user that is currently using the app
     ///
