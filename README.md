@@ -12,10 +12,13 @@ Todo:
 
 water bucket release
 
-
 ### notes for addin creator:
 
 new project --> enter project name -->
 
 button to create new pushbutton -->
 select icon
+
+# for a web migration:
+
+All the stuff that locally accesses DB or files at a shared place goes on web server. Local access stuff stays.

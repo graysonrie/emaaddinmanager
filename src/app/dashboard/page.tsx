@@ -19,7 +19,6 @@ import PongGame from "./components/pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import AboutAddinModal from "./components/about-addin-modal";
 
-
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete, config } = useConfigInitialization();
@@ -83,7 +82,7 @@ export default function Home() {
   // Show main app content
   return (
     <PageWrapper>
-      <div className="flex flex-col gap-4 w-full h-full mx-auto thin-scrollbar items-center justify-center">
+      <div className="flex flex-col font-sans gap-4 w-full h-full mx-auto thin-scrollbar items-center justify-center">
         <div className="flex flex-col gap-2 w-full h-full p-6">
           {isLoadingAddins ? (
             <div className="flex items-center justify-center h-full w-full flex-col gap-4">
@@ -105,7 +104,6 @@ export default function Home() {
             </>
           )}
         </div>
-        
       </div>
     </PageWrapper>
   );
