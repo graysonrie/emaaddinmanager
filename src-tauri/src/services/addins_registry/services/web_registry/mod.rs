@@ -1,9 +1,8 @@
 use super::*;
 
-use crate::services::{
-    addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
-    admin::addin_exporter::models::category_model::CategoryModel,
-};
+use web_server_ver::constants::Fut;
+use web_server_ver::services::addins_registry::*;
+use web_server_ver::services::admin::addin_exporter::*;
 pub struct WebAddinsRegistryService {}
 
 impl AddinsRegistry for WebAddinsRegistryService {

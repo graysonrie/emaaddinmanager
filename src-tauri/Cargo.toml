@@ -44,6 +44,7 @@ rayon = "1.7"
 tauri-plugin-process = "2"
 db_manager = { path = "./crates/db_manager" }
 revit_check = { path = "./crates/revit_check" }
+web_server_ver = { path = "./crates/web_server_ver" }
 
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]

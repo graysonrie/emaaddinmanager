@@ -1,14 +1,10 @@
 use std::sync::Arc;
 
-use crate::services::{
-    addins_registry::{
-        models::{addin_model::AddinModel, install_request_model::InstallAddinRequestModel},
-        services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
-    },
-    admin::addin_exporter::models::category_model::CategoryModel,
-};
+use crate::services::addins_registry::services::local_registry::LocalAddinsRegistryService;
 use futures::stream::{FuturesUnordered, StreamExt};
 use tauri::{AppHandle, Emitter, State};
+use web_server_ver::services::addins_registry::*;
+use web_server_ver::services::admin::addin_exporter::*;
 
 #[tauri::command]
 pub async fn get_addins(

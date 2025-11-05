@@ -1,21 +1,19 @@
 use std::{fs, path::Path, sync::Arc};
 
-use super::*;
 use log::{error, info};
 mod helpers;
 use helpers::*;
 
 use crate::{
-    constants::Fut,
     models::kv_store_value::KvStoreValue,
     services::{
-        addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
-        admin::addin_exporter::models::category_model::CategoryModel,
-        config::keys::LOCAL_ADDIN_REGISTRY_PATH,
-        local_addins::service::LocalAddinsService,
+        config::keys::LOCAL_ADDIN_REGISTRY_PATH, local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
     },
 };
+use web_server_ver::constants::Fut;
+use web_server_ver::services::addins_registry::*;
+use web_server_ver::services::admin::addin_exporter::*;
 
 pub struct LocalAddinsRegistryService {
     registry_location: KvStoreValue<String>,
@@ -78,7 +76,7 @@ impl AddinsRegistry for LocalAddinsRegistryService {
         &self,
         addin: AddinModel,
         for_revit_versions: Vec<String>,
-    ) -> Fut<Result<(), super::InstallAddinError>> {
+    ) -> Fut<Result<(), InstallAddinError>> {
         Box::pin(async move {
             self.local_addins_service
                 .install_addin(&addin, &for_revit_versions)
