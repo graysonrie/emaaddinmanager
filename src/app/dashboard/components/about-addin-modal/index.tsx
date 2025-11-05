@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Download,
   FileWarning,
+  Hammer,
   Loader,
   Loader2,
   XCircle,
@@ -22,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { useEffect, useState } from "react";
-import { useReportAddinErrorModalStore } from "./report-error/report-error-modal-store";
+import { useEnableAllAddinModalStore } from "./enable-all/enable-all-modal-store";
 
 export default function AboutAddinModal() {
   const {
@@ -34,7 +35,7 @@ export default function AboutAddinModal() {
     hasFullyLoaded,
   } = useAboutAddinModalStore();
 
-  const { setIsOpen: setErrorIsOpen } = useReportAddinErrorModalStore();
+  const { setIsOpen: setEnableAllIsOpen } = useEnableAllAddinModalStore();
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
@@ -52,8 +53,10 @@ export default function AboutAddinModal() {
   };
 
   const bugReportClicked = () => {
-    setIsOpen(false);
-    setErrorIsOpen(true);
+    if (addinModel && permissionModel) {
+      setIsOpen(false);
+      setEnableAllIsOpen(true, addinModel, permissionModel);
+    }
   };
 
   const getIsCurrentlyInstalled = () => {
@@ -147,13 +150,15 @@ export default function AboutAddinModal() {
               </div>
             )}
 
-            {/* <div
-              className="flex items-center gap-2 justify-center text-sm text-muted-foreground hover:underline cursor-pointer"
-              onClick={bugReportClicked}
-            >
-              <Bug className="w-4 h-4 shrink-0" />
-              <p>Report a bug</p>
-            </div> */}
+            {isAdmin && (
+              <div
+                className="flex items-center gap-2 justify-center text-sm text-blue-500 hover:underline cursor-pointer"
+                onClick={bugReportClicked}
+              >
+                <Hammer className="w-4 h-4 shrink-0 text-blue-500" />
+                <p>Manage</p>
+              </div>
+            )}
           </>
         )}
       </DialogContent>

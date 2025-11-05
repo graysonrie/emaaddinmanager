@@ -8,6 +8,7 @@ import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissio
 import { AddinPermissionModel } from "@/lib/addins/addin-management/types";
 import AboutAddinModal from "../about-addin-modal";
 import { useAboutAddinModalStore } from "../about-addin-modal/store";
+import EnableAllModal from "../about-addin-modal/enable-all";
 
 interface Props {
   allowedAddins: AddinPermissionModel[];
@@ -45,6 +46,7 @@ export default function AddinBadgesDisplay({ allowedAddins }: Props) {
       </div>
 
       <AboutAddinModal />
+      <EnableAllModal />
     </div>
   );
 }
