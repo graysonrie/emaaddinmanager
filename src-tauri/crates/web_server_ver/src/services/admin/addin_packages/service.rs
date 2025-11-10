@@ -1,31 +1,41 @@
+use rocket::http::ContentType;
 use serde_json;
 use std::{
-    fs::{self},
+    fs::{self, File},
     os::windows::process::CommandExt,
     path::{Path, PathBuf},
     sync::Arc,
 };
 
-use crate::services::{
-    admin::addin_packages::models::{AddinPackageInfoModel, CreateAddinPackageRequestModel},
-    app_save::service::AppSaveService,
-    config::keys,
-    local_db::service::LocalDbService,
+use crate::{
+    models::FileContentType,
+    services::{
+        addins_registry::AddinModel,
+        admin::addin_packages::models::{AddinPackageInfoModel, CreateAddinPackageRequestModel},
+        app_save::service::AppSaveService,
+        config::service::ConfigService,
+        db::service::AppDbService,
+    },
 };
 
-const CREATE_NO_WINDOW: u32 = 0x08000000;
 pub const JSON_FILE_NAME: &str = "info.json";
 
 pub struct AddinPackagesService {
     app_save_service: Arc<AppSaveService>,
-    local_db: Arc<LocalDbService>,
+    local_db: Arc<AppDbService>,
+    config: Arc<ConfigService>,
 }
 
 impl AddinPackagesService {
-    pub fn new(local_db: Arc<LocalDbService>, app_save_service: Arc<AppSaveService>) -> Self {
+    pub fn new(
+        local_db: Arc<AppDbService>,
+        app_save_service: Arc<AppSaveService>,
+        config: Arc<ConfigService>,
+    ) -> Self {
         Self {
             local_db,
             app_save_service,
+            config,
         }
     }
 
@@ -144,14 +154,14 @@ impl AddinPackagesService {
     }
     /// The absolute path to where the addin packages are stored
     async fn get_addin_packages_path(&self) -> Result<PathBuf, String> {
-        let registry_path_str = &keys::get_addins_registry_path(self.local_db.clone()).await?;
+        let registry_path_str = self.config.get_addins_registry_path();
         let registry_path = Path::new(registry_path_str);
         Ok(Path::join(registry_path, "AddinPackages"))
     }
 
     /// Get the addins registry path
     async fn get_addins_registry_path(&self) -> Result<PathBuf, String> {
-        let registry_path_str = keys::get_addins_registry_path(self.local_db.clone()).await?;
+        let registry_path_str = self.config.get_addins_registry_path();
         Ok(PathBuf::from(registry_path_str))
     }
 
@@ -181,10 +191,10 @@ impl AddinPackagesService {
         Ok(None)
     }
 
-    pub async fn load_image_data_for_package(
+    pub async fn get_image_bytes_for_package(
         &self,
         package: &AddinPackageInfoModel,
-    ) -> Result<(Vec<u8>, String), String> {
+    ) -> Result<(Vec<u8>, FileContentType), String> {
         let packages_path = self.get_addin_packages_path().await?;
 
         let addin_package_dir = packages_path.join(&package.display_name);
@@ -192,71 +202,35 @@ impl AddinPackagesService {
 
         // Determine MIME type based on file extension
         let mime_type = match image_path.extension().and_then(|ext| ext.to_str()) {
-            Some("jpg") | Some("jpeg") => "image/jpeg",
-            Some("png") => "image/png",
+            Some("jpg") | Some("jpeg") => FileContentType::Jpeg,
+            Some("png") => FileContentType::Png,
             _ => {
-                return Err("Unsupported image format. Only JPEG and PNG are supported.".to_string())
+                return Err(
+                    "Unsupported image format. Only JPEG and PNG are supported.".to_string()
+                );
             }
         };
 
         let image_data = fs::read(image_path).map_err(|e| e.to_string())?;
-        Ok((image_data, mime_type.to_string()))
+        Ok((image_data, mime_type))
     }
 
-    pub async fn open_help_file_for_package(
+    pub async fn get_help_file_bytes(
         &self,
         package: &AddinPackageInfoModel,
-    ) -> Result<(), String> {
+    ) -> Result<Vec<u8>, String> {
         // Check if package has a help file
         let help_file_path = match &package.relative_path_to_help_file {
             Some(relative_path) => relative_path,
             None => return Err("No help file specified for this package".to_string()),
         };
 
-        // Get the app data directory path
-        let appdata_path = self.app_save_service.get_save_path();
-
-        // Create the help files directory in app data
-        let help_files_dir = appdata_path.join("HelpFiles");
-        std::fs::create_dir_all(&help_files_dir)
-            .map_err(|e| format!("Failed to create help files directory: {}", e))?;
-
         // Construct the source path from the AddinPackages directory
         let packages_path = self.get_addin_packages_path().await?;
         let package_dir = packages_path.join(&package.display_name);
         let source_path = package_dir.join(help_file_path);
 
-        // Check if source file exists
-        if !source_path.exists() {
-            return Err(format!("Help file not found at: {}", source_path.display()));
-        }
-
-        // Create destination path in app data
-        let dest_filename = format!(
-            "{}_{}",
-            package.display_name.replace(" ", "_"),
-            help_file_path
-        );
-        let dest_path = help_files_dir.join(dest_filename);
-
-        // Copy the file to app data directory
-        std::fs::copy(&source_path, &dest_path)
-            .map_err(|e| format!("Failed to copy help file: {}", e))?;
-
-        // Open the file with the default application (usually Microsoft Word for .docx files)
-        // Use 'cmd /c start' to leverage Windows file associations
-        let status = std::process::Command::new("cmd")
-            .creation_flags(CREATE_NO_WINDOW)
-            .args(["/c", "start", "", &dest_path.to_string_lossy()])
-            .status()
-            .map_err(|e| format!("Failed to open file: {}", e))?;
-
-        if !status.success() {
-            return Err(
-                "Failed to open file. Please ensure you have Microsoft Word installed.".to_string(),
-            );
-        }
-
-        Ok(())
+        let bytes = fs::read(source_path).map_err(|e| e.to_string())?;
+        Ok(bytes)
     }
 }

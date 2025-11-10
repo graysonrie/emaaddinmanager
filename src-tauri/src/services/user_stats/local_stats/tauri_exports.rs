@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
 use tauri::State;
+use web_server_ver::services::user_stats::routes::{
+    CreateUserStatsRequestModel, DoesUserExistRequest,
+};
 
 use crate::services::{
     config::keys,
     local_db::service::LocalDbService,
+    server_request_context::ServerRequestContext,
     user_stats::{models::UserStatsModel, *},
 };
 
@@ -14,24 +18,16 @@ use crate::services::{
 /// Returns the user stats of the created user
 #[tauri::command]
 pub async fn create_user_stats(
-    user_stats_service: State<'_, Arc<LocalUserStatsService>>,
-    local_db_service: State<'_, Arc<LocalDbService>>,
+    request: CreateUserStatsRequestModel,
+    server: State<'_, ServerRequestContext>,
 ) -> Result<UserStatsModel, String> {
-    let user_email = keys::get_user_email(local_db_service.inner().clone()).await?;
-    let user_name = keys::get_user_name(local_db_service.inner().clone()).await?;
-    let user_stats_table = user_stats_service.stats_db.user_stats_table();
-    let user_stats = user_stats_table
-        .create_user(user_email, user_name)
-        .await
-        .map_err(|e| e.to_string())?;
-    let user_stats = UserStatsModel::from(user_stats);
-    Ok(user_stats)
+    server.request(request.into()).await
 }
 
 #[tauri::command]
 pub async fn does_user_exist(
-    user_stats_service: State<'_, Arc<LocalUserStatsService>>,
-    user_email: String,
+    request: DoesUserExistRequest,
+    server: State<'_, ServerRequestContext>,
 ) -> Result<bool, String> {
     user_stats_service.does_user_exist(user_email).await
 }

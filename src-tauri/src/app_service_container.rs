@@ -5,17 +5,10 @@ use tauri::{AppHandle, Manager};
 use crate::{
     constants::{ADDINS_REGISTRY_PATH, TEST_ADDINS_REGISTRY_PATH},
     services::{
-        addin_updater::service::AddinUpdaterService,
-        addins_registry::services::local_registry::LocalAddinsRegistryService,
-        admin::{
+        addin_updater::service::AddinUpdaterService, addins_registry::services::local_registry::LocalAddinsRegistryService, admin::{
             addin_packages::service::AddinPackagesService,
             addin_permissions::service::AddinPermissionsService, service::AdminService,
-        },
-        app_save::service::{AppSavePath, AppSaveService},
-        dev_resources::DevResourcesService,
-        local_addins::service::LocalAddinsService,
-        local_db::service::LocalDbService,
-        user_stats::{metadata::service::UserMetadataService, LocalUserStatsService},
+        }, app_save::service::{AppSavePath, AppSaveService}, dev_resources::DevResourcesService, local_addins::service::LocalAddinsService, local_db::service::LocalDbService, server_request_context::{self, ServerRequestContext}, user_stats::{LocalUserStatsService, metadata::service::UserMetadataService}
     },
 };
 
@@ -61,6 +54,8 @@ pub fn initialize_app(handle: &AppHandle) {
             Arc::clone(&user_stats_service),
         );
 
+        let server_request_context = ServerRequestContext::new();
+
         handle.manage(Arc::clone(&local_db_service));
         handle.manage(Arc::clone(&app_save_service));
         handle.manage(Arc::clone(&addins_registry_service));
@@ -71,6 +66,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&packages_service));
         handle.manage(Arc::clone(&dev_resources_service));
         handle.manage(Arc::clone(&user_metadata_service));
+        handle.manage(server_request_context);
     });
 }
 

@@ -5,9 +5,9 @@ use revitcli::{AddinFileInfo, ErrorList};
 use crate::services::admin::addin_exporter::models::dll_model::DllModel;
 use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
 
-pub struct AddinExporterService {}
+pub struct LocalAddinExporterService {}
 
-impl AddinExporterService {
+impl LocalAddinExporterService {
     /// Returns the contents of the .addin xml file for the project directory
     ///
     /// If the .addin file is not found, an error is returned

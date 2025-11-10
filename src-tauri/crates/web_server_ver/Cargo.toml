@@ -8,8 +8,6 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 quick-xml = { version = "0.31", features = ["serialize"] }
 log = "0.4"
-tauri = { version = "2.6.0", features = [] }
-tauri-plugin-log = "2"
 tokio = { version = "1.41.1", features = ["full"] }
 dirs = "5.0"
 futures = "0.3.31"
@@ -25,3 +23,6 @@ revitcli = "1.2.0"
 rayon = "1.7"
 db_manager = { path = "../db_manager" }
 revit_check = { path = "../revit_check" }
+print_err = { path = "../print_err" }
+rocket = { version = "0.5.0-rc.3", features = ["json"] }
+reqwest = { version = "0.11", features = ["json"] }

@@ -1,5 +1,6 @@
 use std::{future::Future, pin::Pin};
 
+pub const APP_NAME: &str = "EmaAddinManager";
 pub const TEST_ADDINS_REGISTRY_PATH: &str =
     "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry";
 // TODO: ensure changed back
