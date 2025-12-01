@@ -5,17 +5,10 @@ use tauri::{AppHandle, Manager};
 use crate::{
     constants::{ADDINS_REGISTRY_PATH, TEST_ADDINS_REGISTRY_PATH},
     services::{
-        addin_updater::service::AddinUpdaterService,
-        addins_registry::services::local_registry::LocalAddinsRegistryService,
-        admin::{
+        addin_updater::service::AddinUpdaterService, addins_registry::services::local_registry::LocalAddinsRegistryService, admin::{
             addin_packages::service::AddinPackagesService,
             addin_permissions::service::AddinPermissionsService, service::AdminService,
-        },
-        app_save::service::{AppSavePath, AppSaveService},
-        dev_resources::DevResourcesService,
-        local_addins::service::LocalAddinsService,
-        local_db::service::LocalDbService,
-        user_stats::{metadata::service::UserMetadataService, LocalUserStatsService},
+        }, app_save::service::{AppSavePath, AppSaveService}, dev_resources::DevResourcesService, local_addins::service::LocalAddinsService, local_db::service::LocalDbService, login_info::service::LoginInfoService, user_stats::{LocalUserStatsService, metadata::service::UserMetadataService}
     },
 };
 
@@ -26,7 +19,7 @@ pub fn initialize_app(handle: &AppHandle) {
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
 
         // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry
-        let stats_db_dir = Path::new(ADDINS_REGISTRY_PATH);
+        let stats_db_dir = Path::new(TEST_ADDINS_REGISTRY_PATH);
 
         let local_addins_service = initialize_local_addins_service(handle.clone());
 
@@ -61,6 +54,8 @@ pub fn initialize_app(handle: &AppHandle) {
             Arc::clone(&user_stats_service),
         );
 
+        let login_info_service = initialize_login_info_service(local_db_service.clone(), user_stats_service.clone());
+
         handle.manage(Arc::clone(&local_db_service));
         handle.manage(Arc::clone(&app_save_service));
         handle.manage(Arc::clone(&addins_registry_service));
@@ -71,6 +66,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&packages_service));
         handle.manage(Arc::clone(&dev_resources_service));
         handle.manage(Arc::clone(&user_metadata_service));
+        handle.manage(Arc::clone(&login_info_service));
     });
 }
 
@@ -146,4 +142,8 @@ fn initialize_user_metadata_service(
     user_stats: Arc<LocalUserStatsService>,
 ) -> Arc<UserMetadataService> {
     Arc::new(UserMetadataService::new(local_db, user_stats))
+}
+
+fn initialize_login_info_service(local_db:Arc<LocalDbService>, local_stats: Arc<LocalUserStatsService>) -> Arc<LoginInfoService> {
+    Arc::new(LoginInfoService::new(local_db, local_stats))
 }

@@ -8,3 +8,4 @@ pub mod local_addins;
 pub mod local_db;
 pub mod user_startup;
 pub mod user_stats;
+pub mod login_info;

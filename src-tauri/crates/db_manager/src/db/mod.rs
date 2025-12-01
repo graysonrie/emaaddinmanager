@@ -9,6 +9,7 @@ use sqlx::SqlitePool;
 
 use crate::db::utils::generate_table_lenient;
 
+pub mod login_table;
 pub mod user_addins_table;
 pub mod user_stats_table;
 pub mod user_metadata_table;
@@ -40,5 +41,6 @@ async fn create_tables(db: Arc<DatabaseConnection>) {
     generate_table_lenient(&db, user_stats_table::user::Entity).await;
     generate_table_lenient(&db, user_addins_table::user::Entity).await;
     generate_table_lenient(&db, user_metadata_table::user_metadata::Entity).await;
+    generate_table_lenient(&db, login_table::login_info::Entity).await;
     println!("Tables created");
 }
