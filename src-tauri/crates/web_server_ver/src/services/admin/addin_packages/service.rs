@@ -1,21 +1,16 @@
-use rocket::http::ContentType;
 use serde_json;
 use std::{
-    fs::{self, File},
-    os::windows::process::CommandExt,
+    fs::{self},
     path::{Path, PathBuf},
     sync::Arc,
 };
 
-use crate::{
-    models::FileContentType,
-    services::{
-        addins_registry::AddinModel,
-        admin::addin_packages::models::{AddinPackageInfoModel, CreateAddinPackageRequestModel},
-        app_save::service::AppSaveService,
-        config::service::ConfigService,
-        db::service::AppDbService,
-    },
+use crate::services::{
+    addins_registry::AddinModel,
+    admin::addin_packages::models::{AddinPackageInfoModel, CreateAddinPackageRequestModel},
+    app_save::service::AppSaveService,
+    config::service::ConfigService,
+    db::service::AppDbService,
 };
 
 pub const JSON_FILE_NAME: &str = "info.json";
@@ -191,34 +186,22 @@ impl AddinPackagesService {
         Ok(None)
     }
 
-    pub async fn get_image_bytes_for_package(
+    pub async fn get_image_file_path(
         &self,
         package: &AddinPackageInfoModel,
-    ) -> Result<(Vec<u8>, FileContentType), String> {
+    ) -> Result<PathBuf, String> {
         let packages_path = self.get_addin_packages_path().await?;
 
         let addin_package_dir = packages_path.join(&package.display_name);
         let image_path = addin_package_dir.join(&package.relative_path_to_image);
 
-        // Determine MIME type based on file extension
-        let mime_type = match image_path.extension().and_then(|ext| ext.to_str()) {
-            Some("jpg") | Some("jpeg") => FileContentType::Jpeg,
-            Some("png") => FileContentType::Png,
-            _ => {
-                return Err(
-                    "Unsupported image format. Only JPEG and PNG are supported.".to_string()
-                );
-            }
-        };
-
-        let image_data = fs::read(image_path).map_err(|e| e.to_string())?;
-        Ok((image_data, mime_type))
+        Ok(image_path)
     }
 
-    pub async fn get_help_file_bytes(
+    pub async fn get_help_file_path(
         &self,
         package: &AddinPackageInfoModel,
-    ) -> Result<Vec<u8>, String> {
+    ) -> Result<PathBuf, String> {
         // Check if package has a help file
         let help_file_path = match &package.relative_path_to_help_file {
             Some(relative_path) => relative_path,
@@ -230,7 +213,6 @@ impl AddinPackagesService {
         let package_dir = packages_path.join(&package.display_name);
         let source_path = package_dir.join(help_file_path);
 
-        let bytes = fs::read(source_path).map_err(|e| e.to_string())?;
-        Ok(bytes)
+        Ok(source_path)
     }
 }
