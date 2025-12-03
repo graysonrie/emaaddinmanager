@@ -54,10 +54,10 @@ export function DisciplineSetup({ onComplete }: DisciplineSetupProps) {
         <CardTitle>One more thing...</CardTitle>
       </CardHeader>
       <CardContent>
-          <DisciplinesSelectorForm
-            onSubmit={handleDisciplineSubmit}
-            submitLabel="Next"
-          />
+        <DisciplinesSelectorForm
+          onSubmit={handleDisciplineSubmit}
+          submitLabel="Next"
+        />
       </CardContent>
     </Card>
   );

@@ -23,7 +23,21 @@ interface EmailSetupProps {
 export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
   const [isComplete, setIsComplete] = useState(false);
   const { update } = useConfig();
-  const {changeUserStatsEmail} = getTauriCommands();
+  const { changeUserStatsEmail, loginVerifyPasswordForUser } =
+    getTauriCommands();
+
+  const handlePasswordVerify = async (
+    email: string,
+    password: string
+  ): Promise<boolean> => {
+    try {
+      const isValid = await loginVerifyPasswordForUser(email, password);
+      return isValid;
+    } catch (error) {
+      console.error("Password verification error:", error);
+      return false;
+    }
+  };
 
   const handleEmailSubmit = async (email: string) => {
     await update("userEmail", email);
@@ -55,15 +69,14 @@ export function EmailSetup({ onComplete, mustUseDomain }: EmailSetupProps) {
           <Blocks className="h-6 w-6 text-primary" />
         </div>
         <CardTitle>Welcome to the EMA Revit Addin Manager</CardTitle>
-        <CardDescription>
-          Please enter your work email address
-        </CardDescription>
+        <CardDescription>Please enter your work email address</CardDescription>
       </CardHeader>
       <CardContent>
         <EmailInputForm
           mustUseDomain={mustUseDomain}
           onSubmit={handleEmailSubmit}
           submitLabel="Next"
+          onPasswordVerify={handlePasswordVerify}
         />
       </CardContent>
     </Card>

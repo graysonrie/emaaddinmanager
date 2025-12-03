@@ -15,6 +15,8 @@ import AddinPermissionsList from "./addin-permissions-list";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import UnregisterForm from "./UnregisterForm";
+import SetTempPasswordForm from "./SetTempPasswordForm";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 export default function ManageDialog() {
   const {
@@ -24,11 +26,15 @@ export default function ManageDialog() {
     userEmail,
     setUnregisteringUser,
     unregisteringUser,
+    settingTempPassword,
+    setSettingTempPassword,
   } = useManageDialogStore();
 
   const [canModify, setCanModify] = useState(false);
   const [canUnregister, setCanUnregister] = useState(false);
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const { isAdmin, amIAnAdmin } = useAuthStore();
+  const { loginCheckIfPasswordIsSetForUser } = getTauriCommands();
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -45,12 +51,26 @@ export default function ManageDialog() {
       }
     };
     checkAdmin();
-  }, [isAdmin, userEmail]);
+  }, [isAdmin, userEmail, amIAnAdmin]);
+
+  useEffect(() => {
+    const checkPassword = async () => {
+      if (userEmail) {
+        const hasPasswordSet = await loginCheckIfPasswordIsSetForUser(
+          userEmail
+        );
+        setHasPassword(hasPasswordSet);
+      }
+    };
+    checkPassword();
+  }, [userEmail, loginCheckIfPasswordIsSetForUser]);
 
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
       {unregisteringUser ? (
         <UnregisterForm />
+      ) : settingTempPassword ? (
+        <SetTempPasswordForm />
       ) : (
         <DialogContent className="max-h-[80vh] flex flex-col thin-scrollbar">
           <DialogHeader>
@@ -84,7 +104,26 @@ export default function ManageDialog() {
               )}
             </div>
             {canUnregister && (
-              <div className="flex justify-center">
+              <div className="flex flex-col gap-2 items-center">
+                <span
+                  className={`font-sans text-sm ${
+                    hasPassword === false
+                      ? "text-muted-foreground cursor-not-allowed"
+                      : "text-blue-500 cursor-pointer hover:underline"
+                  }`}
+                  onClick={() => {
+                    if (hasPassword !== false) {
+                      setSettingTempPassword(userEmail);
+                    }
+                  }}
+                  title={
+                    hasPassword === false
+                      ? "User has no password set. Cannot set temporary password."
+                      : "Set temporary password for this user"
+                  }
+                >
+                  Set Temporary Password
+                </span>
                 <span
                   className="text-destructive cursor-pointer hover:underline font-sans text-sm"
                   onClick={() => setUnregisteringUser(userEmail)}

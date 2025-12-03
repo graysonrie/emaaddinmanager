@@ -5,11 +5,13 @@ import getTauriCommands from "../commands/getTauriCommands";
 import { useKeyValueSubscription } from "./useKeyValueSubscription";
 import { useConfigValue } from "./config/useConfigValue";
 import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
+import usePasswordCheck from "@/app/dashboard/setup/usePasswordCheck";
 
 export default function useUserPermissions() {
   // If the user is undefined, it means that they do not exist
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserModel | undefined>(undefined);
+  const { isPasswordSetForSelf } = usePasswordCheck();
   const userEmail = useConfigValue("userEmail");
   const userName = useConfigValue("userName");
 
@@ -43,6 +45,7 @@ export default function useUserPermissions() {
     }
 
     await addAllowedAddinPaths(user, [permission.relativePathToAddin]);
+
     return user;
   };
 

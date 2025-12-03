@@ -96,6 +96,14 @@ interface TauriCommands {
   updateUserAppVersionMetadata: () => Promise<void>;
   getUserMetadata: (userEmail: string) => Promise<UserMetadataModel>;
   getUserMetadataMany: (userEmails: string[]) => Promise<UserMetadataModel[]>;
+  loginCheckIfPasswordIsSetForSelf: () => Promise<boolean>;
+  loginCheckIfPasswordIsSetForUser: (userEmail: string) => Promise<boolean>;
+  loginSetPassword: (password: string) => Promise<void>;
+  loginVerifyPasswordForUser: (
+    userEmail: string,
+    password: string
+  ) => Promise<boolean>;
+  loginSetTempPasswordForUser: (userEmail: string) => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -397,6 +405,37 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const loginCheckIfPasswordIsSetForSelf = async () => {
+    return await invoke<boolean>("login_check_if_password_is_set_for_self");
+  };
+
+  const loginCheckIfPasswordIsSetForUser = async (userEmail: string) => {
+    return await invoke<boolean>("login_check_if_password_is_set_for_user", {
+      userEmail,
+    });
+  };
+
+  const loginSetPassword = async (password: string) => {
+    return await invoke<void>("login_set_password", { password });
+  };
+
+  const loginVerifyPasswordForUser = async (
+    userEmail: string,
+    password: string
+  ) => {
+    return await invoke<boolean>("login_verify_password_for_user", {
+      userEmail,
+      password,
+    });
+  };
+
+  /// Should only be used by admins
+  const loginSetTempPasswordForUser = async (userEmail: string) => {
+    return await invoke<void>("login_set_temp_password_for_user", {
+      userEmail,
+    });
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -447,5 +486,10 @@ export default function getTauriCommands(): TauriCommands {
     updateUserAppVersionMetadata,
     getUserMetadata,
     getUserMetadataMany,
+    loginCheckIfPasswordIsSetForSelf,
+    loginCheckIfPasswordIsSetForUser,
+    loginSetPassword,
+    loginVerifyPasswordForUser,
+    loginSetTempPasswordForUser,
   };
 }

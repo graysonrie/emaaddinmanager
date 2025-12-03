@@ -18,6 +18,8 @@ import { useAuthStore } from "@/lib/auth/useAuthStore";
 import PongGame from "./components/pong-game";
 import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissions";
 import AboutAddinModal from "./components/about-addin-modal";
+import usePasswordCheck from "./setup/usePasswordCheck";
+import { useSetupStore } from "./setup/store";
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
@@ -26,6 +28,8 @@ export default function Home() {
   const { isLoading: isLoadingAddins, allowedAddins } = useAddinPermissions({
     userEmail: user?.userEmail ?? "",
   });
+  const { isPasswordSetForSelf, isTempPassword } = usePasswordCheck();
+  const { setForcePasswordChange } = useSetupStore();
   const { amIAnAdmin } = useAuthStore();
   const router = useRouter();
   const [description, setDescription] = useState(
@@ -35,7 +39,7 @@ export default function Home() {
   useEffect(() => {
     if (!isInitialized || isUserLoading) return; // Don't make routing decisions until both are ready
 
-    if (!isComplete || !user) {
+    if (!isComplete || !user || !isPasswordSetForSelf) {
       if (!isComplete) {
         console.warn("Config is not complete, redirecting to setup");
       } else if (!user) {
@@ -45,10 +49,28 @@ export default function Home() {
       }
       setIsOpen(false);
       router.replace("/dashboard/setup");
+    } else if (isTempPassword === true) {
+      // User has temp password, force them to change it
+      console.warn(
+        "User has temporary password, redirecting to password change"
+      );
+      setForcePasswordChange(true);
+      setIsOpen(false);
+      router.replace("/dashboard/setup");
     } else {
       setIsOpen(true);
     }
-  }, [isInitialized, isComplete, router, setIsOpen, user, isUserLoading]);
+  }, [
+    isInitialized,
+    isComplete,
+    router,
+    setIsOpen,
+    user,
+    isUserLoading,
+    isPasswordSetForSelf,
+    isTempPassword,
+    setForcePasswordChange,
+  ]);
 
   useEffect(() => {
     const checkAdmin = async () => {

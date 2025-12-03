@@ -5,14 +5,18 @@ use sqlx::sqlite::SqlitePool;
 pub mod user_addins;
 pub mod user_metadata;
 pub mod user_stats;
+pub mod login_info;
 use user_addins::UserAddinsTable;
 use user_metadata::UserMetadataTable;
 use user_stats::UserStatsTable;
+
+use crate::services::user_stats::db::login_info::LoginInfoTable;
 
 pub struct LocalStatsDbHandler {
     user_stats_table: UserStatsTable,
     user_addins_table: UserAddinsTable,
     user_metadata_table:UserMetadataTable,
+    login_info_table:LoginInfoTable,
 }
 
 impl LocalStatsDbHandler {
@@ -31,10 +35,12 @@ impl LocalStatsDbHandler {
         let user_stats_table = UserStatsTable::new_async(db.clone()).await;
         let user_addins_table = UserAddinsTable::new_async(db.clone()).await;
         let user_metadata_table = UserMetadataTable::new_async(db.clone()).await;
+        let login_info_table = LoginInfoTable::new_async(db.clone());
         Self {
             user_stats_table,
             user_addins_table,
-            user_metadata_table
+            user_metadata_table,
+            login_info_table
         }
     }
 
@@ -48,5 +54,9 @@ impl LocalStatsDbHandler {
 
     pub fn user_metadata_table(&self) -> &UserMetadataTable {
         &self.user_metadata_table
+    }
+
+    pub fn login_info_table(&self) -> &LoginInfoTable {
+        &self.login_info_table
     }
 }

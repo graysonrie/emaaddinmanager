@@ -27,6 +27,7 @@ export default function PermissionsSetup({
 
   const onPermissionClick = async (permission: AddinPermissionModel) => {
     await registerAndAddAllowedAddinPaths(permission.forDiscipline);
+
     onComplete();
   };
 
