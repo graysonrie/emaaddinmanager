@@ -27,35 +27,8 @@ export interface CreateUserRequest {
   disciplines: string[];
 }
 
-export interface UpdateUserNameRequest {
-  name: string;
-}
-
-export interface DeleteUserRequest {
-  email: string;
-}
-
-export interface GetUserRoleRequest {
-  email: string;
-}
-
 export interface FilePathIdentifierModel {
   relativePath: string;
-}
-
-export interface PublishedAddinModel {
-  addin: AddinModel;
-  datePublished: Date;
-}
-
-export interface LocalAddinModel {
-  pathToAddinDllFolder: string;
-  pathToAddinXmlFile: string;
-}
-
-export interface UserStats {
-  publishedAddins: PublishedAddinModel[];
-  installedAddins: LocalAddinModel[];
 }
 
 export interface AddinPermission {
@@ -83,6 +56,45 @@ export interface AddinModel {
   isInstalledLocally: boolean;
   isPackage: boolean;
   name: string;
+}
+
+export interface PublishedAddinModel {
+  addin: AddinModel;
+  datePublished: Date;
+}
+
+export interface LocalAddinModel {
+  pathToAddinDllFolder: string;
+  pathToAddinXmlFile: string;
+}
+
+export interface UserStats {
+  publishedAddins: PublishedAddinModel[];
+  installedAddins: LocalAddinModel[];
+}
+
+export interface UserModel {
+  id: string;
+  email: string;
+  name: string;
+  disciplines: string[];
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+  stats: UserStats;
+  addinPermissions: AddinPermission[];
+}
+
+export interface UpdateUserNameRequest {
+  name: string;
+}
+
+export interface DeleteUserRequest {
+  email: string;
+}
+
+export interface GetUserRoleRequest {
+  email: string;
 }
 
 export interface AddinResponse {
@@ -139,7 +151,7 @@ interface ServerCommands {
   getUsers: () => Promise<UserResponse>;
   getCurrentUser: () => Promise<UserResponse>;
   createSelfAsAdmin: (input: CreateUserRequestWithRole) => Promise<void>;
-  createSelf: (input: CreateUserRequest) => Promise<void>;
+  createSelf: (input: CreateUserRequest) => Promise<UserModel>;
   updateUserName: (input: UpdateUserNameRequest) => Promise<UserResponse>;
   deleteUser: (input: DeleteUserRequest) => Promise<object>;
   getUserRole: () => Promise<string>;
@@ -197,7 +209,7 @@ export default function getServerCommands(): ServerCommands {
     );
   };
   const createSelf = async (input: CreateUserRequest) => {
-    return await serverRequest<void>(`api/User/create-me`, "POST", input);
+    return await serverRequest<UserModel>(`api/User/create-me`, "POST", input);
   };
   const updateUserName = async (input: UpdateUserNameRequest) => {
     return await serverRequest<UserResponse>(

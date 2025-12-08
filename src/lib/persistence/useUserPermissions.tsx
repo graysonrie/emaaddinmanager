@@ -4,16 +4,13 @@ import { UserModel } from "../models/user.model";
 import { useKeyValueSubscription } from "./useKeyValueSubscription";
 import { useConfigValue } from "./config/useConfigValue";
 import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
-import {
-  UserResponseModel,
-  UserRole,
-} from "../server/hooks/user/responses/user-response.model";
-import getServerCommands from "../server/getServerCommands";
+
+import getServerCommands, { UserResponse, UserRole } from "../server/getServerCommands";
 
 export default function useUserPermissions() {
   // If the user is undefined, it means that they do not exist
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<UserResponseModel | undefined>(undefined);
+  const [user, setUser] = useState<UserResponse | undefined>(undefined);
 
   const {
     getSelf,
@@ -22,7 +19,7 @@ export default function useUserPermissions() {
   } = getServerCommands();
 
   const registerUser = async (userName: string, discipline: string) => {
-    let user: UserResponseModel;
+    let user: UserResponse;
     try {
       user = await createSelf({ name: userName, disciplines: [discipline] });
     } catch (error) {
@@ -52,7 +49,7 @@ export default function useUserPermissions() {
     role: UserRole,
     key: string
   ) => {
-    let user: UserResponseModel;
+    let user: UserResponse;
     try {
       user = await createSelfAsAdmin({
         name: userName,
