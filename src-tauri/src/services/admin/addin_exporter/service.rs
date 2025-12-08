@@ -1,9 +1,7 @@
 use std::path::Path;
 
 use revitcli::{AddinFileInfo, ErrorList};
-
-use crate::services::admin::addin_exporter::models::dll_model::DllModel;
-use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
+use web_server_ver::services::admin::addin_exporter::{DllModel, SimplifiedAddinInfoModel};
 
 pub struct LocalAddinExporterService {}
 
@@ -103,27 +101,4 @@ impl LocalAddinExporterService {
     pub async fn build_addin(project_dir: &str) -> Result<String, String> {
         revitcli::build_project(project_dir).await
     }
-}
-
-impl From<AddinFileInfo> for SimplifiedAddinInfoModel {
-    fn from(addin_file_info: AddinFileInfo) -> Self {
-        SimplifiedAddinInfoModel {
-            name: addin_file_info.name,
-            vendor_id: addin_file_info.vendor_id,
-            description: addin_file_info.vendor_description,
-            email: addin_file_info.vendor_email,
-            // TODO: This is a hack to get the C# project name from the assembly name.
-            csharp_project_name: get_csharp_project_name_from_assembly(&addin_file_info.assembly),
-            addin_version: addin_file_info
-                .addin_version
-                .unwrap_or_else(|| "0".to_string()),
-        }
-    }
-}
-
-fn get_csharp_project_name_from_assembly(assembly: &str) -> String {
-    let assembly_path = Path::new(&assembly);
-    let assembly_name = assembly_path.file_name().unwrap().to_str().unwrap();
-    let assembly_name = assembly_name.to_string();
-    assembly_name.replace(".dll", "")
 }

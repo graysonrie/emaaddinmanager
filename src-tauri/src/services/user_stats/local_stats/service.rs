@@ -1,6 +1,7 @@
-use crate::services::addins_registry::models::addin_model::AddinModel;
+use web_server_ver::services::addins_registry::AddinModel;
+use web_server_ver::services::traits::AddinsRegistry;
+
 use crate::services::addins_registry::services::local_registry::LocalAddinsRegistryService;
-use crate::services::addins_registry::services::AddinsRegistry;
 use crate::services::config::keys;
 use crate::services::local_addins::service::LocalAddinsService;
 use crate::services::local_db::service::LocalDbService;
