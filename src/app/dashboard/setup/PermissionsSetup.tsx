@@ -10,6 +10,7 @@ import { AddinPermissionModel } from "../../../lib/addins/addin-management/types
 import { Button } from "@/components/ui/button";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
 import usePublicAddinPermissions from "@/lib/addins/addin-management/usePublicAddinPermissions";
+import { useSetupStore } from "./store";
 
 interface PermissionsSetupProps {
   onComplete: () => void;
@@ -24,9 +25,11 @@ export default function PermissionsSetup({
     isLoading,
     error,
   } = usePublicAddinPermissions();
+  const { setUser } = useSetupStore();
 
   const onPermissionClick = async (permission: AddinPermissionModel) => {
-    await registerAndAddAllowedAddinPaths(permission.forDiscipline);
+    const u = await registerAndAddAllowedAddinPaths(permission.forDiscipline);
+    setUser(u);
 
     onComplete();
   };

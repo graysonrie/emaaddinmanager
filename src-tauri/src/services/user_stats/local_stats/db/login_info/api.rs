@@ -56,4 +56,13 @@ impl LoginInfoTable {
             .map_err(|e| e.to_string())?;
         Ok(user)
     }
+
+    pub async fn delete_user(&self, user_email: &str) -> Result<(), String> {
+        login_info::Entity::delete_many()
+            .filter(login_info::Column::UserEmail.eq(user_email))
+            .exec(self.db.as_ref())
+            .await
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
 }

@@ -20,6 +20,7 @@ import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
 import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdaterStore";
+import { useSetupStore } from "../../setup/store";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;
@@ -79,6 +80,7 @@ export default function Sidebar() {
   const { updateNotifications, hasUserCheckedNotifications } =
     useAddinUpdaterStore();
   const authStore = useAuthStore();
+  const { user } = useSetupStore();
   const [isAdmin, setIsAdmin] = useState(false);
   const { reset } = useLocalAddinExporterStore();
 
@@ -96,7 +98,7 @@ export default function Sidebar() {
       }
     };
     checkAdminStatus();
-  }, [authStore]);
+  }, [authStore, user]);
 
   const buttons = [
     {

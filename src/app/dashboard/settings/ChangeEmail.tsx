@@ -65,13 +65,13 @@ export default function ChangeEmail() {
                 Used for notifications and account recovery
               </p>
             </div>
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={() => setIsEditing(true)}
             >
               Edit
-            </Button>
+            </Button> */}
           </div>
         )}
       </div>

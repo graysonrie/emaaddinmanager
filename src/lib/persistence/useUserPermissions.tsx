@@ -6,6 +6,7 @@ import { useKeyValueSubscription } from "./useKeyValueSubscription";
 import { useConfigValue } from "./config/useConfigValue";
 import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
 import usePasswordCheck from "@/app/dashboard/setup/usePasswordCheck";
+import { useSetupStore } from "@/app/dashboard/setup/store";
 
 export default function useUserPermissions() {
   // If the user is undefined, it means that they do not exist
@@ -14,6 +15,7 @@ export default function useUserPermissions() {
   const { isPasswordSetForSelf } = usePasswordCheck();
   const userEmail = useConfigValue("userEmail");
   const userName = useConfigValue("userName");
+  const { setUser: setSetupUser } = useSetupStore();
 
   const { registerUser, setAllowedAddinPathsForUser } = getTauriCommands();
 
@@ -45,6 +47,11 @@ export default function useUserPermissions() {
     }
 
     await addAllowedAddinPaths(user, [permission.relativePathToAddin]);
+
+    // Update the user state so the component knows the user now exists
+    setUser(user);
+    setIsLoading(false);
+    setSetupUser(user);
 
     return user;
   };

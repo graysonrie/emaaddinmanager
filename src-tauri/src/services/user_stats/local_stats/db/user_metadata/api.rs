@@ -86,6 +86,16 @@ impl UserMetadataTable {
             .map_err(|e| e.to_string())?;
         Ok(users)
     }
+
+    pub async fn delete_user(&self, user_email: &str) -> Result<(), String> {
+        user_metadata::Entity::delete_many()
+            .filter(user_metadata::Column::UserEmail.eq(user_email))
+            .exec(self.db.as_ref())
+            .await
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
     // Util:
     fn err_if_str_is_empty(str: &str, value_name: &str) -> Result<(), String> {
         if str.is_empty() {
