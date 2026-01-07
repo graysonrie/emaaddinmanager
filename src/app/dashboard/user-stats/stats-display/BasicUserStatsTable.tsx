@@ -1,18 +1,16 @@
-import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import UserAvatar from "@/app/shared/UserAvatar";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
 import { deduplicateInstalledAddins } from "./helpers";
-import useMockUserStats from "@/lib/user-stats/useMockUserStats";
 import { useManageDialogStore } from "../manage-dialog/store";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 import getMetadataBodyOrDefault from "@/lib/user-stats/user-stats-util";
@@ -60,6 +58,33 @@ export default function BasicUserStatsTable() {
     });
   }, [userStats]);
 
+  const handleEmailUsersWithoutPassword = useCallback(() => {
+    if (!userFacingStats) return;
+
+    // Get all users without passwords
+    const usersWithoutPassword = userFacingStats.filter(
+      (stats) => passwordStatuses[stats.userEmail] === false
+    );
+
+    if (usersWithoutPassword.length === 0) {
+      // Could show a toast/notification here if desired
+      return;
+    }
+
+    // Construct mailto link with all email addresses
+    const emailAddresses = usersWithoutPassword
+      .map((stats) => stats.userEmail)
+      .join(";");
+
+    const subject = encodeURIComponent("Password Setup Required");
+    const body = encodeURIComponent(
+      `All,\n\nThis is a reminder to update to the latest version of the EMA Addin Launcher (Version 0.9.0)\n\nIf the app does not prompt you for an update, please install the latest version by using the installer located at S:\\Autodesk\\Addins\\EMA\\EMA.Addin.Launcher_0.9.0_x64_en-US.msi\n\nThank you.`
+    );
+
+    const mailtoLink = `mailto:${emailAddresses}?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
+  }, [userFacingStats, passwordStatuses]);
+
   // Check password status for all users
   useEffect(() => {
     const checkPasswords = async () => {
@@ -102,6 +127,14 @@ export default function BasicUserStatsTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userFacingStats]);
 
+  // Count users without passwords
+  const usersWithoutPasswordCount = useMemo(() => {
+    if (!userFacingStats) return 0;
+    return userFacingStats.filter(
+      (stats) => passwordStatuses[stats.userEmail] === false
+    ).length;
+  }, [userFacingStats, passwordStatuses]);
+
   if (loading)
     return (
       <div className="flex flex-row gap-4 w-full items-center h-full justify-center">
@@ -116,48 +149,62 @@ export default function BasicUserStatsTable() {
     );
 
   return (
-    <div className="flex flex-row gap-4 font-sans w-full items-center h-full justify-center thin-scrollbar overflow-x-auto">
-      <Table className="min-w-max">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Password Set</TableHead>
-            <TableHead>Addins Installed</TableHead>
-            <TableHead>App Version</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {userFacingStats?.map((stats) => {
-            const hasPassword = passwordStatuses[stats.userEmail];
-            return (
-              <TableRow key={stats.userEmail}>
-                <TableCell>
-                  <UserAvatar
-                    userName={stats.userName}
-                    userEmail={stats.userEmail}
-                    showFullname={true}
-                    size="sm"
-                    onClick={() =>
-                      handleUserAvatarClick(stats.userEmail, stats.userName)
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  {hasPassword === null ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                  ) : hasPassword ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-red-500" />
-                  )}
-                </TableCell>
-                <TableCell>{stats.installedAddins}</TableCell>
-                <TableCell>{stats.metadataBody.appVersion}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+    <div className="flex flex-col gap-4 font-sans w-full items-center h-full justify-center">
+      <div className="flex flex-row gap-4 w-full items-center h-full justify-center thin-scrollbar overflow-x-auto">
+        <Table className="min-w-max">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Password Set</TableHead>
+              <TableHead>Addins Installed</TableHead>
+              <TableHead>App Version</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {userFacingStats?.map((stats) => {
+              const hasPassword = passwordStatuses[stats.userEmail];
+              return (
+                <TableRow key={stats.userEmail}>
+                  <TableCell>
+                    <UserAvatar
+                      userName={stats.userName}
+                      userEmail={stats.userEmail}
+                      showFullname={true}
+                      size="sm"
+                      onClick={() =>
+                        handleUserAvatarClick(stats.userEmail, stats.userName)
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {hasPassword === null ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    ) : hasPassword ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    )}
+                  </TableCell>
+                  <TableCell>{stats.installedAddins}</TableCell>
+                  <TableCell>{stats.metadataBody.appVersion}</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+      {usersWithoutPasswordCount > 0 && (
+        <div className="flex justify-center w-full">
+          <Button
+            onClick={handleEmailUsersWithoutPassword}
+            variant="outline"
+            className="gap-2"
+          >
+            <Mail className="w-4 h-4" />
+            Email Users Without Password ({usersWithoutPasswordCount})
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
