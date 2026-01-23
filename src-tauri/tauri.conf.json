@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "EMA Addin Launcher",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "identifier": "com.ema.addinmanager",
   "build": {
     "frontendDist": "../out",
@@ -19,7 +19,7 @@
         "minHeight": 500,
         "resizable": true,
         "fullscreen": false,
-        "decorations": false, 
+        "decorations": false,
         "transparent": true
       }
     ],
@@ -41,8 +41,7 @@
       "../public/**/*"
     ],
     "createUpdaterArtifacts": true
-  }
-  ,
+  },
   "plugins": {
     "updater": {
       "active": true,
@@ -53,4 +52,3 @@
     }
   }
 }
-

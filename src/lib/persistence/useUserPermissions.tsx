@@ -1,92 +1,30 @@
-import { useEffect, useState } from "react";
-
-import { UserModel } from "../models/user.model";
-import getTauriCommands from "../commands/getTauriCommands";
+import { useEffect } from "react";
 import { useKeyValueSubscription } from "./useKeyValueSubscription";
-import { useConfigValue } from "./config/useConfigValue";
-import { AllPublicAddinPermissions } from "@/lib/addins/addin-management/types";
-import usePasswordCheck from "@/app/dashboard/setup/usePasswordCheck";
-import { useSetupStore } from "@/app/dashboard/setup/store";
+import { useUserPermissionsStore } from "./useUserPermissionsStore";
+import { useKeyValueStore } from "./useKeyValueStore";
 
 export default function useUserPermissions() {
-  // If the user is undefined, it means that they do not exist
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<UserModel | undefined>(undefined);
-  const { isPasswordSetForSelf } = usePasswordCheck();
-  const userEmail = useConfigValue("userEmail");
-  const userName = useConfigValue("userName");
-  const { setUser: setSetupUser } = useSetupStore();
+  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const user = useUserPermissionsStore((state) => state.user);
+  const isLoading = useUserPermissionsStore((state) => state.isLoading);
+  const registerAndAddAllowedAddinPaths = useUserPermissionsStore(
+    (state) => state.registerAndAddAllowedAddinPaths
+  );
+  const fetchUser = useUserPermissionsStore((state) => state.fetchUser);
 
-  const { registerUser, setAllowedAddinPathsForUser } = getTauriCommands();
-
-  const registerAndAddAllowedAddinPaths = async (discipline: string) => {
-    if (!userEmail) {
-      throw new Error("User email is not set");
-    }
-    if (!userName) {
-      throw new Error("User name is not set");
-    }
-    let user: UserModel | undefined;
-    try {
-      user = await registerUser(userEmail, userName, discipline);
-    } catch (error) {
-      console.warn("Failed to register user. Getting existing user:", error);
-      user = await getTauriCommands().getUser(userEmail);
-    }
-    if (!user) {
-      throw new Error("Failed to register user");
-    }
-
-    // Get permissions from packages
-    const permissions = await AllPublicAddinPermissions();
-    const permission = permissions.find(
-      (permission) => permission.forDiscipline === discipline
-    );
-    if (!permission) {
-      throw new Error(`No permission found for discipline: ${discipline}`);
-    }
-
-    await addAllowedAddinPaths(user, [permission.relativePathToAddin]);
-
-    // Update the user state so the component knows the user now exists
-    setUser(user);
-    setIsLoading(false);
-    setSetupUser(user);
-
-    return user;
-  };
-
-  const addAllowedAddinPaths = async (
-    user: UserModel,
-    addinPaths: string[]
-  ) => {
-    const newUser = {
-      ...user,
-      allowedAddinPaths: [...user.allowedAddinPaths, ...addinPaths],
-    };
-    await setAllowedAddinPathsForUser(user.userEmail, addinPaths);
-  };
-
+  // Subscribe to userEmail changes and fetch user when it changes
   useEffect(() => {
-    if (userEmail) {
-      getTauriCommands()
-        .getUser(userEmail)
-        .then((userData) => {
-          setUser(userData);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Failed to get user:", error);
-          setUser(undefined);
-          setIsLoading(false);
-        });
-    } else {
-      setUser(undefined);
-      setIsLoading(false);
-    }
+    // Ensure the key-value store is subscribed to userEmail
+    const keyValueStore = useKeyValueStore.getState();
+    keyValueStore.subscribeToKey<string>("userEmail");
 
-    return () => {};
-  }, [userEmail]);
+    // Fetch user when userEmail changes
+    fetchUser(userEmail);
+
+    return () => {
+      // Cleanup is handled by useKeyValueSubscription
+    };
+  }, [userEmail, fetchUser]);
 
   return {
     user,
