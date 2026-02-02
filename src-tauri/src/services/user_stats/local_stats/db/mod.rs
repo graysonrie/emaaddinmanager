@@ -2,10 +2,10 @@ use std::{fs, path::Path, sync::Arc};
 
 use sea_orm::DatabaseConnection;
 use sqlx::sqlite::SqlitePool;
+pub mod login_info;
 pub mod user_addins;
 pub mod user_metadata;
 pub mod user_stats;
-pub mod login_info;
 use user_addins::UserAddinsTable;
 use user_metadata::UserMetadataTable;
 use user_stats::UserStatsTable;
@@ -15,8 +15,8 @@ use crate::services::user_stats::db::login_info::LoginInfoTable;
 pub struct LocalStatsDbHandler {
     user_stats_table: UserStatsTable,
     user_addins_table: UserAddinsTable,
-    user_metadata_table:UserMetadataTable,
-    login_info_table:LoginInfoTable,
+    user_metadata_table: UserMetadataTable,
+    login_info_table: LoginInfoTable,
 }
 
 impl LocalStatsDbHandler {
@@ -27,7 +27,7 @@ impl LocalStatsDbHandler {
     /// It will NOT create the database file if it doesn't exist.
     pub async fn new_async(dir: &Path) -> Self {
         // Removed code that created DB if the file didn't exist
-        let path_to_db = dir.join("UserStats.db");
+        let path_to_db = dir.join("UserStats2.db");
 
         let db_url = format!("sqlite://{}", path_to_db.to_string_lossy());
         let db: Arc<DatabaseConnection> =
@@ -40,7 +40,7 @@ impl LocalStatsDbHandler {
             user_stats_table,
             user_addins_table,
             user_metadata_table,
-            login_info_table
+            login_info_table,
         }
     }
 

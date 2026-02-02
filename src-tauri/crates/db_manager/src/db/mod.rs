@@ -28,7 +28,7 @@ pub async fn initialize(dir: &Path) {
 ///
 /// Only creates the database if it does not exist
 async fn create_db_file(dir: &Path) -> PathBuf {
-    let path_to_db = dir.join("UserStats.db");
+    let path_to_db = dir.join("UserStats2.db");
     if !path_to_db.exists() {
         fs::create_dir_all(dir).unwrap();
         fs::File::create(&path_to_db).unwrap();
