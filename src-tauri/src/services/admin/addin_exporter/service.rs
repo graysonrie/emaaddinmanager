@@ -117,6 +117,7 @@ impl From<AddinFileInfo> for SimplifiedAddinInfoModel {
             addin_version: addin_file_info
                 .addin_version
                 .unwrap_or_else(|| "0".to_string()),
+            reason_for_export: None,
         }
     }
 }

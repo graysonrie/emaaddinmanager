@@ -31,8 +31,6 @@ export default function AddinInfoForm({
     });
   };
 
-
-
   const userEmail = useKeyValueSubscription<string>("userEmail");
 
   return (
@@ -76,6 +74,19 @@ export default function AddinInfoForm({
             value={addinFileInfo.description}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               handleChange("description", e.target.value)
+            }
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="reasonForExport">Reason for Publish</Label>
+          <Textarea
+            id="reasonForExport"
+            placeholder="Enter a reason for publishing your addin"
+            value={addinFileInfo.reasonForExport ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              handleChange("reasonForExport", e.target.value)
             }
             rows={3}
           />

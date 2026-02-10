@@ -5,6 +5,7 @@ export interface SimplifiedAddinInfoModel {
   description: string;
   csharpProjectName: string;
   addinVersion: string;
+  reasonForExport: string | null;
 }
 
 export function getEmptySimplifiedAddinInfo(): SimplifiedAddinInfoModel {
@@ -15,5 +16,6 @@ export function getEmptySimplifiedAddinInfo(): SimplifiedAddinInfoModel {
     description: "",
     csharpProjectName: "",
     addinVersion: "0",
+    reasonForExport: null,
   };
 }
