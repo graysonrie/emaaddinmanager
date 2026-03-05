@@ -1,7 +1,6 @@
 use chrono::{DateTime, Local, Utc};
 use std::path::Path;
 
-
 use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
 
 const USAGE_TRACKER_FILE_PATH: &str =
@@ -19,6 +18,7 @@ pub struct UsageDataPoint {
     pub addin_name: String,
     pub addin_version: String,
     pub reason_for_export: Option<String>,
+    pub publisher_name: String,
 }
 
 impl From<SimplifiedAddinInfoModel> for UsageDataPoint {
@@ -28,6 +28,7 @@ impl From<SimplifiedAddinInfoModel> for UsageDataPoint {
             addin_name: simplified_addin_info.name,
             addin_version: simplified_addin_info.addin_version,
             reason_for_export: simplified_addin_info.reason_for_export,
+            publisher_name: simplified_addin_info.email,
         }
     }
 }
@@ -58,13 +59,13 @@ pub fn add_usage_data_point(usage_data_point: UsageDataPoint) -> Result<(), Stri
         .ok_or_else(|| format!("Failed to get sheet"))?;
 
     let next_row = sheet.get_highest_row() + 1;
+    let reason_for_export = usage_data_point.reason_for_export.unwrap_or_default();
+    let publisher_name = usage_data_point.publisher_name;
 
     let local_time: DateTime<Local> = usage_data_point.time_of_release.into();
-    sheet.get_cell_mut((1, next_row)).set_value(
-        local_time
-            .format("%Y-%m-%d %I:%M %p")
-            .to_string(),
-    );
+    sheet
+        .get_cell_mut((1, next_row))
+        .set_value(local_time.format("%Y-%m-%d %I:%M %p").to_string());
     sheet
         .get_cell_mut((2, next_row))
         .set_value(usage_data_point.addin_name);
@@ -73,7 +74,7 @@ pub fn add_usage_data_point(usage_data_point: UsageDataPoint) -> Result<(), Stri
         .set_value(usage_data_point.addin_version);
     sheet
         .get_cell_mut((4, next_row))
-        .set_value(usage_data_point.reason_for_export.unwrap_or_default());
+        .set_value(format!("{} - {}", publisher_name, reason_for_export));
 
     umya_spreadsheet::writer::xlsx::write(&book, path)
         .map_err(|e| format!("Failed to write spreadsheet: {e}"))?;
