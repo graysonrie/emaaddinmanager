@@ -13,14 +13,16 @@ where
     db.execute(builder.build(&create_table)).await
 }
 
-/**
-Simply prints an error if something goes wrong
-*/
-pub async fn generate_table_lenient<E>(db: &DatabaseConnection, entity: E)
+/// Ignores benign "already exists" errors and surfaces other failures.
+pub async fn generate_table_lenient<E>(db: &DatabaseConnection, entity: E) -> Result<(), String>
 where
     E: EntityTrait,
 {
     if let Err(err) = generate_table(db, entity).await {
-        println!("Warning: Error generating table: {}", err);
+        let err_text = err.to_string();
+        if !err_text.contains("already exists") {
+            return Err(err_text);
+        }
     }
+    Ok(())
 }

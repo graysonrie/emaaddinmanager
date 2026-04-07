@@ -43,15 +43,10 @@ pub async fn unregister_user(
 ) -> Result<(), String> {
     // Ensure that the user trying to unregister the user is an super adim:
     if admin_service.is_super_admin().await {
-        let user_stats_table = user_stats.stats_db.user_stats_table();
-        let user_addins_table = user_stats.stats_db.user_addins_table();
-        let user_metadata_table = user_stats.stats_db.user_metadata_table();
-        let login_info_table = user_stats.stats_db.login_info_table();
-
-        user_stats_table.delete_user(&user_email).await?;
-        user_addins_table.delete_user(&user_email).await?;
-        user_metadata_table.delete_user(&user_email).await?;
-        login_info_table.delete_user(&user_email).await?;
+        user_stats
+            .stats_db
+            .unregister_user_transactional(&user_email)
+            .await?;
     } else {
         return Err("oh your an admin all right, just not a super one".to_string());
     }

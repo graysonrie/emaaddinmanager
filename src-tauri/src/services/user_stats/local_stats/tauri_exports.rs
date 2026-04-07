@@ -69,18 +69,10 @@ pub async fn change_user_stats_email(
     local_db_service: State<'_, Arc<LocalDbService>>,
 ) -> Result<(), String> {
     let user_email = keys::get_user_email(local_db_service.inner().clone()).await?;
-    let user_stats_table = user_stats_service.stats_db.user_stats_table();
-    let user_addins_table = user_stats_service.stats_db.user_addins_table();
-    user_stats_table
-        .change_email(user_email.clone(), new_user_email.clone())
+    user_stats_service
+        .stats_db
+        .change_email_transactional(&user_email, &new_user_email)
         .await
-        .map_err(|e| e.to_string())?;
-    // Also change the email in the user addins table:
-    user_addins_table
-        .change_email(user_email, new_user_email)
-        .await
-        .map_err(|e| e.to_string())?;
-    Ok(())
 }
 
 #[tauri::command]

@@ -22,9 +22,6 @@ impl UserMetadataService {
         let user_email = keys::get_user_email(self.local_db.clone()).await?;
 
         let table = self.stats.stats_db.user_metadata_table();
-        // Ensure the user exists:
-        let _user_metadata = table.get_or_create_metadata(user_email.clone()).await?;
-
         let metadata = MetadataBody {
             app_version: Some(version),
         };
