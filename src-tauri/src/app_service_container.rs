@@ -3,7 +3,7 @@ use std::{path::Path, sync::Arc};
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    constants::{ADDINS_REGISTRY_PATH, TEST_ADDINS_REGISTRY_PATH},
+    constants::ADDINS_REGISTRY_PATH,
     services::{
         addin_updater::service::AddinUpdaterService,
         addins_registry::services::local_registry::LocalAddinsRegistryService,
@@ -23,9 +23,15 @@ use crate::{
 pub fn initialize_app(handle: &AppHandle) {
     let handle = handle.clone();
     tauri::async_runtime::spawn(async move {
-        let app_save_service = initialize_app_save_service(AppSavePath::AppData);
-        let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await;
+        if let Err(err) = initialize_app_inner(handle).await {
+            eprintln!("Failed to initialize app services: {}", err);
+        }
+    });
+}
 
+async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
+        let app_save_service = initialize_app_save_service(AppSavePath::AppData);
+        let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await?;
         // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry
         let stats_db_dir = Path::new(ADDINS_REGISTRY_PATH);
 
@@ -40,7 +46,7 @@ pub fn initialize_app(handle: &AppHandle) {
             Arc::clone(&addins_registry_service),
             stats_db_dir,
         )
-        .await;
+        .await?;
         let addin_permissions_service =
             initialize_addins_permissions_service(Arc::clone(&user_stats_service)).await;
         let admin_service = initialize_admin_service(Arc::clone(&local_db_service)).await;
@@ -76,7 +82,7 @@ pub fn initialize_app(handle: &AppHandle) {
         handle.manage(Arc::clone(&dev_resources_service));
         handle.manage(Arc::clone(&user_metadata_service));
         handle.manage(Arc::clone(&login_info_service));
-    });
+    Ok(())
 }
 
 fn initialize_app_save_service(save_dir: AppSavePath) -> Arc<AppSaveService> {
@@ -113,16 +119,18 @@ fn initialize_addin_updater_service(
 async fn initialize_local_db_service(
     app_save_service: &Arc<AppSaveService>,
     handle: AppHandle,
-) -> Arc<LocalDbService> {
-    Arc::new(LocalDbService::new_async(app_save_service, handle).await)
+) -> Result<Arc<LocalDbService>, String> {
+    Ok(Arc::new(LocalDbService::new_async(app_save_service, handle).await?))
 }
 
 async fn initialize_user_stats_service_local(
     db: Arc<LocalDbService>,
     addins_registry: Arc<LocalAddinsRegistryService>,
     path_to_stats_db: &Path,
-) -> Arc<LocalUserStatsService> {
-    Arc::new(LocalUserStatsService::new_async(db, addins_registry, path_to_stats_db).await)
+) -> Result<Arc<LocalUserStatsService>, String> {
+    Ok(Arc::new(
+        LocalUserStatsService::new_async(db, addins_registry, path_to_stats_db).await?,
+    ))
 }
 
 async fn initialize_addins_permissions_service(

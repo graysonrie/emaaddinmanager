@@ -9,13 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/app/shared/UserAvatar";
-import { Loader2, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { deduplicateInstalledAddins } from "./helpers";
 import { useManageDialogStore } from "../manage-dialog/store";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 import getMetadataBodyOrDefault from "@/lib/user-stats/user-stats-util";
 import { MetadataBody } from "@/lib/models/user-metadata.model";
-import getTauriCommands from "@/lib/commands/getTauriCommands";
 import { getVersion } from "@tauri-apps/api/app";
 
 interface UserFacingStats {
@@ -27,14 +26,8 @@ interface UserFacingStats {
   metadataBody: MetadataBody;
 }
 
-interface PasswordStatus {
-  [userEmail: string]: boolean | null; // null = loading, true = has password, false = no password
-}
-
 export default function BasicUserStatsTable() {
   const { userStats, loading, error, refresh } = useUserStatsStore();
-  const { loginCheckIfPasswordIsSetForUser } = getTauriCommands();
-  const [passwordStatuses, setPasswordStatuses] = useState<PasswordStatus>({});
   const [appVersion, setAppVersion] = useState<string | null>(null);
   const manageDialogStore = useManageDialogStore();
 
@@ -88,48 +81,6 @@ export default function BasicUserStatsTable() {
     window.location.href = mailtoLink;
   }, [userFacingStats, appVersion]);
 
-  // Check password status for all users
-  useEffect(() => {
-    const checkPasswords = async () => {
-      if (!userFacingStats || userFacingStats.length === 0) return;
-
-      const statuses: PasswordStatus = {};
-
-      // Initialize all as loading
-      userFacingStats.forEach((stats) => {
-        statuses[stats.userEmail] = null;
-      });
-      setPasswordStatuses(statuses);
-
-      // Check each user's password status
-      const checks = userFacingStats.map(async (stats) => {
-        try {
-          const hasPassword = await loginCheckIfPasswordIsSetForUser(
-            stats.userEmail
-          );
-          return { userEmail: stats.userEmail, hasPassword };
-        } catch (err) {
-          console.error(
-            `Failed to check password for ${stats.userEmail}:`,
-            err
-          );
-          return { userEmail: stats.userEmail, hasPassword: false };
-        }
-      });
-
-      const results = await Promise.all(checks);
-      const updatedStatuses: PasswordStatus = {};
-      results.forEach((result) => {
-        updatedStatuses[result.userEmail] = result.hasPassword;
-      });
-      setPasswordStatuses(updatedStatuses);
-    };
-
-    checkPasswords();
-    // loginCheckIfPasswordIsSetForUser is stable from getTauriCommands, so we don't need it in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userFacingStats]);
-
   // Count users without latest app version
   const usersWithoutLatestVersionCount = useMemo(() => {
     if (!userFacingStats || !appVersion) return 0;
@@ -158,14 +109,12 @@ export default function BasicUserStatsTable() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Password Set</TableHead>
               <TableHead>Addins Installed</TableHead>
               <TableHead>App Version</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {userFacingStats?.map((stats) => {
-              const hasPassword = passwordStatuses[stats.userEmail];
               return (
                 <TableRow key={stats.userEmail}>
                   <TableCell>
@@ -178,15 +127,6 @@ export default function BasicUserStatsTable() {
                         handleUserAvatarClick(stats.userEmail, stats.userName)
                       }
                     />
-                  </TableCell>
-                  <TableCell>
-                    {hasPassword === null ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                    ) : hasPassword ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
                   </TableCell>
                   <TableCell>{stats.installedAddins}</TableCell>
                   <TableCell>{stats.metadataBody.appVersion}</TableCell>

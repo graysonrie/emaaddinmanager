@@ -1,5 +1,5 @@
 use db_manager::db::user_stats_table::*;
-use sea_orm::{prelude::*, ActiveValue::Set};
+use sea_orm::{prelude::*, ActiveValue::Set, TransactionTrait};
 use std::sync::Arc;
 
 use crate::services::user_stats::*;
@@ -58,18 +58,19 @@ impl UserStatsTable {
         new_user_email: String,
     ) -> Result<(), String> {
         println!("Changing email from {} to {}", user_email, new_user_email);
+        let txn = self.db.begin().await.map_err(|e| e.to_string())?;
 
         // First, find the existing user
         let user = user::Entity::find()
             .filter(user::Column::UserEmail.eq(&user_email))
-            .one(self.db.as_ref())
+            .one(&txn)
             .await
             .map_err(|e| e.to_string())?;
 
         if let Some(user) = user {
             // Delete the old record
             user::Entity::delete_by_id(&user_email)
-                .exec(self.db.as_ref())
+                .exec(&txn)
                 .await
                 .map_err(|e| e.to_string())?;
 
@@ -83,10 +84,12 @@ impl UserStatsTable {
             };
 
             new_user
-                .insert(self.db.as_ref())
+                .insert(&txn)
                 .await
                 .map_err(|e| e.to_string())?;
         }
+
+        txn.commit().await.map_err(|e| e.to_string())?;
 
         Ok(())
     }
@@ -176,6 +179,37 @@ impl UserStatsTable {
                 .await
                 .map_err(|e| e.to_string())?;
         }
+        Ok(())
+    }
+
+    pub async fn upsert_user_stats_fields(
+        &self,
+        user_email: &str,
+        published_addins: Vec<PublishedAddinModel>,
+        installed_addins: Vec<InstalledAddinModel>,
+        disciplines: Vec<String>,
+    ) -> Result<(), String> {
+        let published_addins =
+            serde_json::to_value(published_addins).map_err(|e| e.to_string())?;
+        let installed_addins =
+            serde_json::to_value(installed_addins).map_err(|e| e.to_string())?;
+        let disciplines = serde_json::to_value(disciplines).map_err(|e| e.to_string())?;
+
+        user::Entity::update_many()
+        .col_expr(
+            user::Column::PublishedAddins,
+            Expr::value(published_addins),
+        )
+        .col_expr(
+            user::Column::InstalledAddins,
+            Expr::value(installed_addins),
+        )
+        .col_expr(user::Column::Disciplines, Expr::value(disciplines))
+        .filter(user::Column::UserEmail.eq(user_email))
+        .exec(self.db.as_ref())
+        .await
+        .map_err(|e| e.to_string())?;
+
         Ok(())
     }
 

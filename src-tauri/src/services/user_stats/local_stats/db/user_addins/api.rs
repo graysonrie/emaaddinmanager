@@ -1,5 +1,5 @@
 use db_manager::db::user_addins_table::*;
-use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel};
+use sea_orm::{prelude::*, ActiveValue::Set, IntoActiveModel, TransactionTrait};
 use std::{fmt::Display, sync::Arc};
 
 pub struct UserAddinsTable {
@@ -95,18 +95,19 @@ impl UserAddinsTable {
         new_user_email: String,
     ) -> Result<(), UserAddinsError> {
         println!("Changing email from {} to {}", user_email, new_user_email);
+        let txn = self.db.begin().await.map_err(UserAddinsError::DbError)?;
 
         // First, find the existing user
         let user = user::Entity::find()
             .filter(user::Column::UserEmail.eq(&user_email))
-            .one(self.db.as_ref())
+            .one(&txn)
             .await
             .map_err(UserAddinsError::DbError)?;
 
         if let Some(user) = user {
             // Delete the old record
             user::Entity::delete_by_id(&user_email)
-                .exec(self.db.as_ref())
+                .exec(&txn)
                 .await
                 .map_err(UserAddinsError::DbError)?;
 
@@ -119,10 +120,12 @@ impl UserAddinsTable {
             };
 
             new_user
-                .insert(self.db.as_ref())
+                .insert(&txn)
                 .await
                 .map_err(UserAddinsError::DbError)?;
         }
+
+        txn.commit().await.map_err(UserAddinsError::DbError)?;
 
         Ok(())
     }

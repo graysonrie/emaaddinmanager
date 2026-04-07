@@ -57,7 +57,6 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
       }));
 
       set({ userStats: statsWithMetadata, loading: false });
-      console.log("Got user stats");
     } catch (err) {
       console.warn("Error fetching user stats", err);
       set({ error: err as string, loading: false });

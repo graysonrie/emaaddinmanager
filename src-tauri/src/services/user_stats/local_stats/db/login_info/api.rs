@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use db_manager::db::login_table::login_info;
-use sea_orm::{prelude::*, ActiveValue::Set};
+use sea_orm::{prelude::*, sea_query::OnConflict, ActiveValue::Set, EntityTrait};
 
 pub struct LoginInfoTable {
     db: Arc<DatabaseConnection>,
@@ -18,30 +18,20 @@ impl LoginInfoTable {
         hashed_password: String,
         salt: String,
     ) -> Result<(), String> {
-        // try to get the user first if they exist:
-        if let Some(existing) = self.get_user_credentials(user_email.clone()).await? {
-            let existing = login_info::ActiveModel {
-                password_hash: Set(hashed_password),
-                salt: Set(salt),
-                ..existing.into()
-            };
-            existing
-                .update(self.db.as_ref())
-                .await
-                .map_err(|e| e.to_string())?;
-            Ok(())
-        } else {
-            let new = login_info::ActiveModel {
-                user_email: Set(user_email),
-                password_hash: Set(hashed_password),
-                salt: Set(salt),
-            };
-            let new = new
-                .insert(self.db.as_ref())
-                .await
-                .map_err(|e| e.to_string())?;
-            Ok(())
-        }
+        login_info::Entity::insert(login_info::ActiveModel {
+            user_email: Set(user_email),
+            password_hash: Set(hashed_password),
+            salt: Set(salt),
+        })
+        .on_conflict(
+            OnConflict::column(login_info::Column::UserEmail)
+                .update_columns([login_info::Column::PasswordHash, login_info::Column::Salt])
+                .to_owned(),
+        )
+        .exec(self.db.as_ref())
+        .await
+        .map_err(|e| e.to_string())?;
+        Ok(())
     }
 
     /// Will return the hashed password and the salt, not plaintext!!

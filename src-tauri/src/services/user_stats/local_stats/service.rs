@@ -20,13 +20,13 @@ impl LocalUserStatsService {
         db: Arc<LocalDbService>,
         addins_registry: Arc<LocalAddinsRegistryService>,
         path_to_stats_db: &Path,
-    ) -> Self {
-        let stats_db = LocalStatsDbHandler::new_async(path_to_stats_db).await;
-        Self {
+    ) -> Result<Self, String> {
+        let stats_db = LocalStatsDbHandler::new_async(path_to_stats_db).await?;
+        Ok(Self {
             local_db: db,
             addins_registry,
             stats_db,
-        }
+        })
     }
 
     pub async fn get_all_user_stats(&self) -> Result<Vec<UserStatsModel>, String> {
@@ -48,12 +48,13 @@ impl LocalUserStatsService {
 
         // Refresh the user stats:
         table
-            .set_published_addins(&user_email, published_addins)
+            .upsert_user_stats_fields(
+                &user_email,
+                published_addins,
+                installed_addins,
+                disciplines,
+            )
             .await?;
-        table
-            .set_installed_addins(&user_email, installed_addins)
-            .await?;
-        table.set_disciplines(&user_email, disciplines).await?;
 
         // Return the user with the updated stats:
         let user_stats = table.get_user(user_email.clone()).await?;

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use db_manager::db::user_metadata_table::user_metadata;
-use sea_orm::{prelude::*, ActiveValue::Set};
+use sea_orm::{prelude::*, sea_query::OnConflict, ActiveValue::Set};
 use sea_orm::{DatabaseConnection, EntityTrait};
 
 use crate::services::user_stats::db::user_metadata::models::{
@@ -50,24 +50,20 @@ impl UserMetadataTable {
         metadata: MetadataBody,
     ) -> Result<(), String> {
         Self::err_if_str_is_empty(&user_email, "user_email")?;
+        let metadata = serde_json::to_value(metadata).map_err(|e| e.to_string())?;
 
-        let user = user_metadata::Entity::find()
-            .filter(user_metadata::Column::UserEmail.eq(&user_email))
-            .one(self.db.as_ref())
-            .await
-            .map_err(|e| e.to_string())?;
-
-        if let Some(user) = user {
-            let user = user_metadata::ActiveModel {
-                metadata: Set(serde_json::to_value(metadata).map_err(|e| e.to_string())?),
-                ..user.into()
-            };
-            user.update(self.db.as_ref())
-                .await
-                .map_err(|e| e.to_string())?;
-        } else {
-            return Err(format!("User with email {} not found", user_email));
-        }
+        user_metadata::Entity::insert(user_metadata::ActiveModel {
+            user_email: Set(user_email),
+            metadata: Set(metadata),
+        })
+        .on_conflict(
+            OnConflict::column(user_metadata::Column::UserEmail)
+                .update_columns([user_metadata::Column::Metadata])
+                .to_owned(),
+        )
+        .exec(self.db.as_ref())
+        .await
+        .map_err(|e| e.to_string())?;
         Ok(())
     }
     pub async fn get_metadata_many(

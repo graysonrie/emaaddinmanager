@@ -25,14 +25,14 @@ pub struct AppKvStoreTable {
 }
 
 impl AppKvStoreTable {
-    pub async fn new_async(db: Arc<DatabaseConnection>, app_handle: AppHandle) -> Self {
-        generate_table_lenient(&db, kv_pair::Entity).await;
+    pub async fn new_async(db: Arc<DatabaseConnection>, app_handle: AppHandle) -> Result<Self, String> {
+        generate_table_lenient(&db, kv_pair::Entity).await?;
 
-        Self {
+        Ok(Self {
             db,
             tauri_subscriptions: TauriSubscriptionList::new(app_handle),
             subscriptions: BackendSubscriptionList::new(),
-        }
+        })
     }
 
     /// Set a value in the key-value store
