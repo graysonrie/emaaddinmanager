@@ -15,6 +15,20 @@ import { VsTemplateModel } from "../models/vs-template.model";
 import { CodeSnippetModel } from "../models/code-snippet.model";
 import { CodeSnippetAndGroupsModel } from "../models/code-snippet-and-groups.model";
 import { UserMetadataModel } from "../models/user-metadata.model";
+import {
+  login as loginViaApi,
+  register as registerViaApi,
+  setPasswordForUser as setPasswordForUserViaApi,
+  setTemporaryPassword as setTemporaryPasswordViaApi,
+} from "../api/services/authApi";
+import {
+  getRegistryAddins,
+  getRegistryCategories,
+} from "../api/services/registryApi";
+import {
+  getUser as getUserViaApi,
+  setAllowedAddinPathsForUser as setAllowedAddinPathsViaApi,
+} from "../api/services/usersApi";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -107,6 +121,8 @@ interface TauriCommands {
 }
 
 export default function getTauriCommands(): TauriCommands {
+  const shouldUseRemote = () =>
+    process.env.NEXT_PUBLIC_USE_FASTAPI === "true";
   const kvStoreSet = async (key: string, value: any) => {
     await invoke<void>("kv_store_set", {
       key,
@@ -135,6 +151,9 @@ export default function getTauriCommands(): TauriCommands {
 
   const getAddins = async (path: string) => {
     try {
+      if (shouldUseRemote()) {
+        return await getRegistryAddins();
+      }
       return await invoke<AddinModel[]>("get_addins", { path });
     } catch (err) {
       console.error("Failed to get addins:", err);
@@ -181,6 +200,9 @@ export default function getTauriCommands(): TauriCommands {
 
   const getCategories = async (path: string) => {
     try {
+      if (shouldUseRemote()) {
+        return await getRegistryCategories();
+      }
       return await invoke<CategoryModel[]>("get_categories", { path });
     } catch (err) {
       console.error("Failed to get categories:", err);
@@ -269,6 +291,15 @@ export default function getTauriCommands(): TauriCommands {
     userName: string,
     userDiscipline: string
   ) => {
+    if (shouldUseRemote()) {
+      await registerViaApi(userEmail, userName, userDiscipline, "change-me");
+      return {
+        userEmail,
+        allowedAddinIds: [],
+        allowedAddinPaths: [],
+        discipline: userDiscipline,
+      };
+    }
     return await invoke<UserModel>("register_user", {
       userEmail,
       userName,
@@ -277,6 +308,9 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const getUser = async (userEmail: string) => {
+    if (shouldUseRemote()) {
+      return await getUserViaApi(userEmail);
+    }
     return await invoke<UserModel | undefined>("get_user", { userEmail });
   };
 
@@ -284,6 +318,10 @@ export default function getTauriCommands(): TauriCommands {
     userEmail: string,
     addinPaths: string[]
   ) => {
+    if (shouldUseRemote()) {
+      await setAllowedAddinPathsViaApi(userEmail, addinPaths);
+      return;
+    }
     return await invoke<void>("set_allowed_addin_paths", {
       userEmail,
       addinPaths,
@@ -291,18 +329,46 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const isUserAdmin = async () => {
+    if (shouldUseRemote()) {
+      const email = await kvStoreGet<string>("userEmail");
+      if (!email) return false;
+      const { data } = await (await import("../api/httpClient")).httpClient.get<{
+        role: string;
+      }>(`/users/${encodeURIComponent(email)}`);
+      return data?.role === "admin" || data?.role === "super_admin";
+    }
     return await invoke<boolean>("is_user_admin");
   };
 
   const isUserSuperAdmin = async () => {
+    if (shouldUseRemote()) {
+      const email = await kvStoreGet<string>("userEmail");
+      if (!email) return false;
+      const { data } = await (await import("../api/httpClient")).httpClient.get<{
+        role: string;
+      }>(`/users/${encodeURIComponent(email)}`);
+      return data?.role === "super_admin";
+    }
     return await invoke<boolean>("is_user_super_admin");
   };
 
   const isOtherUserAdmin = async (userEmail: string) => {
+    if (shouldUseRemote()) {
+      const { data } = await (await import("../api/httpClient")).httpClient.get<{
+        role: string;
+      }>(`/users/${encodeURIComponent(userEmail)}`);
+      return data?.role === "admin" || data?.role === "super_admin";
+    }
     return await invoke<boolean>("is_other_user_admin", { userEmail });
   };
 
   const isOtherUserSuperAdmin = async (userEmail: string) => {
+    if (shouldUseRemote()) {
+      const { data } = await (await import("../api/httpClient")).httpClient.get<{
+        role: string;
+      }>(`/users/${encodeURIComponent(userEmail)}`);
+      return data?.role === "super_admin";
+    }
     return await invoke<boolean>("is_other_user_super_admin", { userEmail });
   };
 
@@ -416,6 +482,14 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const loginSetPassword = async (password: string) => {
+    if (shouldUseRemote()) {
+      const email = await kvStoreGet<string>("userEmail");
+      if (!email) {
+        throw new Error("No userEmail configured");
+      }
+      await setPasswordForUserViaApi(email, password);
+      return;
+    }
     return await invoke<void>("login_set_password", { password });
   };
 
@@ -423,6 +497,14 @@ export default function getTauriCommands(): TauriCommands {
     userEmail: string,
     password: string
   ) => {
+    if (shouldUseRemote()) {
+      try {
+        await loginViaApi(userEmail, password);
+        return true;
+      } catch {
+        return false;
+      }
+    }
     return await invoke<boolean>("login_verify_password_for_user", {
       userEmail,
       password,
@@ -431,6 +513,10 @@ export default function getTauriCommands(): TauriCommands {
 
   /// Should only be used by admins
   const loginSetTempPasswordForUser = async (userEmail: string) => {
+    if (shouldUseRemote()) {
+      await setTemporaryPasswordViaApi(userEmail);
+      return;
+    }
     return await invoke<void>("login_set_temp_password_for_user", {
       userEmail,
     });
