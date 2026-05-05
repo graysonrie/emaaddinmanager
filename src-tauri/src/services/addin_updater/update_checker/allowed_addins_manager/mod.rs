@@ -17,9 +17,7 @@ use crate::{
 mod install_addin_operation;
 pub use install_addin_operation::*;
 
-pub const ALL_REVIT_VERSIONS: [&str; 8] = [
-    "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026",
-];
+pub const ALL_REVIT_VERSIONS: [&str; 7] = ["2021", "2022", "2023", "2024", "2025", "2026", "2027"];
 
 #[derive(Debug)]
 pub enum UpdateCheckError {

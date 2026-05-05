@@ -20,6 +20,13 @@ import useAddinPermissions from "@/lib/addins/addin-management/useAddinPermissio
 import AboutAddinModal from "./components/about-addin-modal";
 import usePasswordCheck from "./setup/usePasswordCheck";
 import { useSetupStore } from "./setup/store";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
+
+interface AddinInstallProgressEvent {
+  progress: number;
+  addinName: string;
+  description: string;
+}
 
 export default function Home() {
   const { setIsOpen } = useSidebarStore();
@@ -28,18 +35,65 @@ export default function Home() {
   const { isLoading: isLoadingAddins, allowedAddins } = useAddinPermissions({
     userEmail: user?.userEmail ?? "",
   });
-  const { isPasswordSetForSelf, isTempPassword } = usePasswordCheck();
+  const { isPasswordSetForSelf, isCheckingPasswordSet, isTempPassword } =
+    usePasswordCheck();
   const { setForcePasswordChange } = useSetupStore();
   const { amIAnAdmin } = useAuthStore();
   const router = useRouter();
   const [description, setDescription] = useState(
     "The addins you have been given access to."
   );
+  const [activeAddinOperations, setActiveAddinOperations] = useState<
+    Record<string, boolean>
+  >({});
+
+  const isAddinOperationInProgress = Object.keys(activeAddinOperations).length > 0;
 
   useEffect(() => {
-    if (!isInitialized || isUserLoading) return; // Don't make routing decisions until both are ready
+    let unlisten: UnlistenFn | undefined;
 
-    if (!isComplete || !user || !isPasswordSetForSelf) {
+    const setupListener = async () => {
+      try {
+        unlisten = await listen<AddinInstallProgressEvent>(
+          "addin_install_progress",
+          (event) => {
+            const { progress, addinName } = event.payload;
+
+            setActiveAddinOperations((prev) => {
+              const next = { ...prev };
+              if (progress >= 100) {
+                delete next[addinName];
+              } else {
+                next[addinName] = true;
+              }
+              return next;
+            });
+          }
+        );
+      } catch (error) {
+        console.error("Failed to set up addin progress listener:", error);
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !isInitialized ||
+      isUserLoading ||
+      isCheckingPasswordSet ||
+      isAddinOperationInProgress
+    )
+      return; // Don't make routing decisions until core checks and addin operations are ready
+
+    if (!isComplete || !user || isPasswordSetForSelf !== true) {
       if (!isComplete) {
         console.warn("Config is not complete, redirecting to setup");
       } else if (!user) {
@@ -67,6 +121,8 @@ export default function Home() {
     setIsOpen,
     user,
     isUserLoading,
+    isCheckingPasswordSet,
+    isAddinOperationInProgress,
     isPasswordSetForSelf,
     isTempPassword,
     setForcePasswordChange,
@@ -85,7 +141,12 @@ export default function Home() {
   }, [amIAnAdmin, setDescription]);
 
   // Show loading state while checking initialization or user
-  if (!isInitialized || isUserLoading) {
+  if (
+    !isInitialized ||
+    isUserLoading ||
+    isCheckingPasswordSet ||
+    isAddinOperationInProgress
+  ) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex items-center gap-2">
