@@ -4,32 +4,39 @@ import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscripti
 import { TEMP_PASSWORD } from "@/types/constants";
 
 export default function usePasswordCheck() {
-  const [isPasswordSetForSelf, setIsPasswordSetForSelf] = useState(false);
+  const [isPasswordSetForSelf, setIsPasswordSetForSelf] = useState<
+    boolean | null
+  >(null);
   const [isTempPassword, setIsTempPassword] = useState<boolean | null>(null);
   const [justSetPassword, setJustSetPassword] = useState(false);
+  const [isCheckingPasswordSet, setIsCheckingPasswordSet] = useState(true);
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const {
     loginCheckIfPasswordIsSetForSelf,
-    loginCheckIfPasswordIsSetForUser,
     loginSetPassword,
     loginVerifyPasswordForUser,
   } = getTauriCommands();
 
-  useEffect(() => {
-    const checkPasswordSetForSelf = async () => {
+  const checkPasswordSetForSelf = async () => {
+    setIsCheckingPasswordSet(true);
+    try {
       const result = await loginCheckIfPasswordIsSetForSelf();
       setIsPasswordSetForSelf(result);
-    };
+    } catch (error) {
+      console.error("Failed to check if password is set for self:", error);
+      setIsPasswordSetForSelf(false);
+    } finally {
+      setIsCheckingPasswordSet(false);
+    }
+  };
+
+  useEffect(() => {
     checkPasswordSetForSelf();
   }, []);
 
   // Also check password status when email becomes available (for users logging in with temp password)
   useEffect(() => {
     if (userEmail) {
-      const checkPasswordSetForSelf = async () => {
-        const result = await loginCheckIfPasswordIsSetForSelf();
-        setIsPasswordSetForSelf(result);
-      };
       checkPasswordSetForSelf();
     }
   }, [userEmail]);
@@ -59,7 +66,7 @@ export default function usePasswordCheck() {
       }
     };
 
-    if (isPasswordSetForSelf && userEmail) {
+    if (isPasswordSetForSelf === true && userEmail) {
       checkTempPassword();
     } else {
       setIsTempPassword(null);
@@ -75,6 +82,7 @@ export default function usePasswordCheck() {
     // Automatically refresh the state after setting password
     const result = await loginCheckIfPasswordIsSetForSelf();
     setIsPasswordSetForSelf(result);
+    setIsCheckingPasswordSet(false);
     // Since the form validation prevents using TEMP_PASSWORD, we know the new password is NOT temp
     // Set it to false immediately so the UI can proceed without waiting for async check
     setIsTempPassword(false);
@@ -85,12 +93,12 @@ export default function usePasswordCheck() {
   }
 
   async function checkIsPasswordIsSet() {
-    const result = await loginCheckIfPasswordIsSetForSelf();
-    setIsPasswordSetForSelf(result);
+    await checkPasswordSetForSelf();
   }
 
   return {
     isPasswordSetForSelf,
+    isCheckingPasswordSet,
     isTempPassword,
     setPassword,
     checkIsPasswordIsSet,

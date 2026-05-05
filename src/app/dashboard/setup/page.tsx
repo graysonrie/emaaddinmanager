@@ -18,8 +18,12 @@ import usePasswordCheck from "./usePasswordCheck";
 import { useSetupStore } from "./store";
 
 export default function SetupPage() {
-  const { isPasswordSetForSelf, isTempPassword, checkIsPasswordIsSet } =
-    usePasswordCheck();
+  const {
+    isPasswordSetForSelf,
+    isCheckingPasswordSet,
+    isTempPassword,
+    checkIsPasswordIsSet,
+  } = usePasswordCheck();
   const userEmail = useKeyValueSubscription<string>("userEmail");
   const userName = useKeyValueSubscription<string>("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
@@ -73,8 +77,12 @@ export default function SetupPage() {
     }
 
     // Don't make routing decisions until we know the password status
+    if (isCheckingPasswordSet) {
+      console.log("SetupPage: Waiting for password status check to complete");
+      return;
+    }
     // If password is set, wait for temp password check to complete (isTempPassword !== null)
-    if (isPasswordSetForSelf && isTempPassword === null) {
+    if (isPasswordSetForSelf === true && isTempPassword === null) {
       console.log("SetupPage: Waiting for temp password check to complete");
       return;
     }
@@ -108,7 +116,7 @@ export default function SetupPage() {
     // If user exists, skip permissions and go straight to password check
     // Step 4: Check for password - if no password OR temp password, go to password step
     if (
-      !isPasswordSetForSelf ||
+      isPasswordSetForSelf !== true ||
       isTempPassword === true ||
       forcePasswordChange
     ) {
@@ -135,7 +143,7 @@ export default function SetupPage() {
     if (
       userEmail &&
       userName &&
-      isPasswordSetForSelf &&
+      isPasswordSetForSelf === true &&
       isTempPassword === false &&
       !forcePasswordChange
     ) {
@@ -149,6 +157,7 @@ export default function SetupPage() {
     setIsOpen,
     isLoading,
     isPasswordSetForSelf,
+    isCheckingPasswordSet,
     isTempPassword,
     forcePasswordChange,
     step, // Add step to dependencies to check current step

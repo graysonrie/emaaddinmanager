@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tokio::time::sleep;
 use tokio::{sync::Mutex, task::JoinHandle};
 
@@ -65,6 +65,9 @@ impl AddinUpdateChecker {
         let pending_updates_state = self.pending_updates_state.clone();
         let allowed_addins_manager = self.allowed_addins_manager.clone();
         let admin_service = self.admin_service.clone();
+
+        let app_handle2 = app_handle.clone();
+
         tokio::spawn(async move {
             AddinUpdateChecker {
                 app_handle,
@@ -73,7 +76,7 @@ impl AddinUpdateChecker {
                 allowed_addins_manager,
                 admin_service,
             }
-            .update_checker_loop()
+            .update_checker_loop(app_handle2)
             .await;
         })
     }
@@ -138,7 +141,7 @@ impl AddinUpdateChecker {
     }
 
     /// The main background update checker loop
-    pub async fn update_checker_loop(self) {
+    pub async fn update_checker_loop(self, app_handle: AppHandle) {
         loop {
             match self.check_and_apply_updates().await {
                 Ok(update_result) => {
@@ -148,7 +151,10 @@ impl AddinUpdateChecker {
                     );
                 }
                 Err(e) => {
-                    eprintln!("Error checking for updates: {}", e);
+                    app_handle.emit(
+                        "UpdateCheckerError",
+                        format!("Error checking for updates: {e}"),
+                    );
                 }
             }
             // Try to apply pending updates if Revit is now closed

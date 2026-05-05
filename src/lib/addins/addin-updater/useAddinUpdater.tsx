@@ -29,7 +29,7 @@ export function useAddinUpdater({
   const isOnNotificationsPage = pathname === "/dashboard/notifications";
 
   // Function to start or restart the debounce timer
-  const startDebounceTimer = () => {
+  function startDebounceTimer() {
     // Clear existing timer if any
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
