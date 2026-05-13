@@ -73,14 +73,14 @@ export function WindowChrome() {
         >
           <Square className="h-4 w-4" />
         </Button>
-        <Button
+        {/* <Button
           variant="ghost"
           size="sm"
           onClick={handleClose}
           className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
         >
           <X className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
