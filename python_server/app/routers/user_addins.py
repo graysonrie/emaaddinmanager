@@ -7,6 +7,7 @@ from app.models import UserAddins
 from app.schemas import (
     CreateUserAddinsRequest,
     SetAllowedPathsRequest,
+    SetBlockedPathsRequest,
     UserAddinsModel,
 )
 
@@ -27,6 +28,7 @@ def create_user(body: CreateUserAddinsRequest, db: Session = Depends(get_db)) ->
         user_email=body.user_email,
         allowed_addin_ids=[],
         allowed_addin_paths=[],
+        blocked_addin_paths=[],
         discipline=body.discipline,
     )
     db.add(user)
@@ -54,4 +56,17 @@ def set_allowed_paths(
     # Sort + dedupe to match the previous Rust behaviour.
     cleaned = sorted(set(body.paths))
     user.allowed_addin_paths = cleaned
+    db.commit()
+
+
+@router.put("/{user_email}/blocked-paths", status_code=status.HTTP_204_NO_CONTENT)
+def set_blocked_paths(
+    user_email: str, body: SetBlockedPathsRequest, db: Session = Depends(get_db)
+) -> None:
+    user = db.get(UserAddins, user_email)
+    if user is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+
+    cleaned = sorted(set(body.paths))
+    user.blocked_addin_paths = cleaned
     db.commit()

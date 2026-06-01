@@ -73,3 +73,14 @@ pub async fn set_allowed_addin_paths(
         .set_allowed_addin_paths(user_email, addin_paths)
         .await
 }
+
+#[tauri::command]
+pub async fn set_blocked_addin_paths(
+    addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
+    user_email: String,
+    addin_paths: Vec<String>,
+) -> Result<(), String> {
+    addin_permissions_service
+        .set_blocked_addin_paths(user_email, addin_paths)
+        .await
+}

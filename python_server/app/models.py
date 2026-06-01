@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, String, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -26,6 +26,11 @@ class UserAddins(Base):
     user_email: Mapped[str] = mapped_column(String, primary_key=True)
     allowed_addin_ids: Mapped[list | dict] = mapped_column(JSONB, nullable=False)
     allowed_addin_paths: Mapped[list | dict] = mapped_column(JSONB, nullable=False)
+    # NOT present in the original UserStats2.db. Defaults to an empty list so it
+    # is populated for migrated rows and any insert that omits it.
+    blocked_addin_paths: Mapped[list | dict] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
     discipline: Mapped[str] = mapped_column(String, nullable=False)
 
 

@@ -58,6 +58,10 @@ interface TauriCommands {
     userEmail: string,
     addinPaths: string[]
   ) => Promise<void>;
+  setBlockedAddinPathsForUser: (
+    userEmail: string,
+    addinPaths: string[]
+  ) => Promise<void>;
   isUserAdmin: () => Promise<boolean>;
   isUserSuperAdmin: () => Promise<boolean>;
 
@@ -290,6 +294,16 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const setBlockedAddinPathsForUser = async (
+    userEmail: string,
+    addinPaths: string[]
+  ) => {
+    return await invoke<void>("set_blocked_addin_paths", {
+      userEmail,
+      addinPaths,
+    });
+  };
+
   const isUserAdmin = async () => {
     return await invoke<boolean>("is_user_admin");
   };
@@ -463,6 +477,7 @@ export default function getTauriCommands(): TauriCommands {
     registerUser,
     getUser,
     setAllowedAddinPathsForUser,
+    setBlockedAddinPathsForUser,
     isUserAdmin,
     isUserSuperAdmin,
     isOtherUserAdmin,

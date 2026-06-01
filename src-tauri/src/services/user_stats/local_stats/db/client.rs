@@ -31,6 +31,19 @@ impl StatsApiClient {
         format!("{}{}", self.base_url, path)
     }
 
+    /// Pings the server's unauthenticated `/health` endpoint to verify the
+    /// stats server is reachable.
+    pub async fn health(&self) -> Result<(), String> {
+        let resp = self
+            .http
+            .get(self.url("/health"))
+            .send()
+            .await
+            .map_err(|e| format!("Could not reach stats server at {}: {e}", self.base_url))?;
+        Self::error_for_status(resp).await?;
+        Ok(())
+    }
+
     /// GET a resource that may not exist. Returns `None` on `404`.
     pub async fn get_opt<T: DeserializeOwned>(&self, path: &str) -> Result<Option<T>, String> {
         let resp = self

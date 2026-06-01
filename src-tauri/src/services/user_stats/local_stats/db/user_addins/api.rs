@@ -66,4 +66,19 @@ impl UserAddinsTable {
             .await
             .map_err(UserAddinsError::Request)
     }
+
+    pub async fn set_blocked_addin_paths(
+        &self,
+        user_email: String,
+        paths: Vec<String>,
+    ) -> Result<(), UserAddinsError> {
+        // The server sorts and de-duplicates the paths.
+        self.client
+            .put_no_content(
+                &format!("/user-addins/{user_email}/blocked-paths"),
+                &json!({ "paths": paths }),
+            )
+            .await
+            .map_err(UserAddinsError::Request)
+    }
 }

@@ -68,6 +68,7 @@ pub fn run() {
             register_user,
             get_user,
             set_allowed_addin_paths,
+            set_blocked_addin_paths,
             // Admin
             is_user_admin,
             is_user_super_admin,

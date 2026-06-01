@@ -55,6 +55,8 @@ def _import_from_sqlite(db: Session, sqlite_path: Path) -> None:
                     user_email=row["user_email"],
                     allowed_addin_ids=_parse_json(row["allowed_addin_ids"], []),
                     allowed_addin_paths=_parse_json(row["allowed_addin_paths"], []),
+                    # Not present in the legacy SQLite DB; start empty.
+                    blocked_addin_paths=[],
                     discipline=row["discipline"],
                 )
             )

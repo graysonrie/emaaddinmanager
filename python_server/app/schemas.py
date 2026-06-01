@@ -51,6 +51,7 @@ class UserAddinsModel(CamelModel):
     user_email: str
     allowed_addin_ids: Any
     allowed_addin_paths: Any
+    blocked_addin_paths: Any
     discipline: str
 
 
@@ -61,6 +62,10 @@ class CreateUserAddinsRequest(CamelModel):
 
 class SetAllowedPathsRequest(CamelModel):
     paths: list[str]
+
+class SetBlockedPathsRequest(CamelModel):
+    paths: list[str]
+
 
 
 # --- user_metadata ---
