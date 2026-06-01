@@ -1,9 +1,8 @@
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 
 use tauri::{AppHandle, Manager};
 
 use crate::{
-    constants::ADDINS_REGISTRY_PATH,
     services::{
         addin_updater::service::AddinUpdaterService,
         addins_registry::services::local_registry::LocalAddinsRegistryService,
@@ -32,8 +31,6 @@ pub fn initialize_app(handle: &AppHandle) {
 async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
         let app_save_service = initialize_app_save_service(AppSavePath::AppData);
         let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await?;
-        // Test registry: C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry
-        let stats_db_dir = Path::new(ADDINS_REGISTRY_PATH);
 
         let local_addins_service = initialize_local_addins_service(handle.clone());
 
@@ -44,7 +41,6 @@ async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
         let user_stats_service = initialize_user_stats_service_local(
             Arc::clone(&local_db_service),
             Arc::clone(&addins_registry_service),
-            stats_db_dir,
         )
         .await?;
         let addin_permissions_service =
@@ -126,10 +122,9 @@ async fn initialize_local_db_service(
 async fn initialize_user_stats_service_local(
     db: Arc<LocalDbService>,
     addins_registry: Arc<LocalAddinsRegistryService>,
-    path_to_stats_db: &Path,
 ) -> Result<Arc<LocalUserStatsService>, String> {
     Ok(Arc::new(
-        LocalUserStatsService::new_async(db, addins_registry, path_to_stats_db).await?,
+        LocalUserStatsService::new_async(db, addins_registry).await?,
     ))
 }
 

@@ -6,7 +6,6 @@ use crate::services::local_addins::service::LocalAddinsService;
 use crate::services::local_db::service::LocalDbService;
 use crate::services::user_stats::db::LocalStatsDbHandler;
 use crate::services::user_stats::*;
-use std::path::Path;
 use std::sync::Arc;
 
 pub struct LocalUserStatsService {
@@ -19,9 +18,8 @@ impl LocalUserStatsService {
     pub async fn new_async(
         db: Arc<LocalDbService>,
         addins_registry: Arc<LocalAddinsRegistryService>,
-        path_to_stats_db: &Path,
     ) -> Result<Self, String> {
-        let stats_db = LocalStatsDbHandler::new_async(path_to_stats_db).await?;
+        let stats_db = LocalStatsDbHandler::new_async().await?;
         Ok(Self {
             local_db: db,
             addins_registry,

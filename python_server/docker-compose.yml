@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stats}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stats}
+      POSTGRES_DB: ${POSTGRES_DB:-stats}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stats} -d ${POSTGRES_DB:-stats}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-stats}:${POSTGRES_PASSWORD:-stats}@db:5432/${POSTGRES_DB:-stats}
+      API_KEY: ${API_KEY:-change-me}
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+volumes:
+  pgdata:
