@@ -10,7 +10,7 @@ use crate::{
     models::kv_store_value::KvStoreValue,
     services::{
         addins_registry::{models::addin_model::AddinModel, services::AddinsRegistry},
-        admin::addin_exporter::models::category_model::CategoryModel,
+        admin::{addin_exporter::models::category_model::CategoryModel, service::AdminService},
         config::keys::LOCAL_ADDIN_REGISTRY_PATH,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
@@ -20,6 +20,7 @@ use crate::{
 pub struct LocalAddinsRegistryService {
     registry_location: KvStoreValue<String>,
     local_addins_service: Arc<LocalAddinsService>,
+    local_db: Arc<LocalDbService>,
 }
 
 impl LocalAddinsRegistryService {
@@ -33,6 +34,7 @@ impl LocalAddinsRegistryService {
                 local_db.clone(),
             ),
             local_addins_service,
+            local_db,
         }
     }
 }
@@ -65,7 +67,10 @@ impl AddinsRegistry for LocalAddinsRegistryService {
 
             info!("Searching for addins in: {}", dir_path);
 
-            if let Err(e) = search_directory_recursively(path, &mut addins) {
+            // Non-admins should never see addins inside "Test"/"Testing" folders.
+            let is_admin = AdminService::new(self.local_db.clone()).is_admin().await;
+
+            if let Err(e) = search_directory_recursively(path, &mut addins, is_admin) {
                 error!("Error searching directory {}: {}", dir_path, e);
             }
 
