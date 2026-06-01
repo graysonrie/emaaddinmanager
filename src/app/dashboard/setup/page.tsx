@@ -168,7 +168,7 @@ export default function SetupPage() {
       // Clear the forced password change flag when done
       setForcePasswordChange(false);
       setTimeout(() => {
-        router.replace("/dashboard");
+        router.replace("/dashboard/installed");
       }, SUCCESS_DELAY);
       return;
     }

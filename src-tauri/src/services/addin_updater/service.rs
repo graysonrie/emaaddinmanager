@@ -1,4 +1,4 @@
-use std::{fmt::Display, sync::Arc};
+use std::fmt::Display;
 use tauri::AppHandle;
 
 use crate::services::{
@@ -7,9 +7,6 @@ use crate::services::{
         *,
     },
     addins_registry::services::AsyncAddinsRegistryServiceType,
-    admin::service::AdminService,
-    local_db::service::LocalDbService,
-    user_stats::LocalUserStatsService,
 };
 
 #[derive(Debug)]
@@ -28,20 +25,9 @@ pub struct AddinUpdaterService {
 }
 
 impl AddinUpdaterService {
-    pub fn new(
-        addins_registry: AsyncAddinsRegistryServiceType,
-        app_handle: AppHandle,
-        user_stats: Arc<LocalUserStatsService>,
-        db: Arc<LocalDbService>,
-        admin_service: Arc<AdminService>,
-    ) -> Self {
-        let update_checker = update_checker::AddinUpdateChecker::new(
-            app_handle,
-            addins_registry.clone(),
-            user_stats,
-            db,
-            admin_service,
-        );
+    pub fn new(addins_registry: AsyncAddinsRegistryServiceType, app_handle: AppHandle) -> Self {
+        let update_checker =
+            update_checker::AddinUpdateChecker::new(app_handle, addins_registry.clone());
         update_checker.spawn_update_checker();
         Self { update_checker }
     }

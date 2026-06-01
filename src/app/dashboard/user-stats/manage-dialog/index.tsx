@@ -82,11 +82,11 @@ export default function ManageDialog() {
               </div>
             </DialogTitle>
             <DialogDescription>
-              Manage the addins that this user has access to
+              Manage which addins this user is blocked from installing
             </DialogDescription>
             <DialogDescription>
-              Toggling on an add-in will automatically install it for them when
-              they open the app.
+              Toggling on an add-in will block it, graying it out in their
+              library so they cannot install it.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 overflow-y-auto">

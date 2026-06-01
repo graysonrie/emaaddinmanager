@@ -73,6 +73,48 @@ docker compose down -v
 docker compose up --build
 ```
 
+## Deploying to Render
+
+This repo includes a [`render.yaml`](render.yaml) Blueprint that provisions a
+managed PostgreSQL database and a Docker web service which auto-deploys on every
+push to the `release` branch.
+
+> Render reads `render.yaml` from the **root** of the connected repository. This
+> assumes the server lives in its own repo with `render.yaml`, `Dockerfile`,
+> `app/`, and `assets/` at the root.
+
+Setup (one time):
+
+1. Push this code to its own GitHub repo and create a `release` branch.
+2. In the Render dashboard: **New > Blueprint**, pick the repo. Render reads
+   `render.yaml` and shows the database + web service it will create.
+3. When prompted, set the `API_KEY` value (it is marked `sync: false`, so it is
+   never stored in the repo). Use the same value for the Tauri client's
+   `STATS_SERVER_API_KEY`.
+4. Click **Apply**. Render builds the image, creates the database, injects
+   `DATABASE_URL`, and runs the container. On first boot the lifespan seeds the
+   database from the bundled SQLite file (idempotent on later deploys).
+
+After that, every push to `release` triggers an automatic rebuild + deploy.
+
+Point the Tauri client at the deployed URL:
+
+- `STATS_SERVER_URL=https://<your-service>.onrender.com`
+- `STATS_SERVER_API_KEY=<the key you set in Render>`
+
+Notes:
+
+- The Blueprint uses `free` plans to start. The free database expires ~30 days
+  after creation and free web services sleep when idle (cold starts just log
+  "already seeded"). Upgrade the `plan` values in `render.yaml` for production.
+- `DATABASE_URL` from Render arrives as `postgresql://...`; the config layer
+  rewrites it to the `postgresql+psycopg://` driver automatically.
+- The container binds to Render's injected `$PORT` (defaults to `8000` locally).
+- Schema changes after launch: `create_all` only creates missing tables, it does
+  not `ALTER` existing ones. Once the managed database holds real data, add new
+  columns/tables via a migration tool (e.g. Alembic) rather than relying on
+  startup table creation.
+
 ## Endpoints
 
 All routes require the `X-API-Key` header.

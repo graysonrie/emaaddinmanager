@@ -15,6 +15,7 @@ export default function useAddinPermissions({ userEmail }: Props) {
   const [allAvailableAddins, setAllAvailableAddins] = useState<
     AddinPermissionModel[]
   >([]);
+  const [blockedAddinPaths, setBlockedAddinPaths] = useState<string[]>([]);
   const [hasUserRegistered, setHasUserRegistered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { isAdmin } = useAuthStore();
@@ -41,6 +42,7 @@ export default function useAddinPermissions({ userEmail }: Props) {
       // Then fetch user-specific data
       const user = await tauriCommands.getUser(userEmail);
       if (user) {
+        setBlockedAddinPaths(user.blockedAddinPaths ?? []);
         const isAdminUser = await isAdmin(userEmail);
 
         if (isAdminUser === "admin" || isAdminUser === "super") {
@@ -67,6 +69,7 @@ export default function useAddinPermissions({ userEmail }: Props) {
       } else {
         setHasUserRegistered(false);
         setAllowedAddins([]);
+        setBlockedAddinPaths([]);
       }
     } catch (error) {
       console.error("Failed to initialize addin permissions:", error);
@@ -128,6 +131,7 @@ export default function useAddinPermissions({ userEmail }: Props) {
   return {
     allowedAddins,
     allAvailableAddins,
+    blockedAddinPaths,
     hasUserRegistered,
     isLoading,
     isAllowedAddinPath,

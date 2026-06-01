@@ -55,9 +55,6 @@ async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
         let addin_updater_service = initialize_addin_updater_service(
             Arc::clone(&addins_registry_service),
             handle.clone(),
-            Arc::clone(&user_stats_service),
-            Arc::clone(&local_db_service),
-            Arc::clone(&admin_service),
         );
         let user_metadata_service = initialize_user_metadata_service(
             Arc::clone(&local_db_service),
@@ -99,17 +96,8 @@ fn initialize_addins_registry_service_local(
 fn initialize_addin_updater_service(
     addins_registry: Arc<LocalAddinsRegistryService>,
     app_handle: AppHandle,
-    user_stats: Arc<LocalUserStatsService>,
-    db: Arc<LocalDbService>,
-    admin_service: Arc<AdminService>,
 ) -> Arc<AddinUpdaterService> {
-    Arc::new(AddinUpdaterService::new(
-        addins_registry,
-        app_handle,
-        user_stats,
-        db,
-        admin_service,
-    ))
+    Arc::new(AddinUpdaterService::new(addins_registry, app_handle))
 }
 
 async fn initialize_local_db_service(

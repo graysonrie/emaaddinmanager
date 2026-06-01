@@ -13,4 +13,6 @@ COPY assets ./assets
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Bind to the platform-provided $PORT (Render, Cloud Run, etc.), defaulting to
+# 8000 for local Docker / docker compose.
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

@@ -15,11 +15,11 @@ interface Store {
   isConfirmingTempPassword: boolean;
   setIsConfirmingTempPassword: (isConfirming: boolean) => void;
 
-  // Temporary addin permissions state
-  tempAllowedAddinPaths: string[];
-  setTempAllowedAddinPaths: (paths: string[]) => void;
-  toggleTempAddinPermission: (addinPath: string) => void;
-  isTempAllowedAddinPath: (addinPath: string) => boolean;
+  // Temporary blocked addin paths state
+  tempBlockedAddinPaths: string[];
+  setTempBlockedAddinPaths: (paths: string[]) => void;
+  toggleTempBlockedAddinPath: (addinPath: string) => void;
+  isTempBlockedAddinPath: (addinPath: string) => boolean;
   resetTempPermissions: () => void;
 }
 
@@ -41,29 +41,29 @@ export const useManageDialogStore = create<Store>((set, get) => ({
   setIsConfirmingTempPassword: (isConfirming: boolean) =>
     set({ isConfirmingTempPassword: isConfirming }),
 
-  // Temporary addin permissions state
-  tempAllowedAddinPaths: [],
-  setTempAllowedAddinPaths: (paths: string[]) =>
-    set({ tempAllowedAddinPaths: paths }),
-  toggleTempAddinPermission: (addinPath: string) => {
-    const { tempAllowedAddinPaths } = get();
-    const isCurrentlyAllowed = tempAllowedAddinPaths.includes(addinPath);
+  // Temporary blocked addin paths state
+  tempBlockedAddinPaths: [],
+  setTempBlockedAddinPaths: (paths: string[]) =>
+    set({ tempBlockedAddinPaths: paths }),
+  toggleTempBlockedAddinPath: (addinPath: string) => {
+    const { tempBlockedAddinPaths } = get();
+    const isCurrentlyBlocked = tempBlockedAddinPaths.includes(addinPath);
 
-    if (isCurrentlyAllowed) {
-      // Remove the path
-      const newPaths = tempAllowedAddinPaths.filter(
+    if (isCurrentlyBlocked) {
+      // Remove the path (unblock)
+      const newPaths = tempBlockedAddinPaths.filter(
         (path) => path !== addinPath
       );
-      set({ tempAllowedAddinPaths: newPaths });
+      set({ tempBlockedAddinPaths: newPaths });
     } else {
-      // Add the path
-      const newPaths = [...tempAllowedAddinPaths, addinPath].sort();
-      set({ tempAllowedAddinPaths: newPaths });
+      // Add the path (block)
+      const newPaths = [...tempBlockedAddinPaths, addinPath].sort();
+      set({ tempBlockedAddinPaths: newPaths });
     }
   },
-  isTempAllowedAddinPath: (addinPath: string) => {
-    const { tempAllowedAddinPaths } = get();
-    return tempAllowedAddinPaths.includes(addinPath);
+  isTempBlockedAddinPath: (addinPath: string) => {
+    const { tempBlockedAddinPaths } = get();
+    return tempBlockedAddinPaths.includes(addinPath);
   },
-  resetTempPermissions: () => set({ tempAllowedAddinPaths: [] }),
+  resetTempPermissions: () => set({ tempBlockedAddinPaths: [] }),
 }));

@@ -85,7 +85,7 @@ export default function DashboardLayout({
       >
         <Sidebar />
       </motion.div>
-      <main className="flex-1 flex flex-col overflow-hidden bg-background-opaque rounded-tl-lg">
+      <main className="flex-1 flex flex-col overflow-hidden rounded-tl-lg">
         {children}
       </main>
       <InstallingAddinsOverlay />

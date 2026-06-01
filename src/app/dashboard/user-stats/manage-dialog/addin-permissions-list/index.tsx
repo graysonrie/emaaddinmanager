@@ -10,11 +10,11 @@ import getTauriCommands from "../../../../../lib/commands/getTauriCommands";
 export default function AddinPermissionsList() {
   const {
     userEmail,
-    setTempAllowedAddinPaths,
-    tempAllowedAddinPaths,
+    setTempBlockedAddinPaths,
+    tempBlockedAddinPaths,
     resetTempPermissions,
   } = useManageDialogStore();
-  const { allowedAddins, hasUserRegistered, allAvailableAddins } =
+  const { blockedAddinPaths, hasUserRegistered, allAvailableAddins } =
     useAddinPermissions({
       userEmail,
     });
@@ -31,23 +31,17 @@ export default function AddinPermissionsList() {
     }
   }, [userEmail]);
 
-  // Load user's current permissions into temporary state on mount
+  // Load user's current blocked paths into temporary state on mount
   useEffect(() => {
-    if (hasUserRegistered && allowedAddins.length > 0) {
-      const currentPaths = allowedAddins.map(
-        (addin) => addin.relativePathToAddin
-      );
-      setTempAllowedAddinPaths(currentPaths);
-    } else if (hasUserRegistered) {
-      // User is registered but has no permissions yet
-      setTempAllowedAddinPaths([]);
+    if (hasUserRegistered) {
+      setTempBlockedAddinPaths(blockedAddinPaths);
     } else {
       resetTempPermissions();
     }
   }, [
     hasUserRegistered,
-    allowedAddins,
-    setTempAllowedAddinPaths,
+    blockedAddinPaths,
+    setTempBlockedAddinPaths,
     resetTempPermissions,
   ]);
 
@@ -55,13 +49,13 @@ export default function AddinPermissionsList() {
     if (hasUserRegistered) {
       setIsSaving(true);
       try {
-        await getTauriCommands().setAllowedAddinPathsForUser(
+        await getTauriCommands().setBlockedAddinPathsForUser(
           userEmail,
-          tempAllowedAddinPaths
+          tempBlockedAddinPaths
         );
         manageDialog.setIsVisible(false);
       } catch (error) {
-        console.error("Failed to save addin permissions:", error);
+        console.error("Failed to save blocked addins:", error);
         // You might want to show an error message to the user here
       } finally {
         setIsSaving(false);
@@ -75,7 +69,7 @@ export default function AddinPermissionsList() {
     <div className="flex flex-col gap-2">
       {hasUserRegistered ? (
         <>
-          <p className="text-sm font-bold font-sans">Allowed Addins</p>
+          <p className="text-sm font-bold font-sans">Blocked Addins</p>
           <div className="flex flex-col gap-2">
             {allAvailableAddins.map((permission) => (
               <AddinPermission

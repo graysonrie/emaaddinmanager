@@ -12,7 +12,7 @@ export default function AddinCard({
   onUninstallClicked,
 }: AddinCardProps) {
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-lg p-4 font-sans">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="font-semibold text-lg">{addin.name}</h3>

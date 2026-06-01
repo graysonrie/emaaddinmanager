@@ -1,7 +1,7 @@
 import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
-import { Blocks, ChevronLeft, ChevronRight, EyeOff } from "lucide-react";
+import { Blocks, ChevronLeft, ChevronRight, EyeOff, Folder } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 export interface FilePathNode {
@@ -25,6 +25,8 @@ type Props<T extends FilePathNode> = {
   nodeName: string;
   rules?: FileTreeRules;
   treeRoot?: string; // Add tree root for path conversion
+  gridView?: boolean; // Render items as a responsive grid of tiles instead of a flat list
+  isItemDisabled?: (data: T) => boolean; // Gray out and disable selection for matching leaf nodes
 };
 
 function findNodeByPath<T extends FilePathNode>(
@@ -213,6 +215,8 @@ export default function FileTreeView<T extends FilePathNode>({
   rules,
   nodeName,
   treeRoot,
+  gridView = false,
+  isItemDisabled,
 }: Props<T>) {
   const [path, setPath] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -472,7 +476,13 @@ export default function FileTreeView<T extends FilePathNode>({
       </nav>
 
       {/* Folder/Addin List */}
-      <ul className="space-y-2">
+      <ul
+        className={
+          gridView
+            ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+            : "space-y-2"
+        }
+      >
         {filteredNodes.map((node) => {
           const nodeName = node.data.displayName
             ? node.data.displayName
@@ -483,7 +493,11 @@ export default function FileTreeView<T extends FilePathNode>({
               ref={selectedNode === node.name ? autoSelectRef : null}
             >
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg border transition cursor-pointer ${
+                className={`w-full h-full text-left rounded-lg border transition cursor-pointer ${
+                  gridView
+                    ? "flex flex-col items-start gap-2 p-4"
+                    : "px-4 py-3"
+                } ${
                   selectedNode === node.name
                     ? "border-primary bg-primary/10"
                     : "bg-card hover:bg-accent"
@@ -506,33 +520,82 @@ export default function FileTreeView<T extends FilePathNode>({
                   }
                 }}
               >
-                <div className="flex items-center">
-                  {rules?.overrideShowHiddenFolders && isHiddenFolder(node) && (
-                    <EyeOff className="w-4 h-4 mr-2 text-muted-foreground" />
-                  )}
-                  <span className="font-medium">{node.name}</span>
-                  {!rules?.onlyFolders && (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      (Folder)
-                    </span>
-                  )}
-                </div>
+                {gridView ? (
+                  <>
+                    <Folder className="w-6 h-6 text-muted-foreground" />
+                    <div className="flex items-center w-full">
+                      {rules?.overrideShowHiddenFolders &&
+                        isHiddenFolder(node) && (
+                          <EyeOff className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+                        )}
+                      <span className="font-medium break-words">
+                        {node.name}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center">
+                    {rules?.overrideShowHiddenFolders &&
+                      isHiddenFolder(node) && (
+                        <EyeOff className="w-4 h-4 mr-2 text-muted-foreground" />
+                      )}
+                    <span className="font-medium">{node.name}</span>
+                    {!rules?.onlyFolders && (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        (Folder)
+                      </span>
+                    )}
+                  </div>
+                )}
               </button>
             </li>
           ) : (
-            <li key={nodeName}>
-              <button
-                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition cursor-pointer flex items-center"
-                onClick={() => node.data && onSelect?.(node.data)}
-              >
-                <Blocks className="w-4 h-4 mr-2" />
-                <span className="font-medium">{nodeName}</span>
-              </button>
-            </li>
+            (() => {
+              const disabled = isItemDisabled?.(node.data) ?? false;
+              return (
+                <li key={nodeName}>
+                  <button
+                    disabled={disabled}
+                    title={disabled ? "Blocked by your administrator" : undefined}
+                    className={`w-full h-full text-left rounded-lg bg-card border transition ${
+                      disabled
+                        ? "opacity-50 cursor-not-allowed text-muted-foreground"
+                        : "hover:bg-primary/10 cursor-pointer"
+                    } ${
+                      gridView
+                        ? "flex flex-col items-start gap-2 p-4"
+                        : "px-4 py-3 flex items-center"
+                    }`}
+                    onClick={() => {
+                      if (disabled) return;
+                      node.data && onSelect?.(node.data);
+                    }}
+                  >
+                    {gridView ? (
+                      <>
+                        <Blocks className="w-6 h-6 text-primary" />
+                        <span className="font-medium break-words">
+                          {nodeName}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Blocks className="w-4 h-4 mr-2" />
+                        <span className="font-medium">{nodeName}</span>
+                      </>
+                    )}
+                  </button>
+                </li>
+              );
+            })()
           );
         })}
         {filteredNodes.length === 0 && (
-          <li className="text-muted-foreground px-4 py-3">
+          <li
+            className={`text-muted-foreground px-4 py-3 ${
+              gridView ? "col-span-full" : ""
+            }`}
+          >
             No items in this folder.
           </li>
         )}

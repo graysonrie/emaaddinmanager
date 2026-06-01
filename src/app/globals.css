@@ -82,7 +82,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: #ffffff71;
+  --background: #ffffff00;
   --foreground: oklch(0.145 0 0);
   --background-opaque: #f5f5f5;
 
@@ -96,21 +96,22 @@
 }
 
 .dark {
-  --background: #000000ae;
+  --background: #00000000;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: #0000002e;
+
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #00af00;
+  --primary: #00ff00;
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.469 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.704 0.691 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -140,9 +141,9 @@
 
   /* Optimized transition styles for better performance */
   * {
-    transition-property: color, background-color, border-color,
-      text-decoration-color, fill, stroke, opacity, box-shadow, transform,
-      filter, backdrop-filter;
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill,
+      stroke, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
   }
@@ -210,7 +211,9 @@ body,
 .page-enter-active {
   opacity: 1;
   transform: translateX(0);
-  transition: opacity 300ms, transform 300ms;
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
 
 .page-exit {
@@ -221,7 +224,9 @@ body,
 .page-exit-active {
   opacity: 0;
   transform: translateX(-20px);
-  transition: opacity 300ms, transform 300ms;
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
 
 @keyframes fade-in {
@@ -269,9 +274,13 @@ body,
     var(--muted-indigo),
     var(--muted-violet)
   );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
   opacity: 0;
@@ -308,7 +317,9 @@ body,
 .custom-dropdown-enter-active {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition: opacity 200ms ease-out, transform 200ms ease-out;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
 }
 
 .custom-dropdown-exit {
@@ -319,7 +330,9 @@ body,
 .custom-dropdown-exit-active {
   opacity: 0;
   transform: scale(0.95) translateY(-8px);
-  transition: opacity 150ms ease-in, transform 150ms ease-in;
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in;
 }
 
 /* Ensure dropdown appears above other content */

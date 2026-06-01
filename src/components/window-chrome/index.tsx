@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Button } from "../ui/button";
 import { Minus, X, Square } from "lucide-react";
@@ -6,6 +7,8 @@ import { AppLogo } from "./AppLogo";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { useMemo } from "react";
 import UserAvatar from "@/app/shared/UserAvatar";
+import { Label } from "../ui/label";
+import { getVersion } from "@tauri-apps/api/app";
 
 export function WindowChrome() {
   const userName = useKeyValueSubscription<string>("userName");
@@ -43,13 +46,22 @@ export function WindowChrome() {
     e.preventDefault();
   };
 
+  const [appVersion, setAppVersion] = useState("");
+
+  useEffect(() => {
+    getVersion().then(setAppVersion);
+  }, []);
+
   return (
     <div
       className="titlebar flex items-center justify-between  px-4 py-2 select-none"
       onContextMenu={handleContextMenu}
     >
-      <div className="flex-1">
+      <div className="flex-1 gap-2 flex items-center">
         <AppLogo />
+        <Label className="text-sm font-medium text-muted-foreground font-sans">
+          Addin Launcher {appVersion}
+        </Label>
       </div>
 
       {userName && userEmail && (
@@ -73,14 +85,14 @@ export function WindowChrome() {
         >
           <Square className="h-4 w-4" />
         </Button>
-        {/* <Button
+        <Button
           variant="ghost"
           size="sm"
           onClick={handleClose}
           className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
         >
           <X className="h-4 w-4" />
-        </Button> */}
+        </Button>
       </div>
     </div>
   );

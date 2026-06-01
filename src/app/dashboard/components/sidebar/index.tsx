@@ -101,11 +101,11 @@ export default function Sidebar() {
   }, [authStore, user]);
 
   const buttons = [
-    {
-      icon: <HomeIcon />,
-      label: "Home",
-      link: "/dashboard",
-    },
+    // {
+    //   icon: <HomeIcon />,
+    //   label: "Home",
+    //   link: "/dashboard",
+    // },
 
     {
       icon: <PackageIcon />,
@@ -120,8 +120,13 @@ export default function Sidebar() {
         updateNotifications.filter((x) => !x.title.includes("No updates"))
           .length > 0,
       badgeCount: updateNotifications.filter(
-        (x) => !x.title.includes("No updates")
+        (x) => !x.title.includes("No updates"),
       ).length,
+    },
+    {
+      icon: <LibraryIcon />,
+      label: "Library",
+      link: "/dashboard/library",
     },
     {
       icon: <SettingsIcon />,
@@ -131,11 +136,6 @@ export default function Sidebar() {
   ];
 
   const adminButtons = [
-    {
-      icon: <LibraryIcon />,
-      label: "Library",
-      link: "/dashboard/library",
-    },
     {
       icon: <ChartBarBig />,
       label: "User Stats",

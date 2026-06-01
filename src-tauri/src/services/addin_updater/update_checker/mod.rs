@@ -1,16 +1,10 @@
-use std::sync::Arc;
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::time::sleep;
 use tokio::{sync::Mutex, task::JoinHandle};
 
-use crate::services::admin::service::AdminService;
-use crate::services::{
-    addin_updater::update_checker::allowed_addins_manager::AllowedAddinsManager,
-    local_db::service::LocalDbService, user_stats::LocalUserStatsService,
-};
+use std::sync::Arc;
 
-mod allowed_addins_manager;
 mod helpers;
 mod notifications;
 mod pending_updates;
@@ -34,28 +28,16 @@ pub struct AddinUpdateChecker {
     app_handle: AppHandle,
     addins_registry: AsyncAddinsRegistryServiceType,
     pending_updates_state: PendingUpdatesStateType,
-    allowed_addins_manager: AllowedAddinsManager,
-    admin_service: Arc<AdminService>,
 }
 
 impl AddinUpdateChecker {
-    pub fn new(
-        app_handle: AppHandle,
-        addins_registry: AsyncAddinsRegistryServiceType,
-        user_stats: Arc<LocalUserStatsService>,
-        db: Arc<LocalDbService>,
-        admin_service: Arc<AdminService>,
-    ) -> Self {
-        let allowed_addins_manager =
-            AllowedAddinsManager::new(app_handle.clone(), user_stats, db, addins_registry.clone());
+    pub fn new(app_handle: AppHandle, addins_registry: AsyncAddinsRegistryServiceType) -> Self {
         let pending_updates_state = Arc::new(Mutex::new(PendingUpdatesState::default()));
         app_handle.manage(pending_updates_state.clone());
         Self {
             app_handle,
             addins_registry,
             pending_updates_state,
-            allowed_addins_manager,
-            admin_service,
         }
     }
     /// Spawns the background update checker loop and manages the shared state
@@ -63,8 +45,6 @@ impl AddinUpdateChecker {
         let app_handle = self.app_handle.clone();
         let addins_registry = self.addins_registry.clone();
         let pending_updates_state = self.pending_updates_state.clone();
-        let allowed_addins_manager = self.allowed_addins_manager.clone();
-        let admin_service = self.admin_service.clone();
 
         let app_handle2 = app_handle.clone();
 
@@ -73,8 +53,6 @@ impl AddinUpdateChecker {
                 app_handle,
                 addins_registry,
                 pending_updates_state,
-                allowed_addins_manager,
-                admin_service,
             }
             .update_checker_loop(app_handle2)
             .await;
@@ -97,19 +75,7 @@ impl AddinUpdateChecker {
         let addins_needing_updates =
             Self::detect_addins_needing_update(&addins, &current_local_addins)?;
 
-        // Only check for addins needing installs if the user is NOT an admin:
-        let mut addins_needing_installs = Vec::new();
-        if !self.admin_service.is_admin().await {
-            addins_needing_installs = self
-                .allowed_addins_manager
-                .run_check()
-                .await
-                .map_err(|e| e.to_string())?;
-        }
-        // ! Debug print:
-        println!("Addins needing installs: {}", addins_needing_installs.len());
-
-        if addins_needing_updates.is_empty() && addins_needing_installs.is_empty() {
+        if addins_needing_updates.is_empty() {
             pending_updates::clear_pending_updates(&self.pending_updates_state).await;
             return Ok(UpdateResult::NoUpdatesAvailable);
         }
@@ -126,15 +92,9 @@ impl AddinUpdateChecker {
             )
             .await;
             notifications::with(&self.app_handle).update_addin_pending(&addins_needing_updates);
-            notifications::with(&self.app_handle).install_addin_pending(&addins_needing_installs);
-            // notifications::with(&self.app_handle).pending_update(&addins_needing_updates);
             return Ok(UpdateResult::RevitIsOpen);
         }
         self.apply_updates(addins_needing_updates).await;
-        // Apply all of the installs:
-        for install in addins_needing_installs.iter() {
-            install.execute().await.map_err(|e| e.to_string())?;
-        }
 
         pending_updates::clear_pending_updates(&self.pending_updates_state).await;
         Ok(UpdateResult::Updated)
