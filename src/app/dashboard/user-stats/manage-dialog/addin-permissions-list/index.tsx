@@ -51,7 +51,7 @@ export default function AddinPermissionsList() {
       try {
         await getTauriCommands().setBlockedAddinPathsForUser(
           userEmail,
-          tempBlockedAddinPaths
+          tempBlockedAddinPaths,
         );
         manageDialog.setIsVisible(false);
       } catch (error) {

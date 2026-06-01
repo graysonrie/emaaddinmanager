@@ -340,6 +340,16 @@ body,
   z-index: 60 !important;
 }
 
+/* Radix positions popper content (context menus, dropdowns, popovers, tooltips,
+   selects) via an inline `transform` on this wrapper. The global
+   `* { transition: ...transform... }` rule would animate that transform from the
+   top-left when the overlay opens, making it "fly into place". Disabling
+   transitions on the wrapper keeps positioning instant while the inner content's
+   own fade/zoom enter animations still play. */
+[data-radix-popper-content-wrapper] {
+  transition: none !important;
+}
+
 /* Smooth transitions for dropdown elements */
 .dropdown-transition {
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);

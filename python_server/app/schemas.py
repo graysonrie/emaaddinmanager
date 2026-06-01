@@ -67,6 +67,16 @@ class SetBlockedPathsRequest(CamelModel):
     paths: list[str]
 
 
+class BlockPathForAllRequest(CamelModel):
+    path: str
+    # Emails that should NOT be blocked (e.g. admins).
+    exclude_emails: list[str] = []
+
+
+class UnblockPathForAllRequest(CamelModel):
+    path: str
+
+
 
 # --- user_metadata ---
 

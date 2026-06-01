@@ -44,4 +44,17 @@ impl AdminService {
     pub fn is_other_admin(&self, user_email: &str) -> bool {
         ADMIN_USER_EMAILS.contains(&user_email)
     }
+
+    /// Returns the de-duplicated union of all admin and super-admin emails.
+    /// Used to exclude admins from bulk operations such as "block for all users".
+    pub fn all_admin_emails(&self) -> Vec<String> {
+        let mut emails: Vec<String> = ADMIN_USER_EMAILS
+            .iter()
+            .chain(SUPER_ADMIN_USER_EMAILS.iter())
+            .map(|email| email.to_string())
+            .collect();
+        emails.sort();
+        emails.dedup();
+        emails
+    }
 }

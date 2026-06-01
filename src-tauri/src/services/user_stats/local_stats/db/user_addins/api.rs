@@ -81,4 +81,33 @@ impl UserAddinsTable {
             .await
             .map_err(UserAddinsError::Request)
     }
+
+    /// Blocks the given addin path for every user, except those in `exclude_emails`.
+    pub async fn block_addin_path_for_all_users(
+        &self,
+        path: String,
+        exclude_emails: Vec<String>,
+    ) -> Result<(), UserAddinsError> {
+        self.client
+            .post_no_content(
+                "/user-addins/block-path-for-all",
+                &json!({ "path": path, "excludeEmails": exclude_emails }),
+            )
+            .await
+            .map_err(UserAddinsError::Request)
+    }
+
+    /// Unblocks the given addin path for every user.
+    pub async fn unblock_addin_path_for_all_users(
+        &self,
+        path: String,
+    ) -> Result<(), UserAddinsError> {
+        self.client
+            .post_no_content(
+                "/user-addins/unblock-path-for-all",
+                &json!({ "path": path }),
+            )
+            .await
+            .map_err(UserAddinsError::Request)
+    }
 }

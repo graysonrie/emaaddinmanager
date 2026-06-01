@@ -62,6 +62,10 @@ interface TauriCommands {
     userEmail: string,
     addinPaths: string[]
   ) => Promise<void>;
+  /** Blocks an addin path for all users except admins. */
+  blockAddinPathForAllUsers: (addinPath: string) => Promise<void>;
+  /** Unblocks an addin path for all users. */
+  unblockAddinPathForAllUsers: (addinPath: string) => Promise<void>;
   isUserAdmin: () => Promise<boolean>;
   isUserSuperAdmin: () => Promise<boolean>;
 
@@ -304,6 +308,16 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const blockAddinPathForAllUsers = async (addinPath: string) => {
+    return await invoke<void>("block_addin_path_for_all_users", { addinPath });
+  };
+
+  const unblockAddinPathForAllUsers = async (addinPath: string) => {
+    return await invoke<void>("unblock_addin_path_for_all_users", {
+      addinPath,
+    });
+  };
+
   const isUserAdmin = async () => {
     return await invoke<boolean>("is_user_admin");
   };
@@ -478,6 +492,8 @@ export default function getTauriCommands(): TauriCommands {
     getUser,
     setAllowedAddinPathsForUser,
     setBlockedAddinPathsForUser,
+    blockAddinPathForAllUsers,
+    unblockAddinPathForAllUsers,
     isUserAdmin,
     isUserSuperAdmin,
     isOtherUserAdmin,
