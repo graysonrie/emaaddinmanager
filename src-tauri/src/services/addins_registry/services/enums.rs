@@ -2,7 +2,9 @@ use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum GetAddinsError {
+    #[allow(dead_code)]
     LocalDbError(String),
+    #[allow(dead_code)]
     RegistryNotFound(String),
     InvalidPath,
 }
@@ -14,6 +16,7 @@ impl Display for GetAddinsError {
 
 #[derive(Debug)]
 pub enum InstallAddinError {
+    #[allow(dead_code)]
     InstallationError(String),
 }
 impl Display for InstallAddinError {
@@ -24,7 +27,9 @@ impl Display for InstallAddinError {
 
 #[derive(Debug)]
 pub enum DelistAddinError {
+    #[allow(dead_code)]
     LocalDbError(String),
+    #[allow(dead_code)]
     DirectoryRecursionError(String),
 }
 impl Display for DelistAddinError {
@@ -35,10 +40,13 @@ impl Display for DelistAddinError {
 
 #[derive(Debug)]
 pub enum AddCategoryError {
+    #[allow(dead_code)]
     LocalDbError(String),
+    #[allow(dead_code)]
     RegistryNotFound(String),
     InvalidPath,
     CategoryNotInsideRegistry,
+    #[allow(dead_code)]
     FileError(std::io::Error),
 }
 impl Display for AddCategoryError {
@@ -49,7 +57,9 @@ impl Display for AddCategoryError {
 
 #[derive(Debug)]
 pub enum GetCategoriesError {
+    #[allow(dead_code)]
     LocalDbError(String),
+    #[allow(dead_code)]
     FileError(std::io::Error),
 }
 impl Display for GetCategoriesError {

@@ -11,12 +11,10 @@ export default function SettingsPage() {
     <PageWrapper>
       <div className="flex flex-col h-full  ">
         {/* Header */}
-        <div className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className=" bg-background ">
           <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold">Settings</h1>
-            </div>
-            {/* <ThemeToggle /> */}
+            <div className="flex items-center space-x-4"></div>
+            <ThemeToggle />
           </div>
         </div>
 

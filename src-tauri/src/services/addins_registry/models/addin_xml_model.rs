@@ -48,14 +48,14 @@ impl RevitAddIns {
         Ok(addins)
     }
 
-    /// Serialize the RevitAddIns struct back to XML string
-    pub fn to_xml(&self) -> Result<String, Box<dyn std::error::Error>> {
-        let xml = quick_xml::se::to_string(self)?;
-        Ok(format!(
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n{}",
-            xml
-        ))
-    }
+    // Serialize the RevitAddIns struct back to XML string
+    // pub fn to_xml(&self) -> Result<String, Box<dyn std::error::Error>> {
+    //     let xml = quick_xml::se::to_string(self)?;
+    //     Ok(format!(
+    //         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n{}",
+    //         xml
+    //     ))
+    // }
 }
 
 #[cfg(test)]

@@ -10,9 +10,8 @@ pub struct UserAddinsTable {
 
 #[derive(Debug)]
 pub enum UserAddinsError {
-    UserNotFound,
+    #[allow(dead_code)]
     Request(String),
-    SerializationError(String),
 }
 impl Display for UserAddinsError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

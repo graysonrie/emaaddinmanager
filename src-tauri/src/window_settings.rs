@@ -6,8 +6,9 @@ pub fn set_up_window_vibrancy(window: &WebviewWindow) {
     window_vibrancy::apply_vibrancy(window, NSVisualEffectMaterial::HudWindow, None, None)
         .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
+    // Neutral tint until the frontend syncs from next-themes (see WindowThemeSync).
     #[cfg(target_os = "windows")]
-    window_vibrancy::apply_mica(window, Some(true))
+    window_vibrancy::apply_mica(window, None)
         .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
 }
 

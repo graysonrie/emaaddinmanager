@@ -11,6 +11,7 @@ use crate::services::{
 
 #[derive(Debug)]
 pub enum CheckForUpdatesError {
+    #[allow(dead_code)]
     Update(String),
 }
 impl Display for CheckForUpdatesError {

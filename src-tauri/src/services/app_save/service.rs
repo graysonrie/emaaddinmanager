@@ -6,6 +6,7 @@ use crate::{constants, services::app_save::core::helper::create_file};
 
 pub enum AppSavePath {
     AppData,
+    #[allow(dead_code)]
     Other(PathBuf),
 }
 pub struct AppSaveService {

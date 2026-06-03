@@ -13,7 +13,7 @@ pub fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
     // Split into files and directories
     let (dirs, files): (Vec<_>, Vec<_>) = entries
         .into_iter()
-        .partition(|(path, file_type)| file_type.as_ref().map(|ft| ft.is_dir()).unwrap_or(false));
+        .partition(|(_path, file_type)| file_type.as_ref().map(|ft| ft.is_dir()).unwrap_or(false));
 
     // Copy files in parallel
     files.par_iter().try_for_each(|(src_path, _)| {

@@ -1,7 +1,13 @@
 import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
-import { Blocks, ChevronLeft, ChevronRight, EyeOff, Folder } from "lucide-react";
+import {
+  Blocks,
+  ChevronLeft,
+  ChevronRight,
+  EyeOff,
+  Folder,
+} from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 export interface FilePathNode {
@@ -31,7 +37,7 @@ type Props<T extends FilePathNode> = {
 
 function findNodeByPath<T extends FilePathNode>(
   nodes: TreeNode<T>[],
-  path: string[]
+  path: string[],
 ): TreeNode<T>[] {
   let current = nodes;
   for (const part of path) {
@@ -62,7 +68,7 @@ function parseRootPath(rootPath?: string): string[] {
 
 function findRelativePathFromRoot(
   fullPath: string,
-  treeRoot: string
+  treeRoot: string,
 ): string[] {
   // Normalize both paths to forward slashes
   const normalizedFullPath = fullPath.replace(/\\/g, "/");
@@ -74,7 +80,7 @@ function findRelativePathFromRoot(
   // Try exact match first
   if (normalizedFullPath.startsWith(normalizedTreeRoot)) {
     const relativePath = normalizedFullPath.substring(
-      normalizedTreeRoot.length
+      normalizedTreeRoot.length,
     );
     const cleanRelativePath = relativePath.startsWith("/")
       ? relativePath.substring(1)
@@ -92,7 +98,7 @@ function findRelativePathFromRoot(
 
   if (fullPathWithoutDrive.startsWith(treeRootWithoutDrive)) {
     const relativePath = fullPathWithoutDrive.substring(
-      treeRootWithoutDrive.length
+      treeRootWithoutDrive.length,
     );
     const cleanRelativePath = relativePath.startsWith("/")
       ? relativePath.substring(1)
@@ -111,7 +117,7 @@ function findRelativePathFromRoot(
 
 function findPathInTree<T extends FilePathNode>(
   nodes: TreeNode<T>[],
-  targetPath: string
+  targetPath: string,
 ): string[] {
   // Normalize the target path
   const normalizedTarget = targetPath.replace(/\\/g, "/");
@@ -120,7 +126,7 @@ function findPathInTree<T extends FilePathNode>(
   // Search through the tree to find a node that matches the target path
   function searchNode(
     node: TreeNode<T>,
-    currentPath: string[]
+    currentPath: string[],
   ): string[] | null {
     const nodePath = currentPath.join("/");
     const nodeFileTreePath = node.data.fileTreePath.replace(/\\/g, "/");
@@ -170,7 +176,7 @@ function findPathInTree<T extends FilePathNode>(
   function findFolderByName(
     node: TreeNode<T>,
     currentPath: string[],
-    targetFolderName: string
+    targetFolderName: string,
   ): string[] | null {
     // Check if this node's name matches the target folder
     if (node.name === targetFolderName) {
@@ -184,7 +190,7 @@ function findPathInTree<T extends FilePathNode>(
         const result = findFolderByName(
           child,
           [...currentPath, child.name],
-          targetFolderName
+          targetFolderName,
         );
         if (result) return result;
       }
@@ -270,7 +276,7 @@ export default function FileTreeView<T extends FilePathNode>({
     if (treeRoot && treeRoot.length > 0) {
       const relativePath = findRelativePathFromRoot(
         rules.autoSelectPath,
-        treeRoot
+        treeRoot,
       );
       if (relativePath.length > 0) {
         console.log("Found auto-select relative path:", relativePath);
@@ -294,7 +300,7 @@ export default function FileTreeView<T extends FilePathNode>({
       }
       return node.children && node.children.length > 0;
     },
-    [rules?.onlyFolders]
+    [rules?.onlyFolders],
   );
 
   // Initialize path based on root path or first folder setting
@@ -312,7 +318,7 @@ export default function FileTreeView<T extends FilePathNode>({
         console.warn("Root path parts:", rootPathParts);
         console.warn(
           "Available nodes:",
-          nodes.map((n) => n.name)
+          nodes.map((n) => n.name),
         );
         // Fall back to empty path if root path doesn't exist
         setPath([]);
@@ -494,9 +500,7 @@ export default function FileTreeView<T extends FilePathNode>({
             >
               <button
                 className={`w-full h-full text-left rounded-lg border transition cursor-pointer ${
-                  gridView
-                    ? "flex flex-col items-start gap-2 p-4"
-                    : "px-4 py-3"
+                  gridView ? "flex flex-col items-start gap-2 p-4" : "px-4 py-3"
                 } ${
                   selectedNode === node.name
                     ? "border-primary bg-primary/10"
@@ -556,8 +560,10 @@ export default function FileTreeView<T extends FilePathNode>({
                 <li key={nodeName}>
                   <button
                     disabled={disabled}
-                    title={disabled ? "Blocked by your administrator" : undefined}
-                    className={`w-full h-full text-left rounded-lg bg-card border transition ${
+                    title={
+                      disabled ? "Blocked by your administrator" : undefined
+                    }
+                    className={`w-full h-full text-left bg-card rounded-lg border shadow-sm transition ${
                       disabled
                         ? "opacity-50 cursor-not-allowed text-muted-foreground"
                         : "hover:bg-primary/10 cursor-pointer"

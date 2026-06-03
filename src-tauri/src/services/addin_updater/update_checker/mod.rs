@@ -111,10 +111,12 @@ impl AddinUpdateChecker {
                     );
                 }
                 Err(e) => {
-                    app_handle.emit(
+                    if let Err(e) = app_handle.emit(
                         "UpdateCheckerError",
                         format!("Error checking for updates: {e}"),
-                    );
+                    ) {
+                        eprintln!("Warning: error emitting update checker error: {}", e);
+                    }
                 }
             }
             // Try to apply pending updates if Revit is now closed
