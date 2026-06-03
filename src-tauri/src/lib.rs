@@ -15,7 +15,6 @@ use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 
 mod window_settings;
-use window_settings::*;
 mod app_service_container;
 mod app_updater;
 mod constants;
@@ -107,10 +106,6 @@ pub fn run() {
             login_set_password,
             login_verify_password_for_user,
             login_set_temp_password_for_user,
-            // Window
-            apply_window_light,
-            apply_window_dark,
-            apply_window_system
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -145,6 +140,7 @@ pub fn run() {
             let window = app.get_webview_window("main").unwrap();
 
             window_settings::set_up_window_vibrancy(&window);
+            window_settings::register_system_mica_listener(&window);
 
             Ok(())
         })

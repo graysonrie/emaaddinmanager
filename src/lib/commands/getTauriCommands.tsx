@@ -112,9 +112,6 @@ interface TauriCommands {
     password: string,
   ) => Promise<boolean>;
   loginSetTempPasswordForUser: (userEmail: string) => Promise<void>;
-  applyWindowLight: () => Promise<void>;
-  applyWindowDark: () => Promise<void>;
-  applyWindowSystem: () => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -467,18 +464,6 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
-  const applyWindowLight = async () => {
-    return await invoke<void>("apply_window_light");
-  };
-
-  const applyWindowDark = async () => {
-    return await invoke<void>("apply_window_dark");
-  };
-
-  const applyWindowSystem = async () => {
-    return await invoke<void>("apply_window_system");
-  };
-
   return {
     kvStoreSet,
     kvStoreGet,
@@ -537,8 +522,5 @@ export default function getTauriCommands(): TauriCommands {
     loginSetPassword,
     loginVerifyPasswordForUser,
     loginSetTempPasswordForUser,
-    applyWindowLight,
-    applyWindowDark,
-    applyWindowSystem,
   };
 }
