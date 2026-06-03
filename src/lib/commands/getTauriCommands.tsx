@@ -27,13 +27,13 @@ interface TauriCommands {
   delistAddin: (addin: AddinModel, registryPath: string) => Promise<void>;
   getCategories: (path: string) => Promise<CategoryModel[]>;
   uninstallAddins: (
-    uninstallRequests: UninstallAddinRequestModel[]
+    uninstallRequests: UninstallAddinRequestModel[],
   ) => Promise<void>;
   exportAddin: (
     projectDir: string,
     addinFileInfo: SimplifiedAddinInfoModel,
     extraDlls: string[],
-    destinationDir: string
+    destinationDir: string,
   ) => Promise<ErrorList>;
   getAddinFileInfo: (projectDir: string) => Promise<SimplifiedAddinInfoModel>;
   getAllProjectDlls: (projectDir: string) => Promise<DllModel[]>;
@@ -51,16 +51,16 @@ interface TauriCommands {
   registerUser: (
     userEmail: string,
     userName: string,
-    discipline: string
+    discipline: string,
   ) => Promise<UserModel>;
   getUser: (userEmail: string) => Promise<UserModel | undefined>;
   setAllowedAddinPathsForUser: (
     userEmail: string,
-    addinPaths: string[]
+    addinPaths: string[],
   ) => Promise<void>;
   setBlockedAddinPathsForUser: (
     userEmail: string,
-    addinPaths: string[]
+    addinPaths: string[],
   ) => Promise<void>;
   /** Blocks an addin path for all users except admins. */
   blockAddinPathForAllUsers: (addinPath: string) => Promise<void>;
@@ -75,20 +75,20 @@ interface TauriCommands {
   unregisterUser: (userEmail: string) => Promise<void>;
   createPackageForRegistryAddin: (
     addin: AddinModel,
-    request: CreateAddinPackageRequestModel
+    request: CreateAddinPackageRequestModel,
   ) => Promise<void>;
   getAllAddinPackages: () => Promise<AddinPackageInfoModel[]>;
   getPackageInfoForRegistryAddin: (
-    addin: AddinModel
+    addin: AddinModel,
   ) => Promise<AddinPackageInfoModel | undefined>;
   checkFileExists: (filePath: string) => Promise<boolean>;
   loadImageDataForPackage: (
-    pkg: AddinPackageInfoModel
+    pkg: AddinPackageInfoModel,
   ) => Promise<[number[], string]>;
   openHelpFileForPackage: (pkg: AddinPackageInfoModel) => Promise<void>;
   getDevVisualStudioTemplates: () => Promise<VsTemplateModel[]>;
   installDevVisualStudioTemplates: (
-    templates: VsTemplateModel[]
+    templates: VsTemplateModel[],
   ) => Promise<void>;
   getAllDevCodeSnippets: () => Promise<CodeSnippetAndGroupsModel>;
   addDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
@@ -96,7 +96,7 @@ interface TauriCommands {
   removeDevCodeSnippet: (snippet: CodeSnippetModel) => Promise<void>;
   editDevCodeSnippet: (
     oldSnippet: CodeSnippetModel,
-    newSnippet: CodeSnippetModel
+    newSnippet: CodeSnippetModel,
   ) => Promise<void>;
   removeDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
   /** Throws an error if the server is not connected */
@@ -109,9 +109,12 @@ interface TauriCommands {
   loginSetPassword: (password: string) => Promise<void>;
   loginVerifyPasswordForUser: (
     userEmail: string,
-    password: string
+    password: string,
   ) => Promise<boolean>;
   loginSetTempPasswordForUser: (userEmail: string) => Promise<void>;
+  applyWindowLight: () => Promise<void>;
+  applyWindowDark: () => Promise<void>;
+  applyWindowSystem: () => Promise<void>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -134,7 +137,7 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const kvStoreSubscribeToKey = async <T,>(
-    key: string
+    key: string,
   ): Promise<KvSubscriptionModel<T>> => {
     return await invoke<KvSubscriptionModel<T>>("kv_store_subscribe_to_key", {
       key,
@@ -198,7 +201,7 @@ export default function getTauriCommands(): TauriCommands {
 
   // Uninstalls the addin for the given Revit versions locally
   const uninstallAddins = async (
-    uninstallRequests: UninstallAddinRequestModel[]
+    uninstallRequests: UninstallAddinRequestModel[],
   ) => {
     try {
       return await invoke<void>("uninstall_addins", { uninstallRequests });
@@ -212,7 +215,7 @@ export default function getTauriCommands(): TauriCommands {
     projectDir: string,
     addinFileInfo: SimplifiedAddinInfoModel,
     extraDlls: string[],
-    destinationDir: string
+    destinationDir: string,
   ) => {
     return await invoke<ErrorList>("export_addin", {
       projectDir,
@@ -275,7 +278,7 @@ export default function getTauriCommands(): TauriCommands {
   const registerUser = async (
     userEmail: string,
     userName: string,
-    userDiscipline: string
+    userDiscipline: string,
   ) => {
     return await invoke<UserModel>("register_user", {
       userEmail,
@@ -290,7 +293,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const setAllowedAddinPathsForUser = async (
     userEmail: string,
-    addinPaths: string[]
+    addinPaths: string[],
   ) => {
     return await invoke<void>("set_allowed_addin_paths", {
       userEmail,
@@ -300,7 +303,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const setBlockedAddinPathsForUser = async (
     userEmail: string,
-    addinPaths: string[]
+    addinPaths: string[],
   ) => {
     return await invoke<void>("set_blocked_addin_paths", {
       userEmail,
@@ -340,7 +343,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const createPackageForRegistryAddin = async (
     addin: AddinModel,
-    request: CreateAddinPackageRequestModel
+    request: CreateAddinPackageRequestModel,
   ) => {
     return await invoke<void>("create_package_for_registry_addin", {
       addin,
@@ -355,7 +358,7 @@ export default function getTauriCommands(): TauriCommands {
   const getPackageInfoForRegistryAddin = async (addin: AddinModel) => {
     return await invoke<AddinPackageInfoModel | undefined>(
       "get_package_info_for_registry_addin",
-      { addin }
+      { addin },
     );
   };
 
@@ -378,7 +381,7 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const installDevVisualStudioTemplates = async (
-    templates: VsTemplateModel[]
+    templates: VsTemplateModel[],
   ) => {
     return await invoke<void>("install_dev_visual_studio_templates", {
       templates,
@@ -399,7 +402,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const editDevCodeSnippet = async (
     oldSnippet: CodeSnippetModel,
-    newSnippet: CodeSnippetModel
+    newSnippet: CodeSnippetModel,
   ) => {
     return await invoke<void>("edit_dev_code_snippet", {
       oldSnippet,
@@ -449,7 +452,7 @@ export default function getTauriCommands(): TauriCommands {
 
   const loginVerifyPasswordForUser = async (
     userEmail: string,
-    password: string
+    password: string,
   ) => {
     return await invoke<boolean>("login_verify_password_for_user", {
       userEmail,
@@ -462,6 +465,18 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("login_set_temp_password_for_user", {
       userEmail,
     });
+  };
+
+  const applyWindowLight = async () => {
+    return await invoke<void>("apply_window_light");
+  };
+
+  const applyWindowDark = async () => {
+    return await invoke<void>("apply_window_dark");
+  };
+
+  const applyWindowSystem = async () => {
+    return await invoke<void>("apply_window_system");
   };
 
   return {
@@ -522,5 +537,8 @@ export default function getTauriCommands(): TauriCommands {
     loginSetPassword,
     loginVerifyPasswordForUser,
     loginSetTempPasswordForUser,
+    applyWindowLight,
+    applyWindowDark,
+    applyWindowSystem,
   };
 }
