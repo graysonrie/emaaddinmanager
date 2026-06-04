@@ -184,14 +184,6 @@ impl LocalAddinsService {
         }))
     }
 
-    /// Checks if an addin with the given name, vendor, and addinType is installed locally
-    pub fn is_addin_installed_locally_model(addin: &AddinModel) -> Result<bool, String> {
-        let name = &addin.name;
-        let vendor = &addin.vendor;
-        let addin_type = &addin.addin_type;
-        Self::is_addin_installed_locally(name, vendor, addin_type)
-    }
-
     pub fn install_addin(
         &self,
         addin: &AddinModel,

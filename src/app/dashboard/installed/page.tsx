@@ -7,6 +7,7 @@ import AddinGroupCard from "./AddinGroupCard";
 import FailedToInstallAddinDialog from "@/app/shared/FailedToUninstallAddinDialog";
 import { useInstalledAddinsStore } from "./store";
 import PageWrapper from "@/components/PageWrapper";
+import { Label } from "@/components/ui/label";
 
 /** Page for the user's locally installed addins
  *
@@ -59,7 +60,7 @@ export default function InstalledPage() {
               Your locally installed Revit addins, grouped by Revit versions.
             </p>
           </div>
-          <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar">
+          <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar font-sans">
             {groupedAddins.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-muted-foreground">
@@ -68,6 +69,9 @@ export default function InstalledPage() {
                     No locally installed addins were detected. Make sure you
                     have Revit addins installed in the standard location.
                   </p>
+                  <a href="/dashboard/library" className="text-primary underline">
+                    Visit the library to browse and install addins
+                  </a>
                 </div>
               </div>
             ) : (

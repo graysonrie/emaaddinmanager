@@ -7,7 +7,6 @@ use super::{
 use crate::{
     models::kv_store_value::KvStoreValue, services::local_db::table_creator::generate_table_lenient,
 };
-use print_err::print_err;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{de::DeserializeOwned, Serialize};
 use std::{fmt::Debug, sync::Arc};
@@ -25,7 +24,10 @@ pub struct AppKvStoreTable {
 }
 
 impl AppKvStoreTable {
-    pub async fn new_async(db: Arc<DatabaseConnection>, app_handle: AppHandle) -> Result<Self, String> {
+    pub async fn new_async(
+        db: Arc<DatabaseConnection>,
+        app_handle: AppHandle,
+    ) -> Result<Self, String> {
         generate_table_lenient(&db, kv_pair::Entity).await?;
 
         Ok(Self {
@@ -116,54 +118,48 @@ impl AppKvStoreTable {
         }
     }
 
-    /// Retrieve the value with the certain key in the store, given that it exists and it is in the format you want it in
-    ///
-    /// Not necessarily an expensive operation, as results just get cached for future requests. Though, the underlying JSON has to be deserialized every time.
-    pub async fn get_or_create_default<T>(&self, key: &str) -> Result<T, String>
-    where
-        T: DeserializeOwned + Serialize + Clone + Default + Debug,
-    {
-        return self.get_or_create(key, T::default()).await;
-    }
+    // pub async fn get_or_create_default<T>(&self, key: &str) -> Result<T, String>
+    // where
+    //     T: DeserializeOwned + Serialize + Clone + Default + Debug,
+    // {
+    //     return self.get_or_create(key, T::default()).await;
+    // }
 
-    /// Retrieve the value with the certain key in the store, given that it exists and it is in the format you want it in
-    ///
-    /// Not necessarily an expensive operation, as results just get cached for future requests. Though, the underlying JSON has to be deserialized every time.
-    pub async fn get_or_create<T>(&self, key: &str, default: T) -> Result<T, String>
-    where
-        T: DeserializeOwned + Serialize + Clone + Debug,
-    {
-        // First, check and see if the subscription storage has the key:
-        let val = match self.subscriptions.get_key_status(key).await {
-            Some(value) => {
-                // The key exists in temporary storage. Good
-                (*value).clone()
-            }
-            None => {
-                // The key doesn't exist in the storage, but it might exist in the database
-                match self.get_db(key).await? {
-                    Some(value) => {
-                        // The key exists in the database, but not in the temporary storage,
-                        // so update the temporary storage to reflect the database:
-                        self.subscriptions.key_changed(key, value.clone()).await;
-                        value
-                    }
-                    None => {
-                        // The key does not exist in the database or the temporary storage
-                        print_err(
-                            "AppKvStore:GetOrCreate",
-                            self.set(key.to_string(), default.clone()).await,
-                        );
-                        serde_json::to_value(default)
-                            .expect("Could not convert default value to JSON")
-                    }
-                }
-            }
-        };
+    // pub async fn get_or_create<T>(&self, key: &str, default: T) -> Result<T, String>
+    // where
+    //     T: DeserializeOwned + Serialize + Clone + Debug,
+    // {
+    //     // First, check and see if the subscription storage has the key:
+    //     let val = match self.subscriptions.get_key_status(key).await {
+    //         Some(value) => {
+    //             // The key exists in temporary storage. Good
+    //             (*value).clone()
+    //         }
+    //         None => {
+    //             // The key doesn't exist in the storage, but it might exist in the database
+    //             match self.get_db(key).await? {
+    //                 Some(value) => {
+    //                     // The key exists in the database, but not in the temporary storage,
+    //                     // so update the temporary storage to reflect the database:
+    //                     self.subscriptions.key_changed(key, value.clone()).await;
+    //                     value
+    //                 }
+    //                 None => {
+    //                     // The key does not exist in the database or the temporary storage
+    //                     print_err(
+    //                         "AppKvStore:GetOrCreate",
+    //                         self.set(key.to_string(), default.clone()).await,
+    //                     );
+    //                     serde_json::to_value(default)
+    //                         .expect("Could not convert default value to JSON")
+    //                 }
+    //             }
+    //         }
+    //     };
 
-        let new_value = serde_json::from_value(val).map_err(|err| err.to_string())?;
-        Ok(new_value)
-    }
+    //     let new_value = serde_json::from_value(val).map_err(|err| err.to_string())?;
+    //     Ok(new_value)
+    // }
 
     /// Where `key` is the key you want to check and `value` is the current JSON data that the caller has.
     ///
@@ -196,31 +192,22 @@ impl AppKvStoreTable {
         Ok(false)
     }
 
-    /// Check if the value currently stored for a key differs from the value that the caller currently has.
-    ///
-    /// Returns `true` if the old and new data differ
-    async fn has_value_changed(&self, key: &str, old_value: &serde_json::Value) -> bool {
-        if let Some(value) = self.subscriptions.get_key_status(key).await {
-            return *old_value != *value;
-        }
-        false
-    }
+    // async fn has_value_changed(&self, key: &str, old_value: &serde_json::Value) -> bool {
+    //     if let Some(value) = self.subscriptions.get_key_status(key).await {
+    //         return *old_value != *value;
+    //     }
+    //     false
+    // }
 
     /// Returns the event identifier
     pub async fn tauri_subscribe_to_key(&self, key: &str) -> String {
         self.tauri_subscriptions.add_subscription(key).await
     }
 
-    /// Returns the version of the app. If the version key is not present, None is returned
-    pub async fn get_app_version(&self) -> Result<String, VersionErr> {
-        self.get("version")
-            .await
-            .map_err(VersionErr::DbErr)?
-            .map_or_else(|| Err(VersionErr::VersionKeyNotPresentErr), Ok)
-    }
-}
-
-pub enum VersionErr {
-    VersionKeyNotPresentErr,
-    DbErr(String),
+    // pub async fn get_app_version(&self) -> Result<String, VersionErr> {
+    //     self.get("version")
+    //         .await
+    //         .map_err(VersionErr::DbErr)?
+    //         .map_or_else(|| Err(VersionErr::VersionKeyNotPresentErr), Ok)
+    // }
 }

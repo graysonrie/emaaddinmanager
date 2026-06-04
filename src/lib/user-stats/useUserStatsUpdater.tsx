@@ -19,8 +19,8 @@ export default function useUserStatsUpdater() {
     // Initial update
     updateUserStats();
 
-    // Set up interval for updates every 30 seconds
-    const intervalId = setInterval(updateUserStats, 30000); // 30 seconds
+    // Set up interval for updates every 60 seconds
+    const intervalId = setInterval(updateUserStats, 60000); // 60 seconds
 
     // Cleanup function to clear interval when component unmounts
     return () => {

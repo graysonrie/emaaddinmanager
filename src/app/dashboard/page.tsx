@@ -179,7 +179,6 @@ export default function Home() {
             <>
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-1">Your Addins</h2>
-                <p className="text-muted-foreground mb-4">{description}</p>
               </div>
               <div className="flex flex-col gap-4 overflow-y-auto thin-scrollbar">
                 <AddinBadgesDisplay allowedAddins={allowedAddins} />

@@ -3,7 +3,10 @@ use std::sync::Arc;
 use tauri::State;
 
 use crate::services::{
-    admin::addin_permissions::{models::user::UserModel, service::AddinPermissionsService},
+    admin::{
+        addin_permissions::{models::user::UserModel, service::AddinPermissionsService},
+        service::AdminService,
+    },
     user_stats::LocalUserStatsService,
 };
 
@@ -71,5 +74,39 @@ pub async fn set_allowed_addin_paths(
 ) -> Result<(), String> {
     addin_permissions_service
         .set_allowed_addin_paths(user_email, addin_paths)
+        .await
+}
+
+#[tauri::command]
+pub async fn set_blocked_addin_paths(
+    addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
+    user_email: String,
+    addin_paths: Vec<String>,
+) -> Result<(), String> {
+    addin_permissions_service
+        .set_blocked_addin_paths(user_email, addin_paths)
+        .await
+}
+
+#[tauri::command]
+pub async fn block_addin_path_for_all_users(
+    addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
+    admin_service: State<'_, Arc<AdminService>>,
+    addin_path: String,
+) -> Result<(), String> {
+    // Admins are never blocked.
+    let exclude_emails = admin_service.all_admin_emails();
+    addin_permissions_service
+        .block_addin_path_for_all_users(addin_path, exclude_emails)
+        .await
+}
+
+#[tauri::command]
+pub async fn unblock_addin_path_for_all_users(
+    addin_permissions_service: State<'_, Arc<AddinPermissionsService>>,
+    addin_path: String,
+) -> Result<(), String> {
+    addin_permissions_service
+        .unblock_addin_path_for_all_users(addin_path)
         .await
 }

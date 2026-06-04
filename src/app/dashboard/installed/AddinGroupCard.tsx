@@ -54,7 +54,7 @@ export default function AddinGroupCard({
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 font-sans">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <span>{formatRevitVersions(group.revitVersions)}</span>

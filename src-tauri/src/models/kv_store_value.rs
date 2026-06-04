@@ -75,13 +75,4 @@ where
 
         Ok(self.get_data().await)
     }
-
-    /// Only works if you initialized this instance with `new_with_key`, otherwise, this function will panic
-    ///
-    /// This function will panic if there is an error accessing the database. Use get_data_updated for a non-panicking version.
-    pub async fn data_updated(&self) -> T {
-        self.get_data_updated()
-            .await
-            .expect("Failed to access updated KV data")
-    }
 }

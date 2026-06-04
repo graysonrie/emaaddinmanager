@@ -8,10 +8,14 @@ use crate::services::{
     local_addins::service::LocalAddinsService,
 };
 
-/// Recursively search a directory for .addin files
+/// Recursively search a directory for .addin files.
+///
+/// When `is_admin` is false, any folder named "Test" or "Testing" (case
+/// insensitive) is skipped entirely along with its contents.
 pub fn search_directory_recursively(
     dir_path: &Path,
     addins: &mut Vec<AddinModel>,
+    is_admin: bool,
 ) -> Result<(), std::io::Error> {
     let entries = fs::read_dir(dir_path)?;
 
@@ -20,8 +24,13 @@ pub fn search_directory_recursively(
         let path = entry.path();
 
         if path.is_dir() {
+            // Hide test folders from non-admin users.
+            if !is_admin && is_test_folder(&path) {
+                info!("Skipping test folder for non-admin user: {:?}", path);
+                continue;
+            }
             // Recursively search subdirectories
-            if let Err(e) = search_directory_recursively(&path, addins) {
+            if let Err(e) = search_directory_recursively(&path, addins, is_admin) {
                 warn!("Error searching subdirectory {:?}: {}", path, e);
             }
         } else if path.is_file() {
@@ -37,6 +46,17 @@ pub fn search_directory_recursively(
     }
 
     Ok(())
+}
+
+/// Returns true if the directory's name is "Test" or "Testing" (case insensitive).
+fn is_test_folder(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .map(|name| {
+            let lower = name.to_lowercase();
+            lower == "test" || lower == "testing"
+        })
+        .unwrap_or(false)
 }
 
 /// Process a single .addin file and extract addin information

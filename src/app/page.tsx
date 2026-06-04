@@ -22,13 +22,12 @@ export default function Home() {
         await ensureConnectedToServer();
         // throw new Error("Failed to connect to server");
         console.log("Connected to server");
-        router.push("/dashboard");
+        router.push("/dashboard/installed");
       } catch (error) {
         console.warn("Failed to connect to server", error);
         setError({
           message: "Failed to connect to server",
-          details:
-            "Either the network drives are not available or you are trying to connect from a non-work computer, which is currently unsupported.",
+          details: `Either the network drives are not available or you are trying to connect from a non-work computer, which is currently unsupported. Full error: ${error}`,
         });
       }
     };

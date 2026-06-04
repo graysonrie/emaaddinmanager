@@ -16,8 +16,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +30,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
+          forcedTheme="system"
           disableTransitionOnChange
         >
           <div className="flex flex-col h-full w-full">

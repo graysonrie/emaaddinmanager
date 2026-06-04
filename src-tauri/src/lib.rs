@@ -14,6 +14,7 @@ use services::user_stats::tauri_exports::*;
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 
+mod window_settings;
 mod app_service_container;
 mod app_updater;
 mod constants;
@@ -68,6 +69,9 @@ pub fn run() {
             register_user,
             get_user,
             set_allowed_addin_paths,
+            set_blocked_addin_paths,
+            block_addin_path_for_all_users,
+            unblock_addin_path_for_all_users,
             // Admin
             is_user_admin,
             is_user_super_admin,
@@ -134,13 +138,9 @@ pub fn run() {
             app_service_container::initialize_app(app.handle());
 
             let window = app.get_webview_window("main").unwrap();
-            #[cfg(target_os = "macos")]
-            window_vibrancy::apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
-                .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
 
-            #[cfg(target_os = "windows")]
-            window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
-                .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+            window_settings::set_up_window_vibrancy(&window);
+            window_settings::register_system_mica_listener(&window);
 
             Ok(())
         })

@@ -1,12 +1,6 @@
 use tauri::{AppHandle, Emitter};
 
-use crate::services::addin_updater::{
-    models::UpdateNotificationType,
-    update_checker::{
-        allowed_addins_manager::{InstallAddinOperation, Operation},
-        *,
-    },
-};
+use crate::services::addin_updater::{models::UpdateNotificationType, update_checker::*};
 
 pub fn with(app: &AppHandle) -> Notifier {
     Notifier { app: app.clone() }
@@ -37,22 +31,6 @@ impl Notifier {
         }
     }
 
-    pub fn install_addin_pending(&self, install_operations: &[InstallAddinOperation]) {
-        let mut notifications = Vec::new();
-
-        for operation in install_operations {
-            let notification = match operation.operation {
-                Operation::Install => UpdateNotificationModel {
-                    title: format!("{} is ready to be installed", operation.addin.name),
-                    description: "it will be installed once Revit is closed".to_string(),
-                    notification_type: UpdateNotificationType::Warning,
-                },
-            };
-            notifications.push(notification);
-        }
-        self.emit_update(&notifications);
-    }
-
     pub fn update_addin_pending(&self, addins: &[AddinNeedingUpdate]) {
         let mut notifications = Vec::new();
         for addin in addins {
@@ -64,14 +42,5 @@ impl Notifier {
             notifications.push(notification);
         }
         self.emit_update(&notifications);
-    }
-
-    pub fn allowed_addin_installed(&self, addin: &AddinModel) {
-        let notification = UpdateNotificationModel {
-            title: format!("{} installed", addin.name),
-            description: format!("{} is now available in the addin menu", addin.name),
-            notification_type: UpdateNotificationType::Install,
-        };
-        self.emit_update(&[notification]);
     }
 }

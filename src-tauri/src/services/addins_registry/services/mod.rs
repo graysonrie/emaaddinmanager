@@ -1,30 +1,29 @@
 use std::sync::Arc;
 
-use crate::{
-    constants::Fut,
-    services::{
-        addins_registry::models::addin_model::AddinModel,
-        admin::addin_exporter::models::category_model::CategoryModel,
-    },
+use crate::services::{
+    addins_registry::models::addin_model::AddinModel,
+    admin::addin_exporter::models::category_model::CategoryModel,
 };
 mod enums;
 pub mod local_registry;
-pub mod web_registry;
+use async_trait::async_trait;
 pub use enums::*;
 
 pub type AsyncAddinsRegistryServiceType = Arc<dyn AddinsRegistry + Send + Sync + 'static>;
-pub trait AddinsRegistry {
-    fn get_addins(&self) -> Fut<Result<Vec<AddinModel>, GetAddinsError>>;
 
-    fn install_addin(
+#[async_trait]
+pub trait AddinsRegistry {
+    async fn get_addins(&self) -> Result<Vec<AddinModel>, GetAddinsError>;
+
+    async fn install_addin(
         &self,
         addin: AddinModel,
         for_revit_versions: Vec<String>,
-    ) -> Fut<Result<(), InstallAddinError>>;
+    ) -> Result<(), InstallAddinError>;
 
-    fn delist_addin(&self, addin: AddinModel) -> Fut<Result<(), DelistAddinError>>;
+    async fn delist_addin(&self, addin: AddinModel) -> Result<(), DelistAddinError>;
 
-    fn add_category(&self, full_category_path: &str) -> Fut<Result<(), AddCategoryError>>;
+    async fn add_category(&self, full_category_path: &str) -> Result<(), AddCategoryError>;
 
-    fn get_categories(&self) -> Fut<Result<Vec<CategoryModel>, GetCategoriesError>>;
+    async fn get_categories(&self) -> Result<Vec<CategoryModel>, GetCategoriesError>;
 }

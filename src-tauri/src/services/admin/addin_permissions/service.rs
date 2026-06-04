@@ -62,6 +62,43 @@ impl AddinPermissionsService {
             .map_err(|e| e.to_string())
     }
 
+    pub async fn set_blocked_addin_paths(
+        &self,
+        user_email: String,
+        addin_paths: Vec<String>,
+    ) -> Result<(), String> {
+        let table = self.get_table();
+        table
+            .set_blocked_addin_paths(user_email, addin_paths)
+            .await
+            .map_err(|e| e.to_string())
+    }
+
+    /// Blocks an addin path for every user except those in `exclude_emails`.
+    pub async fn block_addin_path_for_all_users(
+        &self,
+        addin_path: String,
+        exclude_emails: Vec<String>,
+    ) -> Result<(), String> {
+        let table = self.get_table();
+        table
+            .block_addin_path_for_all_users(addin_path, exclude_emails)
+            .await
+            .map_err(|e| e.to_string())
+    }
+
+    /// Unblocks an addin path for every user.
+    pub async fn unblock_addin_path_for_all_users(
+        &self,
+        addin_path: String,
+    ) -> Result<(), String> {
+        let table = self.get_table();
+        table
+            .unblock_addin_path_for_all_users(addin_path)
+            .await
+            .map_err(|e| e.to_string())
+    }
+
     fn get_table(&self) -> &UserAddinsTable {
         self.local_stats.stats_db.user_addins_table()
     }

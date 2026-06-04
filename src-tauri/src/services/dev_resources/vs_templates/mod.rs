@@ -13,8 +13,11 @@ use crate::services::{
 pub enum TemplateInstallError {
     VsTemplatesFolderDoesNotExist,
     AppTemplatesFolderDoesNotExist,
+    #[allow(dead_code)]
     TemplateFetchError(String),
+    #[allow(dead_code)]
     TemplateNameNotFound(String),
+    #[allow(dead_code)]
     CopyError(String),
 }
 impl std::fmt::Display for TemplateInstallError {

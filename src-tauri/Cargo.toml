@@ -47,6 +47,8 @@ revit_check = { path = "./crates/revit_check" }
 argon2 = "0.5"
 rand_core = { version = "0.6", features = ["std"] }
 umya-spreadsheet = "2"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+async-trait = "0.1.89"
 
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]

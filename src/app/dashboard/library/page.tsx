@@ -17,6 +17,8 @@ import MessageDialog from "@/components/dialogs/MessageDialog";
 import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
 import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
+import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
+import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -81,8 +83,8 @@ export default function LibraryPage() {
     // Remove the addin from the installingAddins list
     setInstallingAddins(
       installingAddins.filter(
-        (addin) => addin.addinId !== selectedAddin.addinId
-      )
+        (addin) => addin.addinId !== selectedAddin.addinId,
+      ),
     );
     setSelectedAddin({ ...selectedAddin, isInstalledLocally: true });
   };
@@ -112,13 +114,39 @@ export default function LibraryPage() {
     refreshRegistry();
   }, []);
 
+  const userEmail = useConfigValue("userEmail");
+  const [blockedAddinPaths, setBlockedAddinPaths] = useState<string[]>([]);
+  useEffect(() => {
+    if (!userEmail) {
+      setBlockedAddinPaths([]);
+      return;
+    }
+    getTauriCommands()
+      .getUser(userEmail)
+      .then((user) => setBlockedAddinPaths(user?.blockedAddinPaths ?? []))
+      .catch((error) => {
+        console.warn("Failed to load blocked addins for user:", error);
+        setBlockedAddinPaths([]);
+      });
+  }, [userEmail]);
+
+  const isAddinBlocked = (addin: AddinModel) => {
+    if (blockedAddinPaths.length === 0) {
+      return false;
+    }
+    const fullPath = addin.pathToAddinDllFolder.replace(/\\/g, "/");
+    return blockedAddinPaths.some((blockedPath) =>
+      fullPath.includes(blockedPath.replace(/\\/g, "/"))
+    );
+  };
+
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["AddinPackages", "DevResources"],
   };
 
   return (
     <PageWrapper>
-      <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
+      <div className="flex flex-1 min-h-0 px-8 gap-8 h-full font-sans">
         <div className="flex flex-col h-full w-full min-w-70 ">
           <div className="px-8 pt-8 pb-4">
             <h2 className="text-2xl font-bold mb-1">Addin Library</h2>
@@ -129,13 +157,15 @@ export default function LibraryPage() {
           </div>
           <div className="flex flex-1 min-h-0 px-8 pb-8 gap-8">
             {/* Left: Tree View */}
-            <div className="w-full max-w-md flex-shrink-0 overflow-y-auto thin-scrollbar">
+            <div className="w-full flex-1 overflow-y-auto thin-scrollbar">
               <FileTreeView
                 nodes={tree}
                 onSelect={(addin) => setSelectedAddin(addin)}
                 nodeName="Addin"
                 rules={fileTreeRules}
                 treeRoot={root}
+                gridView
+                isItemDisabled={isAddinBlocked}
               />
             </div>
           </div>

@@ -1,7 +1,13 @@
 import { TreeNode } from "@/components/file-tree/builder/tree-builder";
 import { Button } from "@/components/ui/button";
 import { AddinModel } from "@/lib/models/addin.model";
-import { Blocks, ChevronLeft, ChevronRight, EyeOff } from "lucide-react";
+import {
+  Blocks,
+  ChevronLeft,
+  ChevronRight,
+  EyeOff,
+  Folder,
+} from "lucide-react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 export interface FilePathNode {
@@ -25,11 +31,13 @@ type Props<T extends FilePathNode> = {
   nodeName: string;
   rules?: FileTreeRules;
   treeRoot?: string; // Add tree root for path conversion
+  gridView?: boolean; // Render items as a responsive grid of tiles instead of a flat list
+  isItemDisabled?: (data: T) => boolean; // Gray out and disable selection for matching leaf nodes
 };
 
 function findNodeByPath<T extends FilePathNode>(
   nodes: TreeNode<T>[],
-  path: string[]
+  path: string[],
 ): TreeNode<T>[] {
   let current = nodes;
   for (const part of path) {
@@ -60,7 +68,7 @@ function parseRootPath(rootPath?: string): string[] {
 
 function findRelativePathFromRoot(
   fullPath: string,
-  treeRoot: string
+  treeRoot: string,
 ): string[] {
   // Normalize both paths to forward slashes
   const normalizedFullPath = fullPath.replace(/\\/g, "/");
@@ -72,7 +80,7 @@ function findRelativePathFromRoot(
   // Try exact match first
   if (normalizedFullPath.startsWith(normalizedTreeRoot)) {
     const relativePath = normalizedFullPath.substring(
-      normalizedTreeRoot.length
+      normalizedTreeRoot.length,
     );
     const cleanRelativePath = relativePath.startsWith("/")
       ? relativePath.substring(1)
@@ -90,7 +98,7 @@ function findRelativePathFromRoot(
 
   if (fullPathWithoutDrive.startsWith(treeRootWithoutDrive)) {
     const relativePath = fullPathWithoutDrive.substring(
-      treeRootWithoutDrive.length
+      treeRootWithoutDrive.length,
     );
     const cleanRelativePath = relativePath.startsWith("/")
       ? relativePath.substring(1)
@@ -109,7 +117,7 @@ function findRelativePathFromRoot(
 
 function findPathInTree<T extends FilePathNode>(
   nodes: TreeNode<T>[],
-  targetPath: string
+  targetPath: string,
 ): string[] {
   // Normalize the target path
   const normalizedTarget = targetPath.replace(/\\/g, "/");
@@ -118,7 +126,7 @@ function findPathInTree<T extends FilePathNode>(
   // Search through the tree to find a node that matches the target path
   function searchNode(
     node: TreeNode<T>,
-    currentPath: string[]
+    currentPath: string[],
   ): string[] | null {
     const nodePath = currentPath.join("/");
     const nodeFileTreePath = node.data.fileTreePath.replace(/\\/g, "/");
@@ -168,7 +176,7 @@ function findPathInTree<T extends FilePathNode>(
   function findFolderByName(
     node: TreeNode<T>,
     currentPath: string[],
-    targetFolderName: string
+    targetFolderName: string,
   ): string[] | null {
     // Check if this node's name matches the target folder
     if (node.name === targetFolderName) {
@@ -182,7 +190,7 @@ function findPathInTree<T extends FilePathNode>(
         const result = findFolderByName(
           child,
           [...currentPath, child.name],
-          targetFolderName
+          targetFolderName,
         );
         if (result) return result;
       }
@@ -213,6 +221,8 @@ export default function FileTreeView<T extends FilePathNode>({
   rules,
   nodeName,
   treeRoot,
+  gridView = false,
+  isItemDisabled,
 }: Props<T>) {
   const [path, setPath] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -266,7 +276,7 @@ export default function FileTreeView<T extends FilePathNode>({
     if (treeRoot && treeRoot.length > 0) {
       const relativePath = findRelativePathFromRoot(
         rules.autoSelectPath,
-        treeRoot
+        treeRoot,
       );
       if (relativePath.length > 0) {
         console.log("Found auto-select relative path:", relativePath);
@@ -290,7 +300,7 @@ export default function FileTreeView<T extends FilePathNode>({
       }
       return node.children && node.children.length > 0;
     },
-    [rules?.onlyFolders]
+    [rules?.onlyFolders],
   );
 
   // Initialize path based on root path or first folder setting
@@ -308,7 +318,7 @@ export default function FileTreeView<T extends FilePathNode>({
         console.warn("Root path parts:", rootPathParts);
         console.warn(
           "Available nodes:",
-          nodes.map((n) => n.name)
+          nodes.map((n) => n.name),
         );
         // Fall back to empty path if root path doesn't exist
         setPath([]);
@@ -472,7 +482,13 @@ export default function FileTreeView<T extends FilePathNode>({
       </nav>
 
       {/* Folder/Addin List */}
-      <ul className="space-y-2">
+      <ul
+        className={
+          gridView
+            ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+            : "space-y-2"
+        }
+      >
         {filteredNodes.map((node) => {
           const nodeName = node.data.displayName
             ? node.data.displayName
@@ -483,7 +499,9 @@ export default function FileTreeView<T extends FilePathNode>({
               ref={selectedNode === node.name ? autoSelectRef : null}
             >
               <button
-                className={`w-full text-left px-4 py-3 rounded-lg border transition cursor-pointer ${
+                className={`w-full h-full text-left rounded-lg border transition cursor-pointer ${
+                  gridView ? "flex flex-col items-start gap-2 p-4" : "px-4 py-3"
+                } ${
                   selectedNode === node.name
                     ? "border-primary bg-primary/10"
                     : "bg-card hover:bg-accent"
@@ -506,33 +524,84 @@ export default function FileTreeView<T extends FilePathNode>({
                   }
                 }}
               >
-                <div className="flex items-center">
-                  {rules?.overrideShowHiddenFolders && isHiddenFolder(node) && (
-                    <EyeOff className="w-4 h-4 mr-2 text-muted-foreground" />
-                  )}
-                  <span className="font-medium">{node.name}</span>
-                  {!rules?.onlyFolders && (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      (Folder)
-                    </span>
-                  )}
-                </div>
+                {gridView ? (
+                  <>
+                    <Folder className="w-6 h-6 text-muted-foreground" />
+                    <div className="flex items-center w-full">
+                      {rules?.overrideShowHiddenFolders &&
+                        isHiddenFolder(node) && (
+                          <EyeOff className="w-4 h-4 mr-2 text-muted-foreground flex-shrink-0" />
+                        )}
+                      <span className="font-medium break-words">
+                        {node.name}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center">
+                    {rules?.overrideShowHiddenFolders &&
+                      isHiddenFolder(node) && (
+                        <EyeOff className="w-4 h-4 mr-2 text-muted-foreground" />
+                      )}
+                    <span className="font-medium">{node.name}</span>
+                    {!rules?.onlyFolders && (
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        (Folder)
+                      </span>
+                    )}
+                  </div>
+                )}
               </button>
             </li>
           ) : (
-            <li key={nodeName}>
-              <button
-                className="w-full text-left px-4 py-3 rounded-lg bg-card border hover:bg-primary/10 transition cursor-pointer flex items-center"
-                onClick={() => node.data && onSelect?.(node.data)}
-              >
-                <Blocks className="w-4 h-4 mr-2" />
-                <span className="font-medium">{nodeName}</span>
-              </button>
-            </li>
+            (() => {
+              const disabled = isItemDisabled?.(node.data) ?? false;
+              return (
+                <li key={nodeName}>
+                  <button
+                    disabled={disabled}
+                    title={
+                      disabled ? "Blocked by your administrator" : undefined
+                    }
+                    className={`w-full h-full text-left bg-card rounded-lg border shadow-sm transition ${
+                      disabled
+                        ? "opacity-50 cursor-not-allowed text-muted-foreground"
+                        : "hover:bg-primary/10 cursor-pointer"
+                    } ${
+                      gridView
+                        ? "flex flex-col items-start gap-2 p-4"
+                        : "px-4 py-3 flex items-center"
+                    }`}
+                    onClick={() => {
+                      if (disabled) return;
+                      node.data && onSelect?.(node.data);
+                    }}
+                  >
+                    {gridView ? (
+                      <>
+                        <Blocks className="w-6 h-6 text-primary" />
+                        <span className="font-medium break-words">
+                          {nodeName}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Blocks className="w-4 h-4 mr-2" />
+                        <span className="font-medium">{nodeName}</span>
+                      </>
+                    )}
+                  </button>
+                </li>
+              );
+            })()
           );
         })}
         {filteredNodes.length === 0 && (
-          <li className="text-muted-foreground px-4 py-3">
+          <li
+            className={`text-muted-foreground px-4 py-3 ${
+              gridView ? "col-span-full" : ""
+            }`}
+          >
             No items in this folder.
           </li>
         )}

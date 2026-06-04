@@ -44,7 +44,7 @@ export default function AddinPreview({
   }, [selectedAddin]);
 
   const isInstalling = installingAddins.some(
-    (addin) => addin.addinId === selectedAddin?.addinId
+    (addin) => addin.addinId === selectedAddin?.addinId,
   );
 
   const installButton = (selectedAddin: AddinModel) => (
@@ -155,7 +155,7 @@ export default function AddinPreview({
   };
 
   return (
-    <div className="flex flex-1 bg-card border-l p-6 min-w-[300px] max-w-xl shadow-sm h-full overflow-auto font-sans">
+    <div className="flex flex-1  border-l p-6 min-w-[300px] max-w-xl shadow-s h-full overflow-auto font-sans">
       {selectedAddin ? (
         <div className="flex flex-col gap-4 justify-between h-full w-full">
           <div>
