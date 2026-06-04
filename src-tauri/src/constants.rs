@@ -1,4 +1,3 @@
-
 pub const APP_NAME: &str = "EmaAddinManager";
 // pub const TEST_ADDINS_REGISTRY_PATH: &str =
 //     "C:\\Users\\grieger.EMA\\Favorites\\TEST_BasesRevitAddinsRegistry";
@@ -9,7 +8,7 @@ pub const TEMP_PASSWORD: &str = "temp1234";
 
 /// Default base URL of the standalone stats server. Can be overridden at
 /// runtime with the `STATS_SERVER_URL` environment variable.
-pub const DEFAULT_STATS_SERVER_URL: &str = "http://localhost:8000";
+pub const DEFAULT_STATS_SERVER_URL: &str = "https://ema-stats-api.onrender.com";
 
 /// Returns the configured stats server base URL (env override or default).
 pub fn stats_server_url() -> String {
@@ -23,4 +22,3 @@ pub fn stats_server_url() -> String {
 pub fn stats_server_api_key() -> String {
     std::env::var("STATS_SERVER_API_KEY").unwrap_or_else(|_| "GShg96LdalXXFRRUSoNwf0F5CMVnALArRFHzaQyYUcn0EnTrmDyYfnrPiyKcm8IkEt0RKYiD4c36sZaSpGid5VkF9YQxeXLB4OzH9qwD5hkp".to_string())
 }
-
