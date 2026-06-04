@@ -29,6 +29,22 @@ class UserStatsModel(CamelModel):
     disciplines: Any
 
 
+class UserStatsSummaryModel(CamelModel):
+    """Lightweight projection of a user's stats for list/overview views.
+
+    Omits the heavy published/installed addin arrays; callers fetch the full
+    `UserStatsModel` on demand. `installed_addins_count` is computed
+    distinct-by-name to match the client-side dedup behaviour.
+    """
+
+    user_email: str
+    user_name: str
+    disciplines: Any
+    published_addins_count: int
+    installed_addins_count: int
+    app_version: str | None = None
+
+
 class CreateUserStatsRequest(CamelModel):
     user_email: str
     user_name: str

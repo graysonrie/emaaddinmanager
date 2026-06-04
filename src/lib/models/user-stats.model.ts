@@ -8,6 +8,19 @@ export interface UserStatsModel {
   disciplines: string[];
 }
 
+/**
+ * Lightweight projection of a user's stats for list/overview views. Omits the
+ * heavy published/installed addin arrays; full data is fetched on demand.
+ */
+export interface UserStatsSummaryModel {
+  userEmail: string;
+  userName: string;
+  disciplines: string[];
+  publishedAddinsCount: number;
+  installedAddinsCount: number;
+  appVersion: string | null;
+}
+
 export interface PublishedAddinModel {
   addin: AddinModel;
   datePublished: string;

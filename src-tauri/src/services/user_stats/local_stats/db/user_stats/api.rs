@@ -80,6 +80,12 @@ impl UserStatsTable {
         Ok(user_stats)
     }
 
+    /// Lightweight list of every user (counts + app version), without the heavy
+    /// published/installed addin arrays.
+    pub async fn get_user_stats_summary(&self) -> Result<Vec<UserStatsSummaryModel>, String> {
+        self.client.get("/user-stats/summary").await
+    }
+
     // Util:
     fn err_if_str_is_empty(str: &str, value_name: &str) -> Result<(), String> {
         if str.is_empty() {

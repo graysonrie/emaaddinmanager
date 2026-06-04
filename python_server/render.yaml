@@ -12,9 +12,8 @@
 
 databases:
   - name: ema-stats-db
-    # `free` expires ~30 days after creation. Use a paid plan (e.g.
-    # basic-256mb) for anything long-lived / production.
-    plan: free
+    # basic-256mb: paid, persistent Postgres (no 30-day free expiry).
+    plan: basic-256mb
     databaseName: stats
     user: stats
     region: oregon
@@ -23,10 +22,8 @@ services:
   - type: web
     name: ema-stats-api
     runtime: docker
-    # `free` web services sleep after inactivity (cold starts). The in-app
-    # seeding is idempotent, so a cold start just logs "already seeded".
-    # Use `starter` (or higher) for an always-on instance.
-    plan: free
+    # Starter: always-on (no free-tier sleep), 512 MB RAM, 0.5 CPU (~$7/mo).
+    plan: starter
     region: oregon
     # Auto-deploy whenever the `release` branch is pushed.
     branch: release

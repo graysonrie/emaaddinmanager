@@ -73,47 +73,55 @@ docker compose down -v
 docker compose up --build
 ```
 
-## Deploying to Render
+## Deploying on Railway
 
-This repo includes a [`render.yaml`](render.yaml) Blueprint that provisions a
-managed PostgreSQL database and a Docker web service which auto-deploys on every
-push to the `release` branch.
+Production deploys use [Railway](https://railway.app) with GitHub auto-deploys from the
+`release` branch. The repo includes [`railway.toml`](railway.toml) so the API service
+builds from the root `Dockerfile`, runs the container `CMD` (which binds to Railway’s
+`PORT`), and health-checks `/health`.
 
-> Render reads `render.yaml` from the **root** of the connected repository. This
-> assumes the server lives in its own repo with `render.yaml`, `Dockerfile`,
-> `app/`, and `assets/` at the root.
+### One-time project setup
 
-Setup (one time):
+1. **New Project** → **Deploy from GitHub repo** → select this repository.
+2. **+ New** → **Database** → **PostgreSQL** (persistent volume; not defined in
+   `railway.toml`).
+3. On the **API** service (the repo-linked service, not the database):
+   - **Settings → Source** → set **Branch** to `release`.
+   - **Settings → Networking** → **Generate domain** (or attach a custom domain).
+4. **Variables** on the API service:
+   - Reference the Postgres service’s `DATABASE_URL` (Railway injects `postgres://…`;
+     the app rewrites it to `postgresql+psycopg://` automatically).
+   - Set `API_KEY` to a strong secret (must match the Tauri client’s
+     `STATS_SERVER_API_KEY`).
 
-1. Push this code to its own GitHub repo and create a `release` branch.
-2. In the Render dashboard: **New > Blueprint**, pick the repo. Render reads
-   `render.yaml` and shows the database + web service it will create.
-3. When prompted, set the `API_KEY` value (it is marked `sync: false`, so it is
-   never stored in the repo). Use the same value for the Tauri client's
-   `STATS_SERVER_API_KEY`.
-4. Click **Apply**. Render builds the image, creates the database, injects
-   `DATABASE_URL`, and runs the container. On first boot the lifespan seeds the
-   database from the bundled SQLite file (idempotent on later deploys).
+`railway.toml` overrides build/deploy settings in the dashboard for each deployment;
+secrets and the Postgres plugin are still configured in the Railway UI.
 
-After that, every push to `release` triggers an automatic rebuild + deploy.
+### Seeding on Railway
 
-Point the Tauri client at the deployed URL:
+The Docker image includes [`assets/UserStats2.db`](assets/UserStats2.db) via
+`COPY assets` in the `Dockerfile`. That file is tracked in Git, so every build on
+`release` ships the seed database inside the container at `/srv/assets/UserStats2.db`.
 
-- `STATS_SERVER_URL=https://<your-service>.onrender.com`
-- `STATS_SERVER_API_KEY=<the key you set in Render>`
+On the **first** successful start against a **new** Postgres instance, the app imports
+SQLite into Postgres once (same idempotent `seed_metadata` behavior as locally). If the
+seed file were missing from the image, the server would mark the DB as seeded but
+empty—avoid that on the initial production deploy.
 
-Notes:
+To **re-seed** production data, you must reset Postgres (delete/recreate the database
+service or its volume), then redeploy so the first boot runs again.
 
-- The Blueprint uses `free` plans to start. The free database expires ~30 days
-  after creation and free web services sleep when idle (cold starts just log
-  "already seeded"). Upgrade the `plan` values in `render.yaml` for production.
-- `DATABASE_URL` from Render arrives as `postgresql://...`; the config layer
-  rewrites it to the `postgresql+psycopg://` driver automatically.
-- The container binds to Render's injected `$PORT` (defaults to `8000` locally).
-- Schema changes after launch: `create_all` only creates missing tables, it does
-  not `ALTER` existing ones. Once the managed database holds real data, add new
-  columns/tables via a migration tool (e.g. Alembic) rather than relying on
-  startup table creation.
+### After setup
+
+Each push to `release` triggers a new build and deploy. Verify:
+
+```bash
+curl https://<your-railway-domain>/health
+curl -H "X-API-Key: <your key>" https://<your-railway-domain>/user-stats
+```
+
+Check deployment logs for `[seed] First start: importing data from …` on the first deploy,
+or `[seed] Postgres already seeded; skipping …` on later ones.
 
 ## Endpoints
 

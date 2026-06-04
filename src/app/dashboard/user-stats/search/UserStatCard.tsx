@@ -1,9 +1,9 @@
 import UserAvatar from "@/app/shared/UserAvatar";
-import { UserStatsModel } from "@/lib/models/user-stats.model";
+import { UserStatsSummaryModel } from "@/lib/models/user-stats.model";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  userStats: UserStatsModel;
+  userStats: UserStatsSummaryModel;
   onClick: () => void;
 }
 

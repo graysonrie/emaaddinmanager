@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.middleware.gzip import GZipMiddleware
 
 from app.routers import login_info, user_addins, user_metadata, user_stats, users
 from app.seed import run_seed
@@ -14,6 +15,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="EMA Addin Manager Stats Server", lifespan=lifespan)
+
+# Compress JSON responses (above ~500 bytes) to minimize bandwidth usage.
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 app.include_router(user_stats.router)
 app.include_router(user_addins.router)

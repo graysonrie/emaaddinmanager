@@ -10,24 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/app/shared/UserAvatar";
 import { Loader2, Mail } from "lucide-react";
-import { deduplicateInstalledAddins } from "./helpers";
 import { useManageDialogStore } from "../manage-dialog/store";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
-import getMetadataBodyOrDefault from "@/lib/user-stats/user-stats-util";
-import { MetadataBody } from "@/lib/models/user-metadata.model";
 import { getVersion } from "@tauri-apps/api/app";
 
-interface UserFacingStats {
-  userEmail: string;
-  userName: string;
-  publishedAddins: number;
-  installedAddins: number;
-  disciplines: string[];
-  metadataBody: MetadataBody;
-}
-
 export default function BasicUserStatsTable() {
-  const { userStats, loading, error, refresh } = useUserStatsStore();
+  const { summaries, loading, error } = useUserStatsStore();
   const [appVersion, setAppVersion] = useState<string | null>(null);
   const manageDialogStore = useManageDialogStore();
 
@@ -42,28 +30,11 @@ export default function BasicUserStatsTable() {
     manageDialogStore.setUserEmailAndName(userEmail, userName);
   };
 
-  const userFacingStats = useMemo(() => {
-    return userStats?.map((stats) => {
-      const deduplicatedInstalledAddins = deduplicateInstalledAddins(
-        stats.installedAddins
-      );
-      const userFacingStats: UserFacingStats = {
-        userEmail: stats.userEmail,
-        userName: stats.userName,
-        publishedAddins: stats.publishedAddins.length,
-        installedAddins: deduplicatedInstalledAddins.length,
-        disciplines: stats.disciplines,
-        metadataBody: getMetadataBodyOrDefault(stats.metadata),
-      };
-      return userFacingStats;
-    });
-  }, [userStats]);
-
   const handleEmailUsersWithoutLatestVersion = useCallback(() => {
-    if (!userFacingStats || !appVersion) return;
+    if (!summaries || !appVersion) return;
 
-    const usersWithoutLatestVersion = userFacingStats.filter(
-      (stats) => stats.metadataBody.appVersion !== appVersion
+    const usersWithoutLatestVersion = summaries.filter(
+      (stats) => stats.appVersion !== appVersion
     );
 
     if (usersWithoutLatestVersion.length === 0) return;
@@ -79,15 +50,13 @@ export default function BasicUserStatsTable() {
 
     const mailtoLink = `mailto:${emailAddresses}?subject=${subject}&body=${body}`;
     window.location.href = mailtoLink;
-  }, [userFacingStats, appVersion]);
+  }, [summaries, appVersion]);
 
   // Count users without latest app version
   const usersWithoutLatestVersionCount = useMemo(() => {
-    if (!userFacingStats || !appVersion) return 0;
-    return userFacingStats.filter(
-      (stats) => stats.metadataBody.appVersion !== appVersion
-    ).length;
-  }, [userFacingStats, appVersion]);
+    if (!summaries || !appVersion) return 0;
+    return summaries.filter((stats) => stats.appVersion !== appVersion).length;
+  }, [summaries, appVersion]);
 
   if (loading)
     return (
@@ -114,7 +83,7 @@ export default function BasicUserStatsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {userFacingStats?.map((stats) => {
+            {summaries?.map((stats) => {
               return (
                 <TableRow key={stats.userEmail}>
                   <TableCell>
@@ -128,8 +97,8 @@ export default function BasicUserStatsTable() {
                       }
                     />
                   </TableCell>
-                  <TableCell>{stats.installedAddins}</TableCell>
-                  <TableCell>{stats.metadataBody.appVersion}</TableCell>
+                  <TableCell>{stats.installedAddinsCount}</TableCell>
+                  <TableCell>{stats.appVersion}</TableCell>
                 </TableRow>
               );
             })}

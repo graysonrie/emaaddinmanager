@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 
 from app.auth import require_api_key
 from app.database import get_db
-from app.models import UserStats
+from app.models import UserMetadata, UserStats
 from app.schemas import (
     ChangeNameRequest,
     CreateUserStatsRequest,
     UpsertFieldsRequest,
     UserStatsModel,
+    UserStatsSummaryModel,
 )
 
 router = APIRouter(
@@ -44,6 +45,51 @@ def create_user(body: CreateUserStatsRequest, db: Session = Depends(get_db)) -> 
 @router.get("", response_model=list[UserStatsModel])
 def get_all_user_stats(db: Session = Depends(get_db)) -> list[UserStats]:
     return list(db.execute(select(UserStats)).scalars().all())
+
+
+def _distinct_installed_count(installed_addins) -> int:
+    """Count installed addins distinct by name, mirroring the client's
+    `deduplicateInstalledAddins` grouping."""
+    if not isinstance(installed_addins, list):
+        return 0
+    names = set()
+    for entry in installed_addins:
+        if isinstance(entry, dict):
+            addin = entry.get("addin")
+            if isinstance(addin, dict):
+                names.add(addin.get("name"))
+    return len(names)
+
+
+# NOTE: This route MUST be declared before `/{user_email}` so that the literal
+# "summary" segment is not captured as a `user_email` path parameter.
+@router.get("/summary", response_model=list[UserStatsSummaryModel])
+def get_user_stats_summary(db: Session = Depends(get_db)) -> list[UserStatsSummaryModel]:
+    """Lightweight list of every user: name, email, disciplines, addin counts
+    and app version. Avoids shipping the heavy addin arrays to the client."""
+    rows = db.execute(
+        select(UserStats, UserMetadata.metadata_).join(
+            UserMetadata,
+            UserMetadata.user_email == UserStats.user_email,
+            isouter=True,
+        )
+    ).all()
+
+    summaries: list[UserStatsSummaryModel] = []
+    for user, metadata in rows:
+        published = user.published_addins if isinstance(user.published_addins, list) else []
+        app_version = metadata.get("appVersion") if isinstance(metadata, dict) else None
+        summaries.append(
+            UserStatsSummaryModel(
+                user_email=user.user_email,
+                user_name=user.user_name,
+                disciplines=user.disciplines,
+                published_addins_count=len(published),
+                installed_addins_count=_distinct_installed_count(user.installed_addins),
+                app_version=app_version,
+            )
+        )
+    return summaries
 
 
 @router.get("/{user_email}", response_model=UserStatsModel)

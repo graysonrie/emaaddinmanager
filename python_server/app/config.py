@@ -5,7 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Repository root for this server (python_server/)
 SERVER_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SQLITE_SEED_PATH = SERVER_ROOT / "assets" / "UserStats2.db"
+ASSETS_DIR = SERVER_ROOT / "assets"
+DEFAULT_SQLITE_SEED_PATH = ASSETS_DIR / "UserStats2.db"
 
 
 def _normalize_database_url(url: str) -> str:

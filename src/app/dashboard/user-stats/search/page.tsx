@@ -1,37 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { useConfigInitialization } from "@/lib/persistence/useConfigInitialization";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import PageWrapper from "@/components/PageWrapper";
-import { UserStatsWithMetadata, useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserStatsModel } from "@/lib/models/user-stats.model";
+import { UserStatsSummaryModel } from "@/lib/models/user-stats.model";
 import UserStatCard from "./UserStatCard";
 import { useUserStatsSearchStore } from "./useUserStatsSearchStore";
 import UserDetailsPage from "./UserDetailsPage";
 import ManageDialog from "../manage-dialog";
 
 export default function UserStatsSearchPage() {
-  const { refresh, userStats } = useUserStatsStore();
+  const { refresh, fetchUserDetail } = useUserStatsStore();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     searchResults,
-    setSearchResults,
-    setSelectedUserStats,
-    selectedUserStats,
+    setSelectedUser,
+    selectedUser,
     searchInput,
     setSearchInput,
   } = useUserStatsSearchStore();
 
-  const onStatClick = (userStats: UserStatsWithMetadata) => {
-    setSelectedUserStats(userStats);
+  const onStatClick = (user: UserStatsSummaryModel) => {
+    setSelectedUser(user);
+    // Prefetch the heavy detail for the selected user.
+    void fetchUserDetail(user.userEmail);
   };
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function UserStatsSearchPage() {
   // Show main app content
   return (
     <PageWrapper>
-      {selectedUserStats ? (
+      {selectedUser ? (
         <UserDetailsPage />
       ) : (
         <div className="flex flex-col gap-4 max-w-screen-md w-full h-full mx-auto overflow-auto thin-scrollbar p-2">
@@ -75,11 +75,11 @@ export default function UserStatsSearchPage() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            {searchResults.map((userStats) => (
+            {searchResults.map((user) => (
               <UserStatCard
-                key={userStats.userEmail}
-                userStats={userStats}
-                onClick={() => onStatClick(userStats)}
+                key={user.userEmail}
+                userStats={user}
+                onClick={() => onStatClick(user)}
               />
             ))}
           </div>

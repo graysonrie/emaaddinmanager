@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app.config import ASSETS_DIR, get_settings
 from app.database import Base, SessionLocal, engine
 from app.models import LoginInfo, SeedMetadata, UserAddins, UserMetadata, UserStats
 
@@ -83,22 +83,32 @@ def _import_from_sqlite(db: Session, sqlite_path: Path) -> None:
     db.commit()
 
 
+def _validate_seed_assets(sqlite_path: Path) -> None:
+    """Refuse startup when bundled seed data is missing."""
+    if not ASSETS_DIR.is_dir():
+        raise RuntimeError(
+            f"Required assets directory not found: {ASSETS_DIR}. "
+            "The server cannot start without bundled seed data."
+        )
+    if not sqlite_path.is_file():
+        raise RuntimeError(
+            f"Required SQLite seed file not found: {sqlite_path}. "
+            "The server cannot start without the initial seed database."
+        )
+
+
 def run_seed() -> None:
     """Create tables and, on first start only, import the bundled SQLite data."""
-    Base.metadata.create_all(bind=engine)
-
     settings = get_settings()
     sqlite_path = Path(settings.sqlite_seed_path)
+    _validate_seed_assets(sqlite_path)
+
+    Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
         if _already_seeded(db):
             print("[seed] Postgres already seeded; skipping SQLite import.")
-            return
-
-        if not sqlite_path.exists():
-            print(f"[seed] No SQLite seed file at {sqlite_path}; marking seeded with empty DB.")
-            _mark_seeded(db)
             return
 
         print(f"[seed] First start: importing data from {sqlite_path} ...")
