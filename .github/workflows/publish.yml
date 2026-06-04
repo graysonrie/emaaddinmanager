@@ -54,7 +54,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "App v__VERSION__"
-          releaseBody: "time to get real"
+          releaseBody: "fixed a bruh moment that was present in the app"
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

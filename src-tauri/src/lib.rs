@@ -14,13 +14,13 @@ use services::user_stats::tauri_exports::*;
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 
-mod window_settings;
 mod app_service_container;
 mod app_updater;
 mod constants;
 mod models;
 mod services;
 mod utils;
+mod window_settings;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -106,6 +106,8 @@ pub fn run() {
             login_set_password,
             login_verify_password_for_user,
             login_set_temp_password_for_user,
+            get_user_stats_summary,
+            get_user_stats,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
