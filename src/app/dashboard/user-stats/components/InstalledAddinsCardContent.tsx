@@ -5,30 +5,25 @@ import {
 } from "@/lib/models/user-stats.model";
 import { Download, Upload } from "lucide-react";
 import AddinCard from "../stats-display/stats-by-user/AddinCard";
-import { UserStatsWithMetadata } from "@/lib/user-stats/useUserStatsStore";
-import { useMemo } from "react";
-import getMetadataBodyOrDefault from "@/lib/user-stats/user-stats-util";
 
 interface Props {
-  selectedUserStats: UserStatsWithMetadata;
+  selectedUserStats: UserStatsModel;
+  appVersion: string | null;
   deduplicatedInstalledAddins: InstalledAddinModel[];
 }
 
 export default function InstalledAddinsCardContent({
   selectedUserStats,
+  appVersion,
   deduplicatedInstalledAddins,
 }: Props) {
-  const metadataBody = useMemo(() => {
-    return getMetadataBodyOrDefault(selectedUserStats.metadata);
-
-  }, [selectedUserStats.metadata]);
   return (
     <CardContent className="pt-0 pb-2">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <p className="text-sm font-bold font-sans">App Version</p>
           <p className="text-xs text-muted-foreground font-bold">
-            {metadataBody.appVersion}
+            {appVersion}
           </p>
         </div>
         {selectedUserStats.publishedAddins.length > 0 && (

@@ -5,7 +5,10 @@ use tauri::State;
 use crate::services::{
     config::keys,
     local_db::service::LocalDbService,
-    user_stats::{models::UserStatsModel, *},
+    user_stats::{
+        models::{UserStatsModel, UserStatsSummaryModel},
+        *,
+    },
 };
 
 /// Creates a new user with the given email and name
@@ -54,6 +57,31 @@ pub async fn get_all_user_stats(
     user_stats_service.refresh_user_stats().await?;
 
     user_stats_service.get_all_user_stats().await
+}
+
+/// Returns a lightweight summary (counts + app version) for every user.
+///
+/// Refreshes the current user's stats first so their own counts are current,
+/// then fetches the summary list. Avoids transferring the heavy addin arrays.
+#[tauri::command]
+pub async fn get_user_stats_summary(
+    user_stats_service: State<'_, Arc<LocalUserStatsService>>,
+) -> Result<Vec<UserStatsSummaryModel>, String> {
+    // Refresh this user's stats:
+    user_stats_service.refresh_user_stats().await?;
+
+    user_stats_service.get_user_stats_summary().await
+}
+
+/// Returns the full stats (including addin arrays) for a single user.
+///
+/// Used to lazily load detail when a user row is expanded or opened.
+#[tauri::command]
+pub async fn get_user_stats(
+    user_email: String,
+    user_stats_service: State<'_, Arc<LocalUserStatsService>>,
+) -> Result<Option<UserStatsModel>, String> {
+    user_stats_service.get_user_stats(user_email).await
 }
 
 /// Changes the email of the user with the given email

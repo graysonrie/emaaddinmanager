@@ -1,32 +1,30 @@
-import {
-  useUserStatsStore,
-  UserStatsWithMetadata,
-} from "@/lib/user-stats/useUserStatsStore";
+import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
+import { UserStatsSummaryModel } from "@/lib/models/user-stats.model";
 import { create } from "zustand";
 
 interface UserStatsSearchStore {
-  searchResults: UserStatsWithMetadata[];
-  setSearchResults: (searchResults: UserStatsWithMetadata[]) => void;
-  selectedUserStats: UserStatsWithMetadata | null;
-  setSelectedUserStats: (userStats: UserStatsWithMetadata | null) => void;
+  searchResults: UserStatsSummaryModel[];
+  setSearchResults: (searchResults: UserStatsSummaryModel[]) => void;
+  selectedUser: UserStatsSummaryModel | null;
+  setSelectedUser: (user: UserStatsSummaryModel | null) => void;
   searchInput: string;
   setSearchInput: (searchInput: string) => void;
 }
 
 export const useUserStatsSearchStore = create<UserStatsSearchStore>((set) => ({
   searchResults: [],
-  setSearchResults: (searchResults: UserStatsWithMetadata[]) =>
+  setSearchResults: (searchResults: UserStatsSummaryModel[]) =>
     set({ searchResults }),
-  selectedUserStats: null,
-  setSelectedUserStats: (userStats: UserStatsWithMetadata | null) =>
-    set({ selectedUserStats: userStats }),
+  selectedUser: null,
+  setSelectedUser: (user: UserStatsSummaryModel | null) =>
+    set({ selectedUser: user }),
   searchInput: "",
   setSearchInput: (searchInput: string) => {
-    const { userStats } = useUserStatsStore.getState();
-    const filteredUserStats = userStats.filter(
-      (userStats) =>
-        userStats.userName.toLowerCase().includes(searchInput.toLowerCase()) ||
-        userStats.userEmail.toLowerCase().includes(searchInput.toLowerCase())
+    const { summaries } = useUserStatsStore.getState();
+    const filteredUserStats = summaries.filter(
+      (summary) =>
+        summary.userName.toLowerCase().includes(searchInput.toLowerCase()) ||
+        summary.userEmail.toLowerCase().includes(searchInput.toLowerCase())
     );
     set({ searchResults: filteredUserStats });
     set({ searchInput: searchInput });

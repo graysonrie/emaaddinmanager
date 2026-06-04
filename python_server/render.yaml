@@ -1,0 +1,47 @@
+# Render Blueprint for the EMA Addin Manager stats server.
+#
+# This file must live at the ROOT of the repository Render is connected to.
+# When you split `python_server/` into its own repo, keep this file at the repo
+# root (i.e. alongside Dockerfile / app / assets).
+#
+# It provisions:
+#   - a managed PostgreSQL database
+#   - a Docker web service that auto-deploys on every push to `release`
+#
+# Docs: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: ema-stats-db
+    # basic-256mb: paid, persistent Postgres (no 30-day free expiry).
+    plan: basic-256mb
+    databaseName: stats
+    user: stats
+    region: oregon
+
+services:
+  - type: web
+    name: ema-stats-api
+    runtime: docker
+    # Starter: always-on (no free-tier sleep), 512 MB RAM, 0.5 CPU (~$7/mo).
+    plan: starter
+    region: oregon
+    # Auto-deploy whenever the `release` branch is pushed.
+    branch: release
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Render uses this to gate traffic until the app is healthy.
+    healthCheckPath: /health
+    envVars:
+      # Wired automatically from the managed database above. Our config layer
+      # normalizes the scheme to the psycopg (v3) driver.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ema-stats-db
+          property: connectionString
+      # Shared secret for the X-API-Key header. `sync: false` means Render does
+      # NOT read it from this file: set the value in the dashboard (or when you
+      # first apply the blueprint). Must match STATS_SERVER_API_KEY on the
+      # Tauri client.
+      - key: API_KEY
+        sync: false

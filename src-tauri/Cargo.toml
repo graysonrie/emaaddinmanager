@@ -47,7 +47,7 @@ revit_check = { path = "./crates/revit_check" }
 argon2 = "0.5"
 rand_core = { version = "0.6", features = ["std"] }
 umya-spreadsheet = "2"
-reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "gzip"] }
 async-trait = "0.1.89"
 
 

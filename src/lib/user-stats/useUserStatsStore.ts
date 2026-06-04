@@ -1,22 +1,25 @@
 import { create } from "zustand";
-import { UserStatsModel } from "../models/user-stats.model";
+import {
+  UserStatsModel,
+  UserStatsSummaryModel,
+} from "../models/user-stats.model";
 import getTauriCommands from "../commands/getTauriCommands";
 import { useAddinRegistryStore } from "../addins/addin-registry/useAddinRegistryStore";
-import { UserMetadataModel } from "../models/user-metadata.model";
-
-export interface UserStatsWithMetadata extends UserStatsModel {
-  metadata: UserMetadataModel | undefined;
-}
 
 interface UserStatsStore {
   // State
-  userStats: UserStatsWithMetadata[];
+  /** Lightweight list of all users used for overview/list/search views. */
+  summaries: UserStatsSummaryModel[];
+  /** Cache of full per-user stats, populated on demand. Keyed by email. */
+  detailByEmail: Record<string, UserStatsModel>;
   loading: boolean;
   error: string | null;
 
   // Actions
-  fetchUserStats: () => Promise<void>;
+  fetchSummaries: () => Promise<void>;
   refresh: () => Promise<void>;
+  /** Fetches (and caches) the full stats for a single user. */
+  fetchUserDetail: (userEmail: string) => Promise<UserStatsModel | undefined>;
   doesUserExist: (email: string) => Promise<boolean>;
   createUserStats: () => Promise<UserStatsModel>;
   updateUserStats: () => Promise<UserStatsModel | undefined>;
@@ -27,54 +30,65 @@ interface UserStatsStore {
 
 export const useUserStatsStore = create<UserStatsStore>((set, get) => {
   const {
-    getAllUserStats,
+    getUserStatsSummary,
+    getUserStats,
     createUserStats,
     doesUserExist,
     updateUserStats,
     changeUserStatsEmail,
     changeUserStatsName,
     unregisterUser,
-    getUserMetadataMany,
   } = getTauriCommands();
 
-  const fetchUserStats = async () => {
+  const fetchSummaries = async () => {
     try {
-      console.log("Fetching user stats");
+      console.log("Fetching user stats summary");
       set({ loading: true, error: null });
-      const stats = await getAllUserStats();
+      const summaries = await getUserStatsSummary();
 
-      // Sort stats alphabetically by userName
-      const sortedStats = stats.sort((a, b) =>
+      // Sort alphabetically by userName.
+      const sortedSummaries = summaries.sort((a, b) =>
         a.userName.localeCompare(b.userName)
       );
 
-      const metadata = await getUserMetadataMany(
-        sortedStats.map((stat) => stat.userEmail)
-      );
-      const statsWithMetadata = sortedStats.map((stat) => ({
-        ...stat,
-        metadata: metadata.find((meta) => meta.userEmail === stat.userEmail),
-      }));
-
-      set({ userStats: statsWithMetadata, loading: false });
+      // A fresh list invalidates any cached per-user detail.
+      set({ summaries: sortedSummaries, detailByEmail: {}, loading: false });
     } catch (err) {
-      console.warn("Error fetching user stats", err);
+      console.warn("Error fetching user stats summary", err);
       set({ error: err as string, loading: false });
     }
   };
 
   const refresh = async () => {
-    await fetchUserStats();
+    await fetchSummaries();
     // Update the addin registry
     const addins = useAddinRegistryStore.getState();
     await addins.refreshRegistry();
   };
 
+  const fetchUserDetail = async (userEmail: string) => {
+    const cached = get().detailByEmail[userEmail];
+    if (cached) return cached;
+
+    try {
+      const detail = await getUserStats(userEmail);
+      if (detail) {
+        set((state) => ({
+          detailByEmail: { ...state.detailByEmail, [userEmail]: detail },
+        }));
+      }
+      return detail;
+    } catch (err) {
+      console.warn("Error fetching user detail", err);
+      set({ error: err as string });
+      return undefined;
+    }
+  };
+
   const createUserStatsAction = async () => {
     try {
       const newStats = await createUserStats();
-      // Refresh the stats after creating new ones
-      await fetchUserStats();
+      await fetchSummaries();
       return newStats;
     } catch (err) {
       console.warn("Error creating user stats", err);
@@ -86,8 +100,7 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
   const updateUserStatsAction = async () => {
     try {
       const updatedStats = await updateUserStats();
-      // Refresh the stats after updating
-      await fetchUserStats();
+      await fetchSummaries();
       return updatedStats;
     } catch (err) {
       console.warn("Error updating user stats", err);
@@ -99,8 +112,7 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
   const changeUserStatsEmailAction = async (newUserEmail: string) => {
     try {
       await changeUserStatsEmail(newUserEmail);
-      // Refresh the stats after changing email
-      await fetchUserStats();
+      await fetchSummaries();
     } catch (err) {
       console.warn("Error changing user stats email", err);
       set({ error: err as string });
@@ -111,8 +123,7 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
   const changeUserStatsNameAction = async (newUserName: string) => {
     try {
       await changeUserStatsName(newUserName);
-      // Refresh the stats after changing name
-      await fetchUserStats();
+      await fetchSummaries();
     } catch (err) {
       console.warn("Error changing user stats name", err);
       set({ error: err as string });
@@ -123,8 +134,7 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
   const unregisterUserAction = async (userEmail: string) => {
     try {
       await unregisterUser(userEmail);
-      // Refresh the stats after unregistering user
-      await fetchUserStats();
+      await fetchSummaries();
     } catch (err) {
       console.warn("Error unregistering user", err);
       set({ error: err as string });
@@ -134,13 +144,15 @@ export const useUserStatsStore = create<UserStatsStore>((set, get) => {
 
   return {
     // Initial state
-    userStats: [],
+    summaries: [],
+    detailByEmail: {},
     loading: false,
     error: null,
 
     // Actions
-    fetchUserStats,
+    fetchSummaries,
     refresh,
+    fetchUserDetail,
     doesUserExist,
     createUserStats: createUserStatsAction,
     updateUserStats: updateUserStatsAction,

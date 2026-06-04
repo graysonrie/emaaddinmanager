@@ -32,6 +32,25 @@ impl LocalUserStatsService {
         table.get_all_user_stats().await.map_err(|e| e.to_string())
     }
 
+    /// Lightweight list of every user (counts + app version).
+    pub async fn get_user_stats_summary(&self) -> Result<Vec<UserStatsSummaryModel>, String> {
+        let table = self.stats_db.user_stats_table();
+        table
+            .get_user_stats_summary()
+            .await
+            .map_err(|e| e.to_string())
+    }
+
+    /// Returns the full stats for a single user, or None if the user does not exist.
+    pub async fn get_user_stats(
+        &self,
+        user_email: String,
+    ) -> Result<Option<UserStatsModel>, String> {
+        let table = self.stats_db.user_stats_table();
+        let user = table.get_user(user_email).await?;
+        Ok(user.map(UserStatsModel::from))
+    }
+
     /// Refreshes the user stats for the user that is currently using the app
     ///
     /// Returns the user stats of the user that is currently using the app, or None if the user does not exist

@@ -73,6 +73,21 @@ pub struct UserStatsModel {
     pub disciplines: Vec<String>,
 }
 
+/// Lightweight projection of a user's stats for list/overview views.
+///
+/// Omits the heavy published/installed addin arrays; callers fetch the full
+/// [`UserStatsModel`] on demand.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserStatsSummaryModel {
+    pub user_email: String,
+    pub user_name: String,
+    pub disciplines: Vec<String>,
+    pub published_addins_count: u32,
+    pub installed_addins_count: u32,
+    pub app_version: Option<String>,
+}
+
 impl From<user::Model> for UserStatsModel {
     fn from(user: user::Model) -> Self {
         let published_addins = serde_json::from_value(user.published_addins).unwrap_or_default();

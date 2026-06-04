@@ -10,7 +10,8 @@ export default function useManageAddins() {
       throw new Error("Addin model or addin permission model is not set");
     try {
       const tauriCommands = getTauriCommands();
-      const allUsers = await tauriCommands.getAllUserStats();
+      // Only the emails are needed here, so use the lightweight summary.
+      const allUsers = await tauriCommands.getUserStatsSummary();
       allUsers.forEach(async (user) => {
         const userModel = await tauriCommands.getUser(user.userEmail);
         if (userModel != undefined) {
@@ -48,7 +49,8 @@ export default function useManageAddins() {
       throw new Error("Addin model or addin permission model is not set");
     try {
       const tauriCommands = getTauriCommands();
-      const allUsers = await tauriCommands.getAllUserStats();
+      // Only the emails are needed here, so use the lightweight summary.
+      const allUsers = await tauriCommands.getUserStatsSummary();
       allUsers.forEach(async (user) => {
         const userModel = await tauriCommands.getUser(user.userEmail);
         if (userModel != undefined) {

@@ -7,7 +7,10 @@ import { DllModel } from "../models/dll.model";
 import { CategoryModel } from "../models/category.model";
 import { ErrorList } from "@/types/error-list";
 import { UninstallAddinRequestModel } from "../models/uninstall-addin-request.model";
-import { UserStatsModel } from "../models/user-stats.model";
+import {
+  UserStatsModel,
+  UserStatsSummaryModel,
+} from "../models/user-stats.model";
 import { UserModel } from "../models/user.model";
 import { CreateAddinPackageRequestModel } from "../models/create-addin-package-request.model";
 import { AddinPackageInfoModel } from "../models/addin-package-info.model";
@@ -41,6 +44,10 @@ interface TauriCommands {
   createUserStats: () => Promise<UserStatsModel>;
   updateUserStats: () => Promise<UserStatsModel | undefined>;
   getAllUserStats: () => Promise<UserStatsModel[]>;
+  /** Lightweight list of all users (counts + app version) for overview/list views. */
+  getUserStatsSummary: () => Promise<UserStatsSummaryModel[]>;
+  /** Full stats (including addin arrays) for a single user, loaded on demand. */
+  getUserStats: (userEmail: string) => Promise<UserStatsModel | undefined>;
   doesUserExist: (userEmail: string) => Promise<boolean>;
   changeUserStatsEmail: (newUserEmail: string) => Promise<void>;
   changeUserStatsName: (newUserName: string) => Promise<void>;
@@ -250,6 +257,16 @@ export default function getTauriCommands(): TauriCommands {
 
   const getAllUserStats = async () => {
     return await invoke<UserStatsModel[]>("get_all_user_stats");
+  };
+
+  const getUserStatsSummary = async () => {
+    return await invoke<UserStatsSummaryModel[]>("get_user_stats_summary");
+  };
+
+  const getUserStats = async (userEmail: string) => {
+    return await invoke<UserStatsModel | undefined>("get_user_stats", {
+      userEmail,
+    });
   };
 
   const changeUserStatsEmail = async (newUserEmail: string) => {
@@ -483,6 +500,8 @@ export default function getTauriCommands(): TauriCommands {
     doesUserExist,
     updateUserStats,
     getAllUserStats,
+    getUserStatsSummary,
+    getUserStats,
     changeUserStatsEmail,
     changeUserStatsName,
     checkForUpdatesManual,
