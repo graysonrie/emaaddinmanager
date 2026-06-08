@@ -93,6 +93,7 @@ interface TauriCommands {
     pkg: AddinPackageInfoModel,
   ) => Promise<[number[], string]>;
   openHelpFileForPackage: (pkg: AddinPackageInfoModel) => Promise<void>;
+  regenerateZipFilesInRegistry: () => Promise<void>;
   getDevVisualStudioTemplates: () => Promise<VsTemplateModel[]>;
   installDevVisualStudioTemplates: (
     templates: VsTemplateModel[],
@@ -394,6 +395,10 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<VsTemplateModel[]>("get_dev_visual_studio_templates");
   };
 
+  const regenerateZipFilesInRegistry = async () => {
+    return await invoke<void>("regenerate_zip_files_in_registry");
+  };
+
   const installDevVisualStudioTemplates = async (
     templates: VsTemplateModel[],
   ) => {
@@ -541,5 +546,6 @@ export default function getTauriCommands(): TauriCommands {
     loginSetPassword,
     loginVerifyPasswordForUser,
     loginSetTempPasswordForUser,
+    regenerateZipFilesInRegistry,
   };
 }

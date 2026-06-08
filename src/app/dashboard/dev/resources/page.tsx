@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageWrapper from "@/components/PageWrapper";
 import DevVsTemplates from "./vs-templates";
 import DevCodeSnippets from "./code-snippets";
+import DevToolsContent from "./dev-tools";
 
 export default function ResourcesPage() {
   return (
@@ -41,14 +42,7 @@ export default function ResourcesPage() {
               </TabsContent>
 
               <TabsContent value="tools" className="mt-0">
-                <div className="text-center py-12">
-                  <div className="text-muted-foreground">
-                    <p className="text-lg font-medium">Development Tools</p>
-                    <p className="text-sm mt-2">
-                      Coming soon - utilities and tools for developers
-                    </p>
-                  </div>
-                </div>
+                <DevToolsContent />
               </TabsContent>
 
               {/* <TabsContent value="docs" className="mt-0">
