@@ -5,22 +5,23 @@ export default function useUserStatsUpdater() {
   const commands = getTauriCommands();
 
   useEffect(() => {
-    const updateUserStats = async () => {
+    const syncUserStats = async () => {
       try {
-        await commands.updateUserStats();
-        // Update the metadata for the user as well:
-        await commands.updateUserAppVersionMetadata();
-        console.log("Updated user stats");
+        // Upload-only sync that skips the request when nothing changed and
+        // avoids re-downloading the data we just sent.
+        await commands.syncUserStats();
+        console.log("Synced user stats");
       } catch (error) {
-        console.warn("Failed to update user stats:", error);
+        console.warn("Failed to sync user stats:", error);
       }
     };
 
-    // Initial update
-    updateUserStats();
+    // Initial sync
+    syncUserStats();
 
-    // Set up interval for updates every 60 seconds
-    const intervalId = setInterval(updateUserStats, 60000); // 60 seconds
+    // Stats rarely change and are not real-time critical, so poll every 5
+    // minutes. Install/uninstall flows trigger an immediate sync separately.
+    const intervalId = setInterval(syncUserStats, 300000); // 5 minutes
 
     // Cleanup function to clear interval when component unmounts
     return () => {

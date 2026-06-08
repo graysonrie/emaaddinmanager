@@ -46,6 +46,17 @@ pub async fn update_user_stats(
     user_stats_service.refresh_user_stats().await
 }
 
+/// Uploads the current user's stats to the server without fetching them back.
+///
+/// Used by the periodic background updater; skips the upload entirely when the
+/// stats are unchanged since the last sync in this session.
+#[tauri::command]
+pub async fn sync_user_stats(
+    user_stats_service: State<'_, Arc<LocalUserStatsService>>,
+) -> Result<(), String> {
+    user_stats_service.sync_user_stats().await
+}
+
 /// Returns the stats of every user.
 ///
 /// Updates the stats of the user that is currently using the app

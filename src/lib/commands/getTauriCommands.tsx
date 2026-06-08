@@ -43,6 +43,8 @@ interface TauriCommands {
   buildAddin: (projectDir: string) => Promise<string>;
   createUserStats: () => Promise<UserStatsModel>;
   updateUserStats: () => Promise<UserStatsModel | undefined>;
+  /** Uploads the current user's stats without fetching them back. Used by the background updater. */
+  syncUserStats: () => Promise<void>;
   getAllUserStats: () => Promise<UserStatsModel[]>;
   /** Lightweight list of all users (counts + app version) for overview/list views. */
   getUserStatsSummary: () => Promise<UserStatsSummaryModel[]>;
@@ -250,6 +252,10 @@ export default function getTauriCommands(): TauriCommands {
 
   const updateUserStats = async () => {
     return await invoke<UserStatsModel | undefined>("update_user_stats");
+  };
+
+  const syncUserStats = async () => {
+    return await invoke<void>("sync_user_stats");
   };
 
   const doesUserExist = async (userEmail: string) => {
@@ -504,6 +510,7 @@ export default function getTauriCommands(): TauriCommands {
     createUserStats,
     doesUserExist,
     updateUserStats,
+    syncUserStats,
     getAllUserStats,
     getUserStatsSummary,
     getUserStats,

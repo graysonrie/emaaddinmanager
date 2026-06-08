@@ -12,7 +12,8 @@ interface DetailedError {
 
 export default function Home() {
   const router = useRouter();
-  const { ensureConnectedToServer } = getTauriCommands();
+  const { ensureConnectedToServer, updateUserAppVersionMetadata } =
+    getTauriCommands();
 
   const [error, setError] = useState<DetailedError | null>(null);
 
@@ -22,6 +23,11 @@ export default function Home() {
         await ensureConnectedToServer();
         // throw new Error("Failed to connect to server");
         console.log("Connected to server");
+        // The app version does not change while the app is running, so send it
+        // once on startup rather than on every stats poll.
+        updateUserAppVersionMetadata().catch((error) =>
+          console.warn("Failed to update app version metadata:", error),
+        );
         router.push("/dashboard/installed");
       } catch (error) {
         console.warn("Failed to connect to server", error);
