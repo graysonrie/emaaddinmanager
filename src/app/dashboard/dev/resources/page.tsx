@@ -21,10 +21,10 @@ export default function ResourcesPage() {
         {/* Navigation Tabs - Fixed */}
         <div className="flex-shrink-0 p-2 max-w-4xl mx-auto w-full">
           <Tabs defaultValue="templates" className="w-full h">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-2">
               <TabsTrigger value="templates">VS Templates</TabsTrigger>
               <TabsTrigger value="snippets">Code Snippets</TabsTrigger>
-              <TabsTrigger value="tools">Dev Tools</TabsTrigger>
+              {/* <TabsTrigger value="tools">Dev Tools</TabsTrigger> */}
             </TabsList>
 
             {/* Scrollable Content Area */}
@@ -41,9 +41,9 @@ export default function ResourcesPage() {
                 <DevCodeSnippets />
               </TabsContent>
 
-              <TabsContent value="tools" className="mt-0">
+              {/* <TabsContent value="tools" className="mt-0">
                 <DevToolsContent />
-              </TabsContent>
+              </TabsContent> */}
 
               {/* <TabsContent value="docs" className="mt-0">
                 <div className="text-center py-12">
