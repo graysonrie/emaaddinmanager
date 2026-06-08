@@ -45,6 +45,7 @@ tauri-plugin-process = "2"
 db_manager = { path = "./crates/db_manager" }
 revit_check = { path = "./crates/revit_check" }
 addin_accelerator = { path = "./crates/addin_accelerator" }
+help_ticket_service = { path = "./crates/help_ticket_service" }
 argon2 = "0.5"
 rand_core = { version = "0.6", features = ["std"] }
 umya-spreadsheet = "2"
