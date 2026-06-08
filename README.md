@@ -1,24 +1,4 @@
 Todo:
 
-1. when exporting, warn user if the addin already exists in the registry, and if so, give them a warning saying that they are going to overwrite the addin.
+feature for submitting bug reports about addins.
 
-2. implement auto-updating feature and send notifications if an addin was updated
-
-3. put an 'advanced' button in the publish addin section, and if they click on it, you can add extra dlls the addin needs to include
-
-! unimportant:
-
-- Add a new way to add new categories to the registry when in the app
-
-water bucket release
-
-### notes for addin creator:
-
-new project --> enter project name -->
-
-button to create new pushbutton -->
-select icon
-
-# for a web migration:
-
-All the stuff that locally accesses DB or files at a shared place goes on web server. Local access stuff stays.

@@ -20,5 +20,7 @@ pub fn stats_server_url() -> String {
 /// Read from the `STATS_SERVER_API_KEY` environment variable, falling back to
 /// the development default that matches the server's `.env.example`.
 pub fn stats_server_api_key() -> String {
-    std::env::var("STATS_SERVER_API_KEY").unwrap_or_else(|_| "GShg96LdalXXFRRUSoNwf0F5CMVnALArRFHzaQyYUcn0EnTrmDyYfnrPiyKcm8IkEt0RKYiD4c36sZaSpGid5VkF9YQxeXLB4OzH9qwD5hkp".to_string())
+    std::env::var("STATS_SERVER_API_KEY").unwrap_or_else(|_| {
+        "HZntNvUSqnNBx3ti8RkmTtGfNmooLbAUDC4ui6hm4KqC8iuqwD8coH8LV0VwZwjS".to_string()
+    })
 }

@@ -232,13 +232,41 @@ impl LocalAddinsService {
             *progress += progress_value_per_version;
             emit_progress_event(*progress);
 
-            // Copy the DLL folder (recursively)
+            // * NEW: see if we can get a zip file for the addin and download that instead
+            let zip_file_src = format!("{}_ZIP", &addin.path_to_addin_dll_folder);
+
+            let _zip_file_src = Path::new(&zip_file_src);
+
             let dll_src = Path::new(&addin.path_to_addin_dll_folder);
             let dll_dst = version_path.join(dll_src.file_name().ok_or("Invalid DLL folder name")?);
-            if dll_src.exists() && dll_src.is_dir() {
-                utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
+
+            if !dll_src.exists() || !dll_src.is_dir() {
+                return Err("DLL SRC Does not exist or it is not a valid directory".to_string());
             }
 
+            // ! TEST NOT USING ZIP FILE ACCELERATION
+            // ! Ironically, zip file acceleration is slower. Go figure
+            let accelerated = false;
+            // let accelerated = if zip_file_src.exists() {
+            //     match addin_accelerator::unzip_folder_contents_into(zip_file_src, &dll_dst) {
+            //         Ok(()) => {
+            //             println!("Successfully installed addin using ZIP acceleration");
+            //             true
+            //         }
+            //         Err(e) => {
+            //             println!(
+            //                 "Warning: accelerated unzip failed ({}), falling back to folder copy",
+            //                 e
+            //             );
+            //             false
+            //         }
+            //     }
+            // } else {
+            //     false
+            // };
+            if !accelerated {
+                utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
+            }
             Ok::<(), String>(())
         });
 

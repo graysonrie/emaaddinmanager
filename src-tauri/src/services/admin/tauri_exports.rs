@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use tauri::State;
 
-use crate::services::{admin::service::AdminService, user_stats::LocalUserStatsService};
+use crate::{
+    constants::ADDINS_REGISTRY_PATH,
+    services::{admin::service::AdminService, user_stats::LocalUserStatsService},
+};
 
 #[tauri::command]
 pub async fn is_user_admin(
@@ -52,4 +55,19 @@ pub async fn unregister_user(
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn regenerate_zip_files_in_registry() -> Result<(), String> {
+    let path = ADDINS_REGISTRY_PATH;
+
+    // Run blocking call and capture the actual result.
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        addin_accelerator::create_zips_for_addin_dll_folders_recursive(path)
+            .map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?; // error from join error
+
+    result // propagate accelerator result upwards
 }

@@ -60,6 +60,7 @@ pub fn run() {
             change_user_stats_email,
             change_user_stats_name,
             update_user_stats,
+            sync_user_stats,
             get_all_user_stats,
             // Addin Updater
             check_for_updates_manual,
@@ -85,6 +86,7 @@ pub fn run() {
             check_file_exists,
             load_image_data_for_package,
             open_help_file_for_package,
+            regenerate_zip_files_in_registry,
             // Dev resources:
             get_dev_visual_studio_templates,
             install_dev_visual_studio_templates,
