@@ -508,29 +508,29 @@ export default function getTauriCommands(): TauriCommands {
   };
 
   const createHelpTicket = async (request: CreateHelpTicketRequestModel) => {
-    return await invoke<string>("create_help_ticket", { request });
+    return await invoke<string>("create_ticket", { request });
   };
 
   const getHelpTicketPreviews = async () => {
-    return await invoke<HelpTicketPreviewModel[]>("get_help_ticket_previews");
+    return await invoke<HelpTicketPreviewModel[]>("get_ticket_previews");
   };
 
   const getHelpTicketWithId = async (id: string) => {
-    return await invoke<HelpTicketModel>("get_help_ticket_with_id", { id });
+    return await invoke<HelpTicketModel>("get_ticket_with_id", { id });
   };
 
   const addHelpTicketMessage = async (
     request: AddHelpTicketMessageRequestModel,
   ) => {
-    return await invoke<void>("add_help_ticket_message", { request });
+    return await invoke<void>("add_message", { request });
   };
 
   const setHelpTicketStatus = async (id: string, status: HelpTicketStatus) => {
-    return await invoke<void>("set_help_ticket_status", { id, status });
+    return await invoke<void>("set_ticket_status", { id, status });
   };
 
   const purgeClosedHelpTickets = async () => {
-    return await invoke<void>("purge_closed_help_tickets");
+    return await invoke<void>("purge_closed_tickets");
   };
 
   const removeNonexistantTicketsFromConfig = async () => {

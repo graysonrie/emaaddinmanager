@@ -199,6 +199,7 @@ impl HelpTicketService {
                 title: info.title,
                 for_addin: info.for_addin,
                 created_at: format_local_datetime(info.created_at),
+                updated_at: format_local_datetime(info.updated_at),
                 status: info.status,
                 assigned_to_user: info.assigned_to_user,
             });

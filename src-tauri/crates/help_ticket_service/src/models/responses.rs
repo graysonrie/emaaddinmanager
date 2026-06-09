@@ -42,6 +42,7 @@ pub struct HelpTicketPreview {
     pub title: String,
     pub for_addin: String,
     pub created_at: String,
+    pub updated_at: String,
     pub status: HelpTicketStatus,
     pub assigned_to_user: Option<String>,
 }

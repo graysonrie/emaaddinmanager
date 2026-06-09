@@ -6,6 +6,7 @@ export interface HelpTicketPreviewModel {
   title: string;
   forAddin: string;
   createdAt: string;
+  updatedAt: string;
   status: HelpTicketStatus;
   assignedToUser: string | null;
 }
