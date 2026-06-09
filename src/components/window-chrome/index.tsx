@@ -14,16 +14,16 @@ export function WindowChrome() {
   const userName = useKeyValueSubscription<string>("userName");
   const userEmail = useKeyValueSubscription<string>("userEmail");
 
-  const userFirstName = useMemo(() => {
-    return userName?.split(" ")[0];
-  }, [userName]);
+  // const userFirstName = useMemo(() => {
+  //   return userName?.split(" ")[0];
+  // }, [userName]);
 
-  const userNameInitials = useMemo(() => {
-    return userName
-      ?.split(" ")
-      .map((name) => name[0])
-      .join("");
-  }, [userName]);
+  // const userNameInitials = useMemo(() => {
+  //   return userName
+  //     ?.split(" ")
+  //     .map((name) => name[0])
+  //     .join("");
+  // }, [userName]);
 
   const handleMinimize = () => {
     getCurrentWindow().minimize();

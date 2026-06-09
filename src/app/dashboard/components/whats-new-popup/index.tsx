@@ -44,19 +44,23 @@ export default function WhatsNewPopup() {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-sans">What's New</DialogTitle>
+          <DialogTitle className="font-sans">What's New 🎉</DialogTitle>
         </DialogHeader>
 
         <Label className="font-normal font-sans leading-5 ">
-          Support tickets have been added! Please do not send Teams messages to
-          Jeremy if you encounter issues with an addin. Instead, use the 'Help
-          Tickets' feature to the left and submit a bug report or feature
-          request there so that the Bases team can efficiently review it.
+          Support tickets have been added! Whatever you do, please do not send
+          Teams messages to Jeremy.{" "}
+        </Label>
+
+        <Label className="font-normal font-sans leading-5 ">
+          Instead, if you encounter issues with an addin, use the 'Help Tickets'
+          feature to the left and submit a bug report or feature request there
+          so that the Bases team can efficiently review it.
         </Label>
 
         <DialogFooter className="flex flex-row gap-2 w-full">
           <Button onClick={() => setIsVisible(false)} className="w-full">
-            Great. I don't care
+            Great! I don't care
           </Button>
         </DialogFooter>
       </DialogContent>

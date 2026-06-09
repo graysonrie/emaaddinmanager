@@ -38,6 +38,25 @@ pub struct LoadedHelpTicket {
     pub messages: Vec<LoadedHelpTicketMessage>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum HelpTicketUpdateType {
+    NewReply,
+    StatusChanged,
+    NewTicket,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct HelpTicketUpdateNotification {
+    pub ticket_id: String,
+    pub ticket_title: String,
+    pub update_type: HelpTicketUpdateType,
+    pub title: String,
+    pub description: String,
+    pub updated_at_exact: String,
+}
+
 /// What will be displayed in the help ticket preview list on the admin panel
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

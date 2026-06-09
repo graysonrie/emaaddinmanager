@@ -11,6 +11,7 @@ import UpdaterPopup from "./components/updater-popup";
 import InstallingAddinsOverlay from "./components/installing-addins-overlay";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
+import { useHelpTicketNotifications } from "@/lib/help-tickets/useHelpTicketNotifications";
 import { toast, Toaster } from "sonner";
 import useUserStatsUpdater from "@/lib/user-stats/useUserStatsUpdater";
 
@@ -36,6 +37,21 @@ export default function DashboardLayout({
         }
         if (notification.notificationType == "warning") {
           toast.warning(toastContent);
+        }
+      });
+    },
+  });
+
+  useHelpTicketNotifications({
+    onNewNotifications: (helpTicketNotifications) => {
+      helpTicketNotifications.forEach((notification) => {
+        if (
+          notification.updateType === "statusChanged" ||
+          notification.updateType === "newTicket"
+        ) {
+          toast.info(notification.title, { description: notification.description });
+        } else {
+          toast.success(notification.title, { description: notification.description });
         }
       });
     },

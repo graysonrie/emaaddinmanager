@@ -71,6 +71,18 @@ pub fn remove_nonexistant_tickets_from_config(state: HelpTicketServiceState) -> 
 }
 
 #[tauri::command]
+pub fn check_for_ticket_updates(
+    state: HelpTicketServiceState,
+    user_email: String,
+    include_status_changes: bool,
+    is_admin: bool,
+) -> Result<Vec<HelpTicketUpdateNotification>, String> {
+    state
+        .check_for_ticket_updates(&user_email, include_status_changes, is_admin)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn load_help_ticket_image(
     absolute_path: String,
 ) -> Result<(Vec<u8>, String), String> {

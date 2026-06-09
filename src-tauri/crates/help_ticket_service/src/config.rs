@@ -1,13 +1,26 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use crate::{HelpTicketService, models::*};
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TicketWatchState {
+    pub updated_at_exact: String,
+    pub status: HelpTicketStatus,
+    pub message_count: u32,
+}
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct UserHelpTicketConfig {
     pub version: String,
     /// The IDs of the tickets that the user owns
     pub ticket_ids: Vec<String>,
+    #[serde(default)]
+    pub ticket_watch_states: HashMap<String, TicketWatchState>,
+    /// Ticket IDs the admin has already seen; used to detect newly created tickets
+    #[serde(default)]
+    pub admin_known_ticket_ids: HashSet<String>,
 }
 
 /// Returns the path to the config directory, not the JSON file
@@ -31,6 +44,8 @@ pub fn load_config() -> Result<UserHelpTicketConfig, anyhow::Error> {
         return Ok(UserHelpTicketConfig {
             version: "0.1.0".to_string(),
             ticket_ids: Vec::new(),
+            ticket_watch_states: HashMap::new(),
+            admin_known_ticket_ids: HashSet::new(),
         });
     }
     let config = std::fs::read_to_string(&config_file)?;

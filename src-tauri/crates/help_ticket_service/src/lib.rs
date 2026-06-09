@@ -269,6 +269,189 @@ impl HelpTicketService {
         Ok(())
     }
 
+    fn load_ticket_messages(
+        ticket_dir: &Path,
+    ) -> Result<Vec<HelpTicketMessage>, anyhow::Error> {
+        let mut messages = Vec::new();
+        for file in std::fs::read_dir(ticket_dir)?.flatten() {
+            let file_name = file.file_name();
+            let file_extension = file_name
+                .as_os_str()
+                .to_str()
+                .and_then(|name| std::path::Path::new(name).extension())
+                .and_then(|ext| ext.to_str())
+                .unwrap_or_default();
+            if file_extension != "json" || file_name == "info.json" {
+                continue;
+            }
+
+            let message_json = std::fs::read_to_string(file.path())?;
+            let message: HelpTicketMessage = serde_json::from_str(&message_json)?;
+            messages.push(message);
+        }
+        messages.sort_by_key(|message| message.created_at);
+        Ok(messages)
+    }
+
+    fn help_ticket_status_label(status: &HelpTicketStatus) -> &'static str {
+        match status {
+            HelpTicketStatus::Open => "Open",
+            HelpTicketStatus::InProgress => "In Progress",
+            HelpTicketStatus::Resolved => "Resolved",
+            HelpTicketStatus::Closed => "Closed",
+            HelpTicketStatus::Rejected => "Rejected",
+        }
+    }
+
+    fn collect_all_ticket_infos(
+        ticket_dir: &Path,
+    ) -> Result<Vec<HelpTicketInfo>, anyhow::Error> {
+        let mut tickets = Vec::new();
+        for file in std::fs::read_dir(ticket_dir)?.flatten() {
+            let entry = file.path();
+            if entry.is_file() {
+                continue;
+            }
+            let info_json = std::fs::read_to_string(entry.join("info.json"))?;
+            let info: HelpTicketInfo = serde_json::from_str(&info_json)?;
+            tickets.push(info);
+        }
+        Ok(tickets)
+    }
+
+    fn check_admin_new_tickets(
+        &self,
+        user_email: &str,
+        config: &mut config::UserHelpTicketConfig,
+        notifications: &mut Vec<HelpTicketUpdateNotification>,
+    ) -> Result<(), anyhow::Error> {
+        let ticket_dir = self.help_tickets_dir()?;
+        let all_tickets = Self::collect_all_ticket_infos(&ticket_dir)?;
+
+        if config.admin_known_ticket_ids.is_empty() {
+            for ticket in &all_tickets {
+                config.admin_known_ticket_ids.insert(ticket.id.clone());
+            }
+            return Ok(());
+        }
+
+        let mut existing_ids = std::collections::HashSet::new();
+        for ticket in all_tickets {
+            existing_ids.insert(ticket.id.clone());
+
+            if config.admin_known_ticket_ids.contains(&ticket.id) {
+                continue;
+            }
+
+            config.admin_known_ticket_ids.insert(ticket.id.clone());
+
+            if ticket.opened_by_user == user_email {
+                continue;
+            }
+
+            notifications.push(HelpTicketUpdateNotification {
+                ticket_id: ticket.id.clone(),
+                ticket_title: ticket.title.clone(),
+                update_type: HelpTicketUpdateType::NewTicket,
+                title: "New help ticket created".to_string(),
+                description: format!(
+                    "{} opened \"{}\" for {}",
+                    ticket.opened_by_user, ticket.title, ticket.for_addin
+                ),
+                updated_at_exact: format_exact_datetime(ticket.created_at),
+            });
+        }
+
+        config
+            .admin_known_ticket_ids
+            .retain(|ticket_id| existing_ids.contains(ticket_id));
+
+        Ok(())
+    }
+
+    /// Checks owned tickets for updates since the last poll and updates watch state in config.
+    pub fn check_for_ticket_updates(
+        &self,
+        user_email: &str,
+        include_status_changes: bool,
+        is_admin: bool,
+    ) -> Result<Vec<HelpTicketUpdateNotification>, anyhow::Error> {
+        let mut config = config::load_config()?;
+        let mut notifications = Vec::new();
+        let ticket_dir = self.help_tickets_dir()?;
+
+        if is_admin {
+            self.check_admin_new_tickets(user_email, &mut config, &mut notifications)?;
+        }
+
+        for ticket_id in config.ticket_ids.clone() {
+            let ticket_path = ticket_dir.join(&ticket_id);
+            if !ticket_path.exists() {
+                config.ticket_watch_states.remove(&ticket_id);
+                continue;
+            }
+
+            let info_json = std::fs::read_to_string(ticket_path.join("info.json"))?;
+            let info: HelpTicketInfo = serde_json::from_str(&info_json)?;
+            let messages = Self::load_ticket_messages(&ticket_path)?;
+            let message_count = messages.len() as u32;
+            let updated_at_exact = format_exact_datetime(info.updated_at);
+
+            let current_state = config::TicketWatchState {
+                updated_at_exact: updated_at_exact.clone(),
+                status: info.status.clone(),
+                message_count,
+            };
+
+            let Some(previous_state) = config.ticket_watch_states.get(&ticket_id) else {
+                config
+                    .ticket_watch_states
+                    .insert(ticket_id.clone(), current_state);
+                continue;
+            };
+
+            if let Some(latest_message) = messages.last() {
+                if message_count > previous_state.message_count
+                    && latest_message.from_user != user_email
+                {
+                    notifications.push(HelpTicketUpdateNotification {
+                        ticket_id: ticket_id.clone(),
+                        ticket_title: info.title.clone(),
+                        update_type: HelpTicketUpdateType::NewReply,
+                        title: "New reply on help ticket".to_string(),
+                        description: format!(
+                            "{} replied to \"{}\"",
+                            latest_message.from_user, info.title
+                        ),
+                        updated_at_exact: format_exact_datetime(latest_message.created_at),
+                    });
+                }
+            }
+
+            if include_status_changes && info.status != previous_state.status {
+                notifications.push(HelpTicketUpdateNotification {
+                    ticket_id: ticket_id.clone(),
+                    ticket_title: info.title.clone(),
+                    update_type: HelpTicketUpdateType::StatusChanged,
+                    title: "Help ticket status updated".to_string(),
+                    description: format!(
+                        "\"{}\" is now {}",
+                        info.title,
+                        Self::help_ticket_status_label(&info.status)
+                    ),
+                    updated_at_exact: updated_at_exact.clone(),
+                });
+            }
+
+            config
+                .ticket_watch_states
+                .insert(ticket_id.clone(), current_state);
+        }
+
+        config::save_config(&config)?;
+        Ok(notifications)
+    }
+
     /// Updates the `updated_at` field of the help ticket to the current time
     fn update_help_ticket(&self, id: &str) -> Result<(), anyhow::Error> {
         let ticket_dir = self.help_tickets_dir()?.join(id);

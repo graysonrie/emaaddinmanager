@@ -123,6 +123,7 @@ pub fn run() {
             remove_nonexistant_tickets_from_config,
             get_owned_ticket_previews,
             load_help_ticket_image,
+            check_for_ticket_updates,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

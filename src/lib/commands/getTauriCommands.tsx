@@ -23,6 +23,7 @@ import { HelpTicketPreviewModel } from "../models/help-tickets/help-ticket-previ
 import { HelpTicketModel } from "../models/help-tickets/help-ticket.model";
 import { AddHelpTicketMessageRequestModel } from "../models/help-tickets/add-help-ticket-message-request.model";
 import { HelpTicketStatus } from "../models/help-tickets/help-ticket-status";
+import { HelpTicketUpdateNotificationModel } from "../models/help-tickets/help-ticket-update-notification.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -138,6 +139,11 @@ interface TauriCommands {
   removeNonexistantTicketsFromConfig: () => Promise<void>;
   getOwnedTicketPreviews: () => Promise<HelpTicketPreviewModel[]>;
   loadHelpTicketImage: (absolutePath: string) => Promise<[number[], string]>;
+  checkForTicketUpdates: (
+    userEmail: string,
+    includeStatusChanges: boolean,
+    isAdmin: boolean,
+  ) => Promise<HelpTicketUpdateNotificationModel[]>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -548,6 +554,17 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const checkForTicketUpdates = async (
+    userEmail: string,
+    includeStatusChanges: boolean,
+    isAdmin: boolean,
+  ) => {
+    return await invoke<HelpTicketUpdateNotificationModel[]>(
+      "check_for_ticket_updates",
+      { userEmail, includeStatusChanges, isAdmin },
+    );
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -619,5 +636,6 @@ export default function getTauriCommands(): TauriCommands {
     removeNonexistantTicketsFromConfig,
     getOwnedTicketPreviews,
     loadHelpTicketImage,
+    checkForTicketUpdates,
   };
 }
