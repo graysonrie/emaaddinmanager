@@ -119,6 +119,8 @@ pub fn run() {
             add_message,
             set_ticket_status,
             purge_closed_tickets,
+            remove_nonexistant_tickets_from_config,
+            get_owned_ticket_previews,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

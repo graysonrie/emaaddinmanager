@@ -135,6 +135,8 @@ interface TauriCommands {
   ) => Promise<void>;
   setHelpTicketStatus: (id: string, status: HelpTicketStatus) => Promise<void>;
   purgeClosedHelpTickets: () => Promise<void>;
+  removeNonexistantTicketsFromConfig: () => Promise<void>;
+  getOwnedTicketPreviews: () => Promise<HelpTicketPreviewModel[]>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -531,6 +533,14 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("purge_closed_help_tickets");
   };
 
+  const removeNonexistantTicketsFromConfig = async () => {
+    return await invoke<void>("remove_nonexistant_tickets_from_config");
+  };
+
+  const getOwnedTicketPreviews = async () => {
+    return await invoke<HelpTicketPreviewModel[]>("get_owned_ticket_previews");
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -599,5 +609,7 @@ export default function getTauriCommands(): TauriCommands {
     addHelpTicketMessage,
     setHelpTicketStatus,
     purgeClosedHelpTickets,
+    removeNonexistantTicketsFromConfig,
+    getOwnedTicketPreviews,
   };
 }

@@ -1,4 +1,7 @@
+use std::collections::HashSet;
 use std::path::PathBuf;
+
+use crate::{HelpTicketService, models::*};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct UserHelpTicketConfig {
@@ -37,5 +40,33 @@ pub fn load_config() -> Result<UserHelpTicketConfig, anyhow::Error> {
 pub fn save_config(config: &UserHelpTicketConfig) -> Result<(), anyhow::Error> {
     let config_file = path_to_config_file()?;
     std::fs::write(&config_file, serde_json::to_string(config)?)?;
+    Ok(())
+}
+
+/// Removes any tickets from the config that no longer exist in the service
+pub fn remove_nonexistant_tickets_from_config(
+    service: &HelpTicketService,
+) -> Result<(), anyhow::Error> {
+    let mut config = load_config()?;
+    let ticket_dir = service.help_tickets_dir()?;
+
+    let mut existing_ticket_ids = HashSet::new();
+    for file in std::fs::read_dir(ticket_dir)?.flatten() {
+        if file.path().is_file() {
+            continue;
+        }
+        let info_path = file.path().join("info.json");
+        if !info_path.exists() {
+            continue;
+        }
+        let info_json = std::fs::read_to_string(&info_path)?;
+        let info: HelpTicketInfo = serde_json::from_str(&info_json)?;
+        existing_ticket_ids.insert(info.id);
+    }
+
+    config
+        .ticket_ids
+        .retain(|ticket_id| existing_ticket_ids.contains(ticket_id));
+    save_config(&config)?;
     Ok(())
 }

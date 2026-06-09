@@ -2,9 +2,9 @@ use std::path::{Path, PathBuf};
 
 use crate::models::{format_local_datetime, *};
 
-pub mod tauri_exports;
-mod config;
+pub mod config;
 pub mod models;
+pub mod tauri_exports;
 
 #[cfg(test)]
 mod tests;
@@ -164,6 +164,19 @@ impl HelpTicketService {
             messages: loaded_messages,
         };
         Ok(loaded_ticket)
+    }
+
+    /// Returns a list of all the help ticket previews for a given user. Should be used for the user panel, since admins should be shown all tickets.
+    pub fn get_ticket_previews_with_ids(
+        &self,
+        ids:Vec<String>
+    ) -> Result<Vec<HelpTicketPreview>, anyhow::Error> {
+        let previews = self.get_ticket_previews()?;
+        let previews = previews
+            .into_iter()
+            .filter(|preview| ids.contains(&preview.id))
+            .collect();
+        Ok(previews)
     }
 
     /// Returns a list of all the help ticket previews. Should be used for the admin panel.

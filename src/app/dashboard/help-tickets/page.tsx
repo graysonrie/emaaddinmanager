@@ -1,4 +1,5 @@
 import PageWrapper from "@/components/PageWrapper";
+import HelpTicketsPreview from "./HelpTicketsPreview";
 
 export default function HelpTicketsPage() {
   return (
@@ -10,6 +11,7 @@ export default function HelpTicketsPage() {
             <p className="text-muted-foreground mb-4">
               View and manage your help tickets.
             </p>
+            <HelpTicketsPreview />
           </div>
         </div>
       </div>
