@@ -12,6 +12,7 @@ import {
 import { PackageOpen, Download, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useUpdaterPopupStore } from "./store";
 
 type UpdateStatus =
   | "idle"
@@ -21,7 +22,7 @@ type UpdateStatus =
   | "error";
 
 export default function UpdaterPopup() {
-  const [isVisible, setIsVisible] = useState(false);
+  const { isVisible, setIsVisible } = useUpdaterPopupStore();
   const [update, setUpdate] = useState<Update | undefined>(undefined);
   const [status, setStatus] = useState<UpdateStatus>("idle");
   const [progress, setProgress] = useState(0);
