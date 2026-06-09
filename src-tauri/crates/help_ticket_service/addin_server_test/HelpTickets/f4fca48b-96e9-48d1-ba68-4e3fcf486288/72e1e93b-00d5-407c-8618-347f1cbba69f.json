@@ -1,0 +1,11 @@
+{
+  "id": "72e1e93b-00d5-407c-8618-347f1cbba69f",
+  "fromUser": "test2@example.com",
+  "helpTicketId": "f4fca48b-96e9-48d1-ba68-4e3fcf486288",
+  "message": "Test Message 2",
+  "createdAt": "2026-06-09T12:52:43.961161100Z",
+  "relativeImagePaths": [
+    "test_image1.jpg",
+    "test_image2.png"
+  ]
+}

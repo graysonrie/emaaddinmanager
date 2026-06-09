@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::models::*;
+use crate::models::{format_local_datetime, *};
 
 pub mod config;
 pub mod models;
@@ -79,6 +79,8 @@ impl HelpTicketService {
     }
 
     pub fn add_message(&self, request: AddHelpTicketMessageRequest) -> Result<(), anyhow::Error> {
+        self.update_help_ticket(&request.help_ticket_id)?;
+
         let ticket_dir = self
             .help_tickets_dir()?
             .join(request.help_ticket_id.clone());
@@ -88,12 +90,10 @@ impl HelpTicketService {
         let mut relative_image_paths = Vec::new();
         // Copy the images to the ticket directory
         for path in request.absolute_image_paths {
-            let relative_path = std::path::Path::new(&path)
-                .strip_prefix(&self.addins_registry_path)
-                .map_err(|e| anyhow::anyhow!(e))?
-                .to_string_lossy()
-                .into_owned();
-            relative_image_paths.push(relative_path.clone());
+            let relative_path = Path::new(&path)
+                .file_name()
+                .ok_or(anyhow::anyhow!("Failed to get file name from path"))?;
+            relative_image_paths.push(relative_path.to_string_lossy().into_owned());
             let ticket_image_path = ticket_dir.join(relative_path);
             std::fs::copy(path, ticket_image_path)?;
         }
@@ -142,7 +142,7 @@ impl HelpTicketService {
                 loaded_messages.push(LoadedHelpTicketMessage {
                     from_user: message.from_user,
                     message: message.message,
-                    created_at: message.created_at,
+                    created_at: format_local_datetime(message.created_at),
                     absolute_image_paths: message
                         .relative_image_paths
                         .iter()
@@ -155,9 +155,9 @@ impl HelpTicketService {
             title: ticket_info.title,
             opened_by_user: ticket_info.opened_by_user,
             assigned_to_user: ticket_info.assigned_to_user,
-            created_at: ticket_info.created_at,
-            updated_at: ticket_info.updated_at,
-            closed_at: ticket_info.closed_at,
+            created_at: format_local_datetime(ticket_info.created_at),
+            updated_at: format_local_datetime(ticket_info.updated_at),
+            closed_at: ticket_info.closed_at.map(format_local_datetime),
             status: ticket_info.status,
             for_addin: ticket_info.for_addin,
             messages: loaded_messages,
@@ -184,7 +184,7 @@ impl HelpTicketService {
                 from_user: info.opened_by_user,
                 title: info.title,
                 for_addin: info.for_addin,
-                created_at: info.created_at,
+                created_at: format_local_datetime(info.created_at),
                 status: info.status,
                 assigned_to_user: info.assigned_to_user,
             });
@@ -222,6 +222,50 @@ impl HelpTicketService {
                 std::fs::remove_dir_all(entry)?;
             }
         }
+        Ok(())
+    }
+
+    pub fn set_ticket_status(
+        &self,
+        id: &str,
+        status: HelpTicketStatus,
+    ) -> Result<(), anyhow::Error> {
+        self.update_help_ticket(id)?;
+        let ticket_dir = self.help_tickets_dir()?.join(id);
+        if !ticket_dir.exists() {
+            return Err(anyhow::anyhow!("Ticket not found"));
+        }
+        let info_json = std::fs::read_to_string(ticket_dir.join("info.json"))?;
+        let mut info: HelpTicketInfo = serde_json::from_str(&info_json)?;
+        info.status = status.clone();
+
+        if matches!(
+            status,
+            HelpTicketStatus::Closed | HelpTicketStatus::Resolved | HelpTicketStatus::Rejected
+        ) {
+            info.closed_at = Some(chrono::Utc::now());
+        }
+
+        std::fs::write(
+            ticket_dir.join("info.json"),
+            serde_json::to_string_pretty(&info)?,
+        )?;
+        Ok(())
+    }
+
+    /// Updates the `updated_at` field of the help ticket to the current time
+    fn update_help_ticket(&self, id: &str) -> Result<(), anyhow::Error> {
+        let ticket_dir = self.help_tickets_dir()?.join(id);
+        if !ticket_dir.exists() {
+            return Err(anyhow::anyhow!("Ticket not found"));
+        }
+        let info_json = std::fs::read_to_string(ticket_dir.join("info.json"))?;
+        let mut info: HelpTicketInfo = serde_json::from_str(&info_json)?;
+        info.updated_at = chrono::Utc::now();
+        std::fs::write(
+            ticket_dir.join("info.json"),
+            serde_json::to_string_pretty(&info)?,
+        )?;
         Ok(())
     }
 }

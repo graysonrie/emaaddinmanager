@@ -38,7 +38,7 @@ pub struct HelpTicketMessage {
     pub relative_image_paths: Vec<String>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]
 pub enum HelpTicketStatus {
     Open,
     Closed,
