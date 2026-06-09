@@ -4,6 +4,7 @@ import PageWrapper from "@/components/PageWrapper";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useAuthStore } from "@/lib/auth/useAuthStore";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
 import { HelpTicketPreviewModel } from "@/lib/models/help-tickets/help-ticket-preview.model";
 import { Loader2, Plus, TicketsIcon } from "lucide-react";
@@ -20,6 +21,7 @@ export default function HelpTicketsPage() {
   const [tickets, setTickets] = useState<HelpTicketPreviewModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isRealAdmin, setIsRealAdmin] = useState(false);
 
   const {
     removeNonexistantTicketsFromConfig,
@@ -46,6 +48,14 @@ export default function HelpTicketsPage() {
   }, [isAdminView]);
 
   useEffect(() => {
+    const verifyAdmin = async () => {
+      const status = await useAuthStore.getState().amIAnAdmin();
+      setIsRealAdmin(status === "admin" || status === "super");
+    };
+    verifyAdmin();
+  }, []);
+
+  useEffect(() => {
     loadTickets();
   }, [loadTickets, adminViewOverride]);
 
@@ -58,15 +68,11 @@ export default function HelpTicketsPage() {
   };
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      const isAdmin = await isAdminView();
-      if (isAdmin) {
-        console.log("Purging closed help tickets");
-        purgeClosedHelpTickets();
-      }
-    };
-    checkAdmin();
-  }, [isAdminView]);
+    if (!isRealAdmin) {
+      return;
+    }
+    purgeClosedHelpTickets();
+  }, [isRealAdmin]);
 
   return (
     <PageWrapper>
@@ -80,24 +86,26 @@ export default function HelpTicketsPage() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="admin-view"
-                  checked={isAdmin}
-                  onCheckedChange={handleAdminToggle}
-                />
-                <Label htmlFor="admin-view" className="text-sm font-sans">
-                  View as admin
-                </Label>
-                {adminViewOverride !== null && (
-                  <button
-                    onClick={handleResetOverride}
-                    className="text-xs text-muted-foreground hover:text-foreground underline"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
+              {isRealAdmin && (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="admin-view"
+                    checked={isAdmin}
+                    onCheckedChange={handleAdminToggle}
+                  />
+                  <Label htmlFor="admin-view" className="text-sm font-sans">
+                    View as admin
+                  </Label>
+                  {adminViewOverride !== null && (
+                    <button
+                      onClick={handleResetOverride}
+                      className="text-xs text-muted-foreground hover:text-foreground underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              )}
               <Button
                 onClick={() => router.push("/dashboard/help-tickets/open-new")}
                 className="font-sans"
@@ -108,7 +116,7 @@ export default function HelpTicketsPage() {
             </div>
           </div>
 
-          <div className="overflow-y-auto thin-scrollbar flex-1">
+          <div className="overflow-y-auto thin-scrollbar flex-1 font-sans">
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="size-8 animate-spin text-primary" />

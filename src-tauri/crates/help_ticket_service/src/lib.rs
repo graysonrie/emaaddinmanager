@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::models::{format_local_datetime, *};
+use crate::models::{format_exact_datetime, format_local_datetime, *};
 
 pub mod config;
 pub mod models;
@@ -144,6 +144,7 @@ impl HelpTicketService {
                     from_user: message.from_user,
                     message: message.message,
                     created_at: format_local_datetime(message.created_at),
+                    created_at_exact: format_exact_datetime(message.created_at),
                     absolute_image_paths: message
                         .relative_image_paths
                         .iter()
@@ -169,7 +170,7 @@ impl HelpTicketService {
     /// Returns a list of all the help ticket previews for a given user. Should be used for the user panel, since admins should be shown all tickets.
     pub fn get_ticket_previews_with_ids(
         &self,
-        ids:Vec<String>
+        ids: Vec<String>,
     ) -> Result<Vec<HelpTicketPreview>, anyhow::Error> {
         let previews = self.get_ticket_previews()?;
         let previews = previews

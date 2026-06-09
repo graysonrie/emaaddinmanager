@@ -23,6 +23,7 @@ import HelpTicketMessageThread from "../HelpTicketMessageThread";
 import HelpTicketReplyForm from "../HelpTicketReplyForm";
 import HelpTicketStatusBadge from "../HelpTicketStatusBadge";
 import { useHelpTicketsStore } from "../store";
+import { isClosedLikeStatus } from "../utils";
 
 const ALL_STATUSES: HelpTicketStatus[] = [
   "Open",
@@ -221,12 +222,16 @@ function HelpTicketDetailContent() {
                   <HelpTicketMessageThread messages={ticket.messages} />
                 </div>
 
-                <Separator />
+                {(isAdmin || !isClosedLikeStatus(ticket.status)) && (
+                  <>
+                    <Separator />
 
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-lg font-medium">Reply</h3>
-                  <HelpTicketReplyForm onSubmit={handleReply} />
-                </div>
+                    <div className="flex flex-col gap-3">
+                      <h3 className="text-lg font-medium">Reply</h3>
+                      <HelpTicketReplyForm onSubmit={handleReply} />
+                    </div>
+                  </>
+                )}
               </>
             ) : (
               <p className="text-muted-foreground">Ticket not found.</p>

@@ -1,14 +1,30 @@
 "use client";
 
 import { HelpTicketMessageModel } from "@/lib/models/help-tickets/help-ticket-message.model";
+import { useMemo } from "react";
 import HelpTicketMessageCard from "./HelpTicketMessageCard";
 
 interface Props {
   messages: HelpTicketMessageModel[];
 }
 
+function sortMessagesChronologically(
+  messages: HelpTicketMessageModel[],
+): HelpTicketMessageModel[] {
+  return [...messages].sort(
+    (a, b) =>
+      new Date(a.createdAtExact).getTime() -
+      new Date(b.createdAtExact).getTime(),
+  );
+}
+
 export default function HelpTicketMessageThread({ messages }: Props) {
-  if (messages.length === 0) {
+  const sortedMessages = useMemo(
+    () => sortMessagesChronologically(messages),
+    [messages],
+  );
+
+  if (sortedMessages.length === 0) {
     return (
       <p className="text-sm text-muted-foreground font-sans py-4">
         No messages yet.
@@ -18,9 +34,9 @@ export default function HelpTicketMessageThread({ messages }: Props) {
 
   return (
     <div className="flex flex-col gap-4 font-sans">
-      {messages.map((msg, index) => (
+      {sortedMessages.map((msg, index) => (
         <HelpTicketMessageCard
-          key={`${msg.createdAt}-${msg.fromUser}-${index}`}
+          key={`${msg.createdAtExact}-${msg.fromUser}-${index}`}
           message={msg}
         />
       ))}

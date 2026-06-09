@@ -8,12 +8,17 @@ pub fn format_local_datetime(utc: DateTime<Utc>) -> String {
         .to_string()
 }
 
+pub fn format_exact_datetime(utc: DateTime<Utc>) -> String {
+    utc.to_rfc3339()
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct LoadedHelpTicketMessage {
     pub from_user: String,
     pub message: String,
     pub created_at: String,
+    pub created_at_exact: String,
     /// When loaded, the relative paths will be converted to absolute paths
     /// this is because they are now stored in the same directory as the help ticket
     pub absolute_image_paths: Vec<String>,

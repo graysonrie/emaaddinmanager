@@ -11,7 +11,7 @@ const CLOSED_LIKE_STATUSES: HelpTicketStatus[] = [
   "Rejected",
 ];
 
-function isClosedLike(status: HelpTicketStatus): boolean {
+export function isClosedLikeStatus(status: HelpTicketStatus): boolean {
   return CLOSED_LIKE_STATUSES.includes(status);
 }
 
@@ -52,10 +52,10 @@ export function sortTicketPreviews(
   isAdmin: boolean,
 ): HelpTicketPreviewModel[] {
   const closed = previews
-    .filter((p) => isClosedLike(p.status))
+    .filter((p) => isClosedLikeStatus(p.status))
     .sort(sortByUpdatedAtDesc);
   const active = previews
-    .filter((p) => !isClosedLike(p.status))
+    .filter((p) => !isClosedLikeStatus(p.status))
     .sort(sortByUpdatedAtDesc);
 
   return isAdmin ? [...active, ...closed] : [...closed, ...active];
