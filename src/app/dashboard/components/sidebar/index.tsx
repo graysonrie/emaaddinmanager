@@ -11,6 +11,10 @@ import {
   Upload,
   File,
   Wrench,
+  HelpCircleIcon,
+  BugIcon,
+  MegaphoneIcon,
+  TicketsIcon,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -127,6 +131,11 @@ export default function Sidebar() {
       icon: <LibraryIcon />,
       label: "Library",
       link: "/dashboard/library",
+    },
+    {
+      icon: <TicketsIcon />,
+      label: "Help Tickets",
+      link: "/dashboard/help-tickets",
     },
     {
       icon: <SettingsIcon />,

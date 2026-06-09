@@ -2,7 +2,8 @@ use std::path::{Path, PathBuf};
 
 use crate::models::{format_local_datetime, *};
 
-pub mod config;
+pub mod tauri_exports;
+mod config;
 pub mod models;
 
 #[cfg(test)]
