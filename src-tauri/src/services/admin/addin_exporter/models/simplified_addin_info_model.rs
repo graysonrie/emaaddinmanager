@@ -10,5 +10,5 @@ pub struct SimplifiedAddinInfoModel {
     pub csharp_project_name: String,
     pub addin_version: String,
 
-    pub reason_for_export:Option<String>,
+    pub reason_for_export: Option<String>,
 }

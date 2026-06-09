@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
+use help_ticket_service::HelpTicketService;
 use tauri::{AppHandle, Manager};
 
 use crate::{
+    constants::ADDINS_REGISTRY_PATH,
     services::{
         addin_updater::service::AddinUpdaterService,
         addins_registry::services::local_registry::LocalAddinsRegistryService,
@@ -29,52 +31,53 @@ pub fn initialize_app(handle: &AppHandle) {
 }
 
 async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
-        let app_save_service = initialize_app_save_service(AppSavePath::AppData);
-        let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await?;
+    let app_save_service = initialize_app_save_service(AppSavePath::AppData);
+    let local_db_service = initialize_local_db_service(&app_save_service, handle.clone()).await?;
 
-        let local_addins_service = initialize_local_addins_service(handle.clone());
+    let local_addins_service = initialize_local_addins_service(handle.clone());
 
-        let addins_registry_service = initialize_addins_registry_service_local(
-            Arc::clone(&local_db_service),
-            Arc::clone(&local_addins_service),
-        );
-        let user_stats_service = initialize_user_stats_service_local(
-            Arc::clone(&local_db_service),
-            Arc::clone(&addins_registry_service),
-        )
-        .await?;
-        let addin_permissions_service =
-            initialize_addins_permissions_service(Arc::clone(&user_stats_service)).await;
-        let admin_service = initialize_admin_service(Arc::clone(&local_db_service)).await;
-        let packages_service = initialize_addin_packages_service(
-            Arc::clone(&local_db_service),
-            Arc::clone(&app_save_service),
-        );
-        let dev_resources_service = initialize_dev_resources_service(Arc::clone(&local_db_service));
+    let addins_registry_service = initialize_addins_registry_service_local(
+        Arc::clone(&local_db_service),
+        Arc::clone(&local_addins_service),
+    );
+    let user_stats_service = initialize_user_stats_service_local(
+        Arc::clone(&local_db_service),
+        Arc::clone(&addins_registry_service),
+    )
+    .await?;
+    let addin_permissions_service =
+        initialize_addins_permissions_service(Arc::clone(&user_stats_service)).await;
+    let admin_service = initialize_admin_service(Arc::clone(&local_db_service)).await;
+    let packages_service = initialize_addin_packages_service(
+        Arc::clone(&local_db_service),
+        Arc::clone(&app_save_service),
+    );
+    let dev_resources_service = initialize_dev_resources_service(Arc::clone(&local_db_service));
 
-        let addin_updater_service = initialize_addin_updater_service(
-            Arc::clone(&addins_registry_service),
-            handle.clone(),
-        );
-        let user_metadata_service = initialize_user_metadata_service(
-            Arc::clone(&local_db_service),
-            Arc::clone(&user_stats_service),
-        );
+    let addin_updater_service =
+        initialize_addin_updater_service(Arc::clone(&addins_registry_service), handle.clone());
+    let user_metadata_service = initialize_user_metadata_service(
+        Arc::clone(&local_db_service),
+        Arc::clone(&user_stats_service),
+    );
 
-        let login_info_service =
-            initialize_login_info_service(local_db_service.clone(), user_stats_service.clone());
+    let login_info_service =
+        initialize_login_info_service(local_db_service.clone(), user_stats_service.clone());
 
-        handle.manage(Arc::clone(&local_db_service));
-        handle.manage(Arc::clone(&app_save_service));
-        handle.manage(Arc::clone(&addins_registry_service));
-        handle.manage(Arc::clone(&user_stats_service));
-        handle.manage(Arc::clone(&addin_updater_service));
-        handle.manage(Arc::clone(&addin_permissions_service));
-        handle.manage(Arc::clone(&admin_service));
-        handle.manage(Arc::clone(&packages_service));
-        handle.manage(Arc::clone(&dev_resources_service));
-        handle.manage(Arc::clone(&user_metadata_service));
-        handle.manage(Arc::clone(&login_info_service));
+    let help_ticket_service = initialize_help_ticket_service(ADDINS_REGISTRY_PATH);
+
+    handle.manage(Arc::clone(&local_db_service));
+    handle.manage(Arc::clone(&app_save_service));
+    handle.manage(Arc::clone(&addins_registry_service));
+    handle.manage(Arc::clone(&user_stats_service));
+    handle.manage(Arc::clone(&addin_updater_service));
+    handle.manage(Arc::clone(&addin_permissions_service));
+    handle.manage(Arc::clone(&admin_service));
+    handle.manage(Arc::clone(&packages_service));
+    handle.manage(Arc::clone(&dev_resources_service));
+    handle.manage(Arc::clone(&user_metadata_service));
+    handle.manage(Arc::clone(&login_info_service));
+    handle.manage(Arc::clone(&help_ticket_service));
     Ok(())
 }
 
@@ -104,7 +107,9 @@ async fn initialize_local_db_service(
     app_save_service: &Arc<AppSaveService>,
     handle: AppHandle,
 ) -> Result<Arc<LocalDbService>, String> {
-    Ok(Arc::new(LocalDbService::new_async(app_save_service, handle).await?))
+    Ok(Arc::new(
+        LocalDbService::new_async(app_save_service, handle).await?,
+    ))
 }
 
 async fn initialize_user_stats_service_local(
@@ -149,4 +154,8 @@ fn initialize_login_info_service(
     local_stats: Arc<LocalUserStatsService>,
 ) -> Arc<LoginInfoService> {
     Arc::new(LoginInfoService::new(local_db, local_stats))
+}
+
+fn initialize_help_ticket_service(addins_registry_path: &str) -> Arc<HelpTicketService> {
+    Arc::new(HelpTicketService::new(addins_registry_path))
 }

@@ -6,10 +6,13 @@ use argon2::{
 };
 use rand_core::OsRng;
 
-use crate::{constants::TEMP_PASSWORD, services::{
-    config, local_db::service::LocalDbService, login_info::PasswordHashResult,
-    user_stats::LocalUserStatsService,
-}};
+use crate::{
+    constants::TEMP_PASSWORD,
+    services::{
+        config, local_db::service::LocalDbService, login_info::PasswordHashResult,
+        user_stats::LocalUserStatsService,
+    },
+};
 
 pub struct LoginInfoService {
     local_db: Arc<LocalDbService>,
@@ -76,7 +79,11 @@ impl LoginInfoService {
         }
     }
 
-    pub async fn verify_password_for_user(&self, user_email: String, password: String) -> Result<bool, String> {
+    pub async fn verify_password_for_user(
+        &self,
+        user_email: String,
+        password: String,
+    ) -> Result<bool, String> {
         let login_table = self.local_stats.stats_db.login_info_table();
         let result = login_table.get_user_credentials(user_email).await?;
         if result.is_none() {
@@ -89,7 +96,9 @@ impl LoginInfoService {
     pub async fn set_temp_password_for_user(&self, user_email: String) -> Result<(), String> {
         let login_table = self.local_stats.stats_db.login_info_table();
         let result = self.hash_password(TEMP_PASSWORD.to_string());
-        login_table.set_user_password(user_email, result.password_hash, result.salt).await?;
+        login_table
+            .set_user_password(user_email, result.password_hash, result.salt)
+            .await?;
         Ok(())
     }
 

@@ -18,6 +18,12 @@ import { VsTemplateModel } from "../models/vs-template.model";
 import { CodeSnippetModel } from "../models/code-snippet.model";
 import { CodeSnippetAndGroupsModel } from "../models/code-snippet-and-groups.model";
 import { UserMetadataModel } from "../models/user-metadata.model";
+import { CreateHelpTicketRequestModel } from "../models/help-tickets/create-help-ticket-request.model";
+import { HelpTicketPreviewModel } from "../models/help-tickets/help-ticket-preview.model";
+import { HelpTicketModel } from "../models/help-tickets/help-ticket.model";
+import { AddHelpTicketMessageRequestModel } from "../models/help-tickets/add-help-ticket-message-request.model";
+import { HelpTicketStatus } from "../models/help-tickets/help-ticket-status";
+import { HelpTicketUpdateNotificationModel } from "../models/help-tickets/help-ticket-update-notification.model";
 
 interface TauriCommands {
   kvStoreSet: (key: string, value: any) => Promise<void>;
@@ -122,6 +128,22 @@ interface TauriCommands {
     password: string,
   ) => Promise<boolean>;
   loginSetTempPasswordForUser: (userEmail: string) => Promise<void>;
+  createHelpTicket: (request: CreateHelpTicketRequestModel) => Promise<string>;
+  getHelpTicketPreviews: () => Promise<HelpTicketPreviewModel[]>;
+  getHelpTicketWithId: (id: string) => Promise<HelpTicketModel>;
+  addHelpTicketMessage: (
+    request: AddHelpTicketMessageRequestModel,
+  ) => Promise<void>;
+  setHelpTicketStatus: (id: string, status: HelpTicketStatus) => Promise<void>;
+  purgeClosedHelpTickets: () => Promise<void>;
+  removeNonexistantTicketsFromConfig: () => Promise<void>;
+  getOwnedTicketPreviews: () => Promise<HelpTicketPreviewModel[]>;
+  loadHelpTicketImage: (absolutePath: string) => Promise<[number[], string]>;
+  checkForTicketUpdates: (
+    userEmail: string,
+    includeStatusChanges: boolean,
+    isAdmin: boolean,
+  ) => Promise<HelpTicketUpdateNotificationModel[]>;
 }
 
 export default function getTauriCommands(): TauriCommands {
@@ -492,6 +514,57 @@ export default function getTauriCommands(): TauriCommands {
     });
   };
 
+  const createHelpTicket = async (request: CreateHelpTicketRequestModel) => {
+    return await invoke<string>("create_ticket", { request });
+  };
+
+  const getHelpTicketPreviews = async () => {
+    return await invoke<HelpTicketPreviewModel[]>("get_ticket_previews");
+  };
+
+  const getHelpTicketWithId = async (id: string) => {
+    return await invoke<HelpTicketModel>("get_ticket_with_id", { id });
+  };
+
+  const addHelpTicketMessage = async (
+    request: AddHelpTicketMessageRequestModel,
+  ) => {
+    return await invoke<void>("add_message", { request });
+  };
+
+  const setHelpTicketStatus = async (id: string, status: HelpTicketStatus) => {
+    return await invoke<void>("set_ticket_status", { id, status });
+  };
+
+  const purgeClosedHelpTickets = async () => {
+    return await invoke<void>("purge_closed_tickets");
+  };
+
+  const removeNonexistantTicketsFromConfig = async () => {
+    return await invoke<void>("remove_nonexistant_tickets_from_config");
+  };
+
+  const getOwnedTicketPreviews = async () => {
+    return await invoke<HelpTicketPreviewModel[]>("get_owned_ticket_previews");
+  };
+
+  const loadHelpTicketImage = async (absolutePath: string) => {
+    return await invoke<[number[], string]>("load_help_ticket_image", {
+      absolutePath,
+    });
+  };
+
+  const checkForTicketUpdates = async (
+    userEmail: string,
+    includeStatusChanges: boolean,
+    isAdmin: boolean,
+  ) => {
+    return await invoke<HelpTicketUpdateNotificationModel[]>(
+      "check_for_ticket_updates",
+      { userEmail, includeStatusChanges, isAdmin },
+    );
+  };
+
   return {
     kvStoreSet,
     kvStoreGet,
@@ -554,5 +627,15 @@ export default function getTauriCommands(): TauriCommands {
     loginVerifyPasswordForUser,
     loginSetTempPasswordForUser,
     regenerateZipFilesInRegistry,
+    createHelpTicket,
+    getHelpTicketPreviews,
+    getHelpTicketWithId,
+    addHelpTicketMessage,
+    setHelpTicketStatus,
+    purgeClosedHelpTickets,
+    removeNonexistantTicketsFromConfig,
+    getOwnedTicketPreviews,
+    loadHelpTicketImage,
+    checkForTicketUpdates,
   };
 }

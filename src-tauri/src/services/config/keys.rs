@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use crate::{
-    models::kv_store_value::KvStoreValue,
-    services::local_db::service::LocalDbService,
-};
+use crate::{models::kv_store_value::KvStoreValue, services::local_db::service::LocalDbService};
 
 pub const LOCAL_ADDIN_REGISTRY_PATH: &str = "localAddinRegistryPath";
 pub const USER_EMAIL: &str = "userEmail";

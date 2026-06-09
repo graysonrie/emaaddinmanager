@@ -14,6 +14,8 @@ use services::user_stats::tauri_exports::*;
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 
+use help_ticket_service::tauri_exports::*;
+
 mod app_service_container;
 mod app_updater;
 mod constants;
@@ -25,6 +27,7 @@ mod window_settings;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
@@ -110,6 +113,17 @@ pub fn run() {
             login_set_temp_password_for_user,
             get_user_stats_summary,
             get_user_stats,
+            // Help Ticket Service
+            create_ticket,
+            get_ticket_previews,
+            get_ticket_with_id,
+            add_message,
+            set_ticket_status,
+            purge_closed_tickets,
+            remove_nonexistant_tickets_from_config,
+            get_owned_ticket_previews,
+            load_help_ticket_image,
+            check_for_ticket_updates,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

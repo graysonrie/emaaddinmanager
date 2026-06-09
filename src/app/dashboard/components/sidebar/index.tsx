@@ -11,6 +11,10 @@ import {
   Upload,
   File,
   Wrench,
+  HelpCircleIcon,
+  BugIcon,
+  MegaphoneIcon,
+  TicketsIcon,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -20,6 +24,7 @@ import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { Separator } from "@/components/ui/separator";
 import { useLocalAddinExporterStore } from "@/app/dashboard/publish/stores/useLocalAddinExporterStore";
 import { useAddinUpdaterStore } from "@/lib/addins/addin-updater/useAddinUpdaterStore";
+import { useHelpTicketNotificationsStore } from "@/lib/help-tickets/useHelpTicketNotificationsStore";
 import { useSetupStore } from "../../setup/store";
 
 interface SidebarButtonProps {
@@ -77,15 +82,19 @@ const SidebarButton = ({
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { updateNotifications, hasUserCheckedNotifications } =
-    useAddinUpdaterStore();
+  const { updateNotifications } = useAddinUpdaterStore();
+  const { notifications: helpTicketNotifications } =
+    useHelpTicketNotificationsStore();
   const authStore = useAuthStore();
   const { user } = useSetupStore();
   const [isAdmin, setIsAdmin] = useState(false);
   const { reset } = useLocalAddinExporterStore();
 
-  const hasUnreadNotifications =
-    updateNotifications.length > 0 && !hasUserCheckedNotifications;
+  const addinNotificationCount = updateNotifications.filter(
+    (x) => !x.title.includes("No updates"),
+  ).length;
+  const notificationCount =
+    addinNotificationCount + helpTicketNotifications.length;
 
   // Check admin status on component mount
   useEffect(() => {
@@ -116,17 +125,18 @@ export default function Sidebar() {
       icon: <BellIcon />,
       label: "Notifications",
       link: "/dashboard/notifications",
-      showBadge:
-        updateNotifications.filter((x) => !x.title.includes("No updates"))
-          .length > 0,
-      badgeCount: updateNotifications.filter(
-        (x) => !x.title.includes("No updates"),
-      ).length,
+      showBadge: notificationCount > 0,
+      badgeCount: notificationCount,
     },
     {
       icon: <LibraryIcon />,
       label: "Library",
       link: "/dashboard/library",
+    },
+    {
+      icon: <TicketsIcon />,
+      label: "Help Tickets",
+      link: "/dashboard/help-tickets",
     },
     {
       icon: <SettingsIcon />,

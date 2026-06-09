@@ -53,7 +53,10 @@ impl UserMetadataTable {
     ) -> Result<Vec<UserMetadataModel>, String> {
         let entities: Vec<user_metadata::Model> = self
             .client
-            .post_json("/user-metadata/query", &json!({ "userEmails": user_emails }))
+            .post_json(
+                "/user-metadata/query",
+                &json!({ "userEmails": user_emails }),
+            )
             .await?;
         let users = entities
             .iter()

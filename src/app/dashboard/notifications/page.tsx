@@ -1,43 +1,82 @@
 "use client";
 
 import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
+import { UpdateNotificationWithTime } from "@/lib/addins/addin-updater/update-notification-with-time.model";
 import AddinUpdateNotificationCard from "./AddinUpdateNotificationCard";
+import HelpTicketUpdateNotificationCard from "./HelpTicketUpdateNotificationCard";
 import PageWrapper from "@/components/PageWrapper";
 import { CheckForUpdatesButton } from "./CheckForUpdatesButton";
 import { RevitStatusIndicator } from "./RevitStatusIndicator";
-import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { Info } from "lucide-react";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, Suspense, useMemo } from "react";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
+import { HelpTicketNotificationWithTime } from "@/lib/help-tickets/help-ticket-notification-with-time.model";
+import {
+  helpTicketNotificationKey,
+  useHelpTicketNotificationsStore,
+} from "@/lib/help-tickets/useHelpTicketNotificationsStore";
 
-// Separate component that uses useSearchParams
+type CombinedNotification =
+  | { type: "addin"; key: string; time: Date; notification: UpdateNotificationWithTime }
+  | {
+      type: "helpTicket";
+      key: string;
+      time: Date;
+      notification: HelpTicketNotificationWithTime;
+    };
+
 function NotificationsContent() {
   const { updateNotifications, clearUpdateNotifications } = useAddinUpdater();
+  const {
+    notifications: helpTicketNotifications,
+    clearNotifications: clearHelpTicketNotifications,
+    dismissNotification,
+  } = useHelpTicketNotificationsStore();
   const searchParams = useSearchParams();
   const router = useRouter();
   const autoCheck = searchParams.get("autoCheck");
 
-  // Auto-trigger updates check when navigating from AboutAddinModal
   useEffect(() => {
     if (autoCheck === "true") {
       const triggerAutoCheck = async () => {
         try {
           console.log("Auto-triggering updates check from AboutAddinModal");
           await getTauriCommands().checkForUpdatesManual();
-
-          // Clean up the URL by removing the query parameter
-          // router.replace("dashboard/notifications");
         } catch (error) {
           console.warn("Failed to auto-trigger updates check:", error);
-          // Still clean up the URL even if the check fails
-          // router.replace("dashboard/notifications");
         }
       };
 
       triggerAutoCheck();
     }
   }, [autoCheck, router]);
+
+  const combinedNotifications = useMemo(() => {
+    const items: CombinedNotification[] = [
+      ...updateNotifications.map((notification, index) => ({
+        type: "addin" as const,
+        key: `addin-${notification.title}-${index}`,
+        time: notification.time,
+        notification,
+      })),
+      ...helpTicketNotifications.map((notification) => ({
+        type: "helpTicket" as const,
+        key: helpTicketNotificationKey(notification),
+        time: notification.time,
+        notification,
+      })),
+    ];
+
+    return items.sort((a, b) => b.time.getTime() - a.time.getTime());
+  }, [updateNotifications, helpTicketNotifications]);
+
+  const hasNotifications = combinedNotifications.length > 0;
+
+  const handleClearAll = () => {
+    clearUpdateNotifications();
+    clearHelpTicketNotifications();
+  };
 
   return (
     <PageWrapper>
@@ -48,9 +87,9 @@ function NotificationsContent() {
             <div className="flex items-center gap-3">
               <RevitStatusIndicator />
               <CheckForUpdatesButton />
-              {updateNotifications.length > 0 && (
+              {hasNotifications && (
                 <button
-                  onClick={clearUpdateNotifications}
+                  onClick={handleClearAll}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Clear all
@@ -60,34 +99,37 @@ function NotificationsContent() {
           </div>
 
           <div className="overflow-y-auto thin-scrollbar">
-            {updateNotifications.length === 0 ? (
+            {!hasNotifications ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Info className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
-                  No updates available
+                  No notifications
                 </h3>
                 <p className="text-muted-foreground">
-                  All addins are up to date
+                  Addin updates and help ticket activity will appear here
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {updateNotifications.map((notification, index) => (
-                  <AddinUpdateNotificationCard
-                    key={index}
-                    notification={notification}
-                    onDismiss={() => {
-                      // Remove this specific notification
-                      const newNotifications = updateNotifications.filter(
-                        (_, i) => i !== index
-                      );
-                      // This would need to be handled by the hook, but for now we'll just clear all
-                      clearUpdateNotifications();
-                    }}
-                  />
-                ))}
+                {combinedNotifications.map((item) =>
+                  item.type === "addin" ? (
+                    <AddinUpdateNotificationCard
+                      key={item.key}
+                      notification={item.notification}
+                      onDismiss={() => {
+                        clearUpdateNotifications();
+                      }}
+                    />
+                  ) : (
+                    <HelpTicketUpdateNotificationCard
+                      key={item.key}
+                      notification={item.notification}
+                      onDismiss={() => dismissNotification(item.key)}
+                    />
+                  ),
+                )}
               </div>
             )}
           </div>
@@ -97,7 +139,6 @@ function NotificationsContent() {
   );
 }
 
-// Main page component with Suspense boundary
 export default function NotificationsPage() {
   return (
     <Suspense

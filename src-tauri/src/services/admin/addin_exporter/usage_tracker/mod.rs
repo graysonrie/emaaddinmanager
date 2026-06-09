@@ -43,7 +43,7 @@ pub fn add_usage_data_point(usage_data_point: UsageDataPoint) -> Result<(), Stri
         let mut new_book = umya_spreadsheet::new_file();
         let sheet = new_book
             .get_sheet_mut(&0)
-            .ok_or_else(|| format!("Failed to get default sheet"))?;
+            .ok_or_else(|| "Failed to get default sheet".to_string())?;
 
         for (col_idx, header) in HEADERS.iter().enumerate() {
             sheet
@@ -56,7 +56,7 @@ pub fn add_usage_data_point(usage_data_point: UsageDataPoint) -> Result<(), Stri
 
     let sheet = book
         .get_sheet_mut(&0)
-        .ok_or_else(|| format!("Failed to get sheet"))?;
+        .ok_or_else(|| "Failed to get sheet".to_string())?;
 
     let next_row = sheet.get_highest_row() + 1;
     let reason_for_export = usage_data_point.reason_for_export.unwrap_or_default();

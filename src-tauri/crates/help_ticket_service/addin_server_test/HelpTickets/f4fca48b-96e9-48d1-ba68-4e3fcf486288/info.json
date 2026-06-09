@@ -1,0 +1,12 @@
+{
+  "id": "f4fca48b-96e9-48d1-ba68-4e3fcf486288",
+  "title": "Test Ticket",
+  "openedByUser": "test@example.com",
+  "assignedToUser": "test2@example.com",
+  "createdAt": "2026-06-09T12:52:43.953135900Z",
+  "updatedAt": "2026-06-09T12:52:43.956109500Z",
+  "closedAt": null,
+  "status": "Open",
+  "forAddin": "All Versions/EMA_ELECTRICAL",
+  "messages": []
+}

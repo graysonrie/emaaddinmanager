@@ -8,6 +8,7 @@ import FailedToInstallAddinDialog from "@/app/shared/FailedToUninstallAddinDialo
 import { useInstalledAddinsStore } from "./store";
 import PageWrapper from "@/components/PageWrapper";
 import { Label } from "@/components/ui/label";
+import WhatsNewPopup from "../components/whats-new-popup";
 
 /** Page for the user's locally installed addins
  *
@@ -51,47 +52,54 @@ export default function InstalledPage() {
   }
 
   return (
-    <PageWrapper>
-      <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
-        <div className="flex flex-col h-full w-full max-w-screen-lg mx-auto ">
-          <div className="px-8 pt-8 pb-4">
-            <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
-            <p className="text-muted-foreground mb-4">
-              Your locally installed Revit addins, grouped by Revit versions.
-            </p>
-          </div>
-          <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar font-sans">
-            {groupedAddins.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center text-muted-foreground">
-                  <p className="text-lg mb-2">No addins found</p>
-                  <p className="text-sm">
-                    No locally installed addins were detected. Make sure you
-                    have Revit addins installed in the standard location.
-                  </p>
-                  <a href="/dashboard/library" className="text-primary underline">
-                    Visit the library to browse and install addins
-                  </a>
+    <>
+      <PageWrapper>
+        <div className="flex flex-1 min-h-0 px-8 gap-8 h-full">
+          <div className="flex flex-col h-full w-full max-w-screen-lg mx-auto ">
+            <div className="px-8 pt-8 pb-4">
+              <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
+              <p className="text-muted-foreground mb-4">
+                Your locally installed Revit addins, grouped by Revit versions.
+              </p>
+            </div>
+            <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar font-sans">
+              {groupedAddins.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-muted-foreground">
+                    <p className="text-lg mb-2">No addins found</p>
+                    <p className="text-sm">
+                      No locally installed addins were detected. Make sure you
+                      have Revit addins installed in the standard location.
+                    </p>
+                    <a
+                      href="/dashboard/library"
+                      className="text-primary underline"
+                    >
+                      Visit the library to browse and install addins
+                    </a>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {groupedAddins.map((group, index) => (
-                  <AddinGroupCard
-                    key={index}
-                    group={group}
-                    refreshAddins={refreshAddins}
-                  />
-                ))}
-              </div>
-            )}
+              ) : (
+                <div className="space-y-6">
+                  {groupedAddins.map((group, index) => (
+                    <AddinGroupCard
+                      key={index}
+                      group={group}
+                      refreshAddins={refreshAddins}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+          <FailedToInstallAddinDialog
+            isOpen={failedToUninstallAddin}
+            setIsOpen={setFailedToUninstallAddin}
+          />
         </div>
-        <FailedToInstallAddinDialog
-          isOpen={failedToUninstallAddin}
-          setIsOpen={setFailedToUninstallAddin}
-        />
-      </div>
-    </PageWrapper>
+      </PageWrapper> 
+
+      <WhatsNewPopup />
+    </>
   );
 }

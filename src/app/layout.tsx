@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { WindowChrome } from "@/components/window-chrome";
 import UpdaterPopup from "./dashboard/components/updater-popup";
+import WhatsNewPopup from "./dashboard/components/whats-new-popup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
