@@ -34,7 +34,9 @@ export default function OpenNewHelpTicketPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const dedupedAddins = useMemo(() => dedupeAddinsById(addins), [addins]);
-  const selectedAddin = dedupedAddins.find((a) => a.addinId === selectedAddinId);
+  const selectedAddin = dedupedAddins.find(
+    (a) => a.addinId === selectedAddinId,
+  );
 
   const handleSubmit = async () => {
     if (!title.trim() || !selectedAddin || !message.trim() || !userEmail) {
@@ -99,7 +101,7 @@ export default function OpenNewHelpTicketPage() {
                 <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
-                  placeholder="Brief summary of the issue"
+                  placeholder="Brief summary of the issue or feature you want implemented"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   disabled={submitting}
@@ -130,7 +132,7 @@ export default function OpenNewHelpTicketPage() {
                 <Label htmlFor="message">Message</Label>
                 <Textarea
                   id="message"
-                  placeholder="Describe the issue..."
+                  placeholder="Describe the issue or feature..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={submitting}

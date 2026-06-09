@@ -88,10 +88,7 @@ impl AddinPermissionsService {
     }
 
     /// Unblocks an addin path for every user.
-    pub async fn unblock_addin_path_for_all_users(
-        &self,
-        addin_path: String,
-    ) -> Result<(), String> {
+    pub async fn unblock_addin_path_for_all_users(&self, addin_path: String) -> Result<(), String> {
         let table = self.get_table();
         table
             .unblock_addin_path_for_all_users(addin_path)

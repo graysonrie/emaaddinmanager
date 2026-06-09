@@ -21,13 +21,14 @@ export default function HelpTicketsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const loadTickets = useCallback(async () => {
-    const {
-      removeNonexistantTicketsFromConfig,
-      getHelpTicketPreviews,
-      getOwnedTicketPreviews,
-    } = getTauriCommands();
+  const {
+    removeNonexistantTicketsFromConfig,
+    getHelpTicketPreviews,
+    getOwnedTicketPreviews,
+    purgeClosedHelpTickets,
+  } = getTauriCommands();
 
+  const loadTickets = useCallback(async () => {
     setLoading(true);
     try {
       await removeNonexistantTicketsFromConfig();
@@ -55,6 +56,17 @@ export default function HelpTicketsPage() {
   const handleResetOverride = () => {
     setAdminViewOverride(null);
   };
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const isAdmin = await isAdminView();
+      if (isAdmin) {
+        console.log("Purging closed help tickets");
+        purgeClosedHelpTickets();
+      }
+    };
+    checkAdmin();
+  }, [isAdminView]);
 
   return (
     <PageWrapper>
@@ -110,7 +122,8 @@ export default function HelpTicketsPage() {
                   No help tickets
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  You have no help tickets yet. Open a new ticket to get support.
+                  You have no help tickets yet. Open a new ticket to get
+                  support.
                 </p>
                 <Button
                   onClick={() =>

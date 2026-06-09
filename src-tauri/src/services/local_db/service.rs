@@ -5,8 +5,8 @@ use crate::services::app_save::service::AppSaveService;
 use super::tables::app_kv_store::api::AppKvStoreTable;
 use sea_orm::DatabaseConnection;
 use sqlx::sqlite::SqlitePoolOptions;
-use tauri::AppHandle;
 use std::time::Duration;
+use tauri::AppHandle;
 
 pub struct LocalDbService {
     kv_store_table: AppKvStoreTable,
@@ -14,7 +14,10 @@ pub struct LocalDbService {
 
 impl LocalDbService {
     // consider using a config here
-    pub async fn new_async(save_service: &AppSaveService, app_handle: AppHandle) -> Result<Self, String> {
+    pub async fn new_async(
+        save_service: &AppSaveService,
+        app_handle: AppHandle,
+    ) -> Result<Self, String> {
         let db_path = save_service.create_path("file_index.db");
         let db_url = format!("sqlite://{}", db_path.to_string_lossy());
 
