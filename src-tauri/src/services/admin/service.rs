@@ -8,10 +8,9 @@ const SUPER_ADMIN_USER_EMAILS: [&str; 3] = [
     "skhadka@emaengineer.com",
 ];
 
-const ADMIN_USER_EMAILS: [&str; 4] = [
+const ADMIN_USER_EMAILS: [&str; 3] = [
     "grieger@emaengineer.com",
     "jbright@emaengineer.com",
-    "lcasey@emaengineer.com",
     "skhadka@emaengineer.com",
 ];
 
