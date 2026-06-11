@@ -97,9 +97,9 @@ export default function InstalledPage() {
             setIsOpen={setFailedToUninstallAddin}
           />
         </div>
-      </PageWrapper> 
+      </PageWrapper>
 
-      <WhatsNewPopup />
+      {/* <WhatsNewPopup /> */}
     </>
   );
 }

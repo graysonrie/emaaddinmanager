@@ -54,7 +54,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "App v__VERSION__"
-          releaseBody: "add help ticket service"
+          releaseBody: "made stats updater more reliable, so Jeremy, Sujan and I can get real-time results"
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

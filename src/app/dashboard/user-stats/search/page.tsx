@@ -86,7 +86,7 @@ export default function UserStatsSearchPage() {
         </div>
       )}
 
-      <ManageDialog/>
+      <ManageDialog />
     </PageWrapper>
   );
 }
