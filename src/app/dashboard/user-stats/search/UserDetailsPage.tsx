@@ -9,12 +9,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { deduplicateInstalledAddins } from "../stats-display/helpers";
 import InstalledAddinsCardContent from "../components/InstalledAddinsCardContent";
 import { useUserStatsStore } from "@/lib/user-stats/useUserStatsStore";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function UserDetailsPage() {
   const { selectedUser, setSelectedUser } = useUserStatsSearchStore();
-  const { detailByEmail } = useUserStatsStore();
+  const { detailByEmail, fetchUserDetail } = useUserStatsStore();
   const manageDialogStore = useManageDialogStore();
+
+  const userEmail = selectedUser?.userEmail;
+
+  useEffect(() => {
+    if (!userEmail) return;
+    if (!detailByEmail[userEmail]) {
+      void fetchUserDetail(userEmail);
+    }
+  }, [userEmail, detailByEmail[userEmail ?? ""], fetchUserDetail]);
 
   const handleManageUserClick = (userEmail: string, userName: string) => {
     manageDialogStore.setIsVisible(true);

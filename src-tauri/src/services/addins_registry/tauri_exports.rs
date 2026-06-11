@@ -6,6 +6,7 @@ use crate::services::{
         services::{local_registry::LocalAddinsRegistryService, AddinsRegistry},
     },
     admin::addin_exporter::models::category_model::CategoryModel,
+    user_stats::sync_user_stats_from_app,
 };
 use futures::stream::{FuturesUnordered, StreamExt};
 use tauri::{AppHandle, Emitter, State};
@@ -50,6 +51,8 @@ pub async fn install_addins(
     while let Some(result) = futures.next().await {
         result?; // propagate error if any
     }
+
+    sync_user_stats_from_app(&app).await;
     Ok(())
 }
 

@@ -9,6 +9,7 @@ use crate::services::user_stats::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
+use tauri::{AppHandle, Manager};
 
 pub struct LocalUserStatsService {
     local_db: Arc<LocalDbService>,
@@ -191,5 +192,15 @@ impl LocalUserStatsService {
             .collect::<Vec<InstalledAddinModel>>();
 
         Ok(installed_addins)
+    }
+}
+
+/// Uploads user stats after an addin install, update, or uninstall.
+/// Failures are logged only so the calling operation is not affected.
+pub async fn sync_user_stats_from_app(app: &AppHandle) {
+    if let Some(service) = app.try_state::<Arc<LocalUserStatsService>>() {
+        if let Err(e) = service.sync_user_stats().await {
+            eprintln!("Failed to sync user stats after addin change: {e}");
+        }
     }
 }

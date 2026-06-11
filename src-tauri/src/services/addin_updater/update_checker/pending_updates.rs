@@ -1,6 +1,9 @@
 use tauri::AppHandle;
 
-use crate::services::addin_updater::update_checker::*;
+use crate::services::{
+    addin_updater::update_checker::*,
+    user_stats::sync_user_stats_from_app,
+};
 
 pub async fn store_pending_updates(
     update_state: &PendingUpdatesStateType,
@@ -40,6 +43,7 @@ pub async fn try_apply_pending_updates(
     if let Some(pending_paths) = pending_updates {
         let notifications = apply_pending_updates_by_path(addins_registry, &pending_paths).await?;
         if !notifications.is_empty() {
+            sync_user_stats_from_app(app).await;
             notifications::with(app).emit_update(&notifications);
         }
     }

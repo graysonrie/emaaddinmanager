@@ -15,6 +15,7 @@ use crate::services::{
     addin_updater::models::UpdateNotificationModel,
     addins_registry::{models::addin_model::AddinModel, services::AsyncAddinsRegistryServiceType},
     local_addins::service::LocalAddinsService,
+    user_stats::sync_user_stats_from_app,
 };
 
 #[derive(Debug)]
@@ -191,6 +192,9 @@ impl AddinUpdateChecker {
                     eprintln!("Failed to update addin {}: {:?}", local_addin.name, e);
                 }
             }
+        }
+        if !notifications.is_empty() {
+            sync_user_stats_from_app(&self.app_handle).await;
         }
         notifications::with(&self.app_handle).emit_update(&notifications);
     }

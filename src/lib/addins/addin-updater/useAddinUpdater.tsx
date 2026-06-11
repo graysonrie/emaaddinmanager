@@ -3,7 +3,6 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { UpdateNotificationModel } from "@/lib/models/update-notification.model";
 import { useAddinUpdaterStore } from "./useAddinUpdaterStore";
 import { usePathname } from "next/navigation";
-import getTauriCommands from "@/lib/commands/getTauriCommands";
 
 interface AddinUpdaterProps {
   onNewNotifications?: (notifications: UpdateNotificationModel[]) => void;
@@ -58,16 +57,6 @@ export function useAddinUpdater({
       "addin_updates_available",
       (event) => {
         console.log("Received addin updates:", event.payload);
-
-        // check if any of the notifications were for installing addins
-        const didInstallAddins = event.payload.some(
-          (notification) => notification.notificationType === "install"
-        );
-        if (didInstallAddins) {
-          const commands = getTauriCommands();
-          console.log("Updating user stats because we installed addins");
-          commands.updateUserStats();
-        }
 
         // Add to pending notifications instead of immediately adding to main list
         addPendingNotifications(event.payload);

@@ -20,7 +20,7 @@ export default function useUserStatsUpdater() {
     syncUserStats();
 
     // Stats rarely change and are not real-time critical, so poll every 5
-    // minutes. Install/uninstall flows trigger an immediate sync separately.
+    // minutes. Install, update, and uninstall flows sync immediately in the backend.
     const intervalId = setInterval(syncUserStats, 300000); // 5 minutes
 
     // Cleanup function to clear interval when component unmounts
