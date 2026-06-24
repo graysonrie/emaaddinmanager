@@ -5,20 +5,16 @@ import { findCommonRoot } from "@/components/file-tree/builder/utils";
 import { AddinModel } from "@/lib/models/addin.model";
 import { useLibraryStore } from "./store";
 import AddinPreview from "./AddinPreview";
-import {
-  buildTree,
-  TreeNode,
-} from "@/components/file-tree/builder/tree-builder";
+import { buildTree } from "@/components/file-tree/builder/tree-builder";
 import FileTreeView, { FileTreeRules } from "@/components/file-tree";
 import { determineRevitVersions } from "./helpers";
 import FailedToDelistAddinDialog from "@/app/shared/FailedToDelistAddinDialog";
 import PageWrapper from "@/components/PageWrapper";
-import MessageDialog from "@/components/dialogs/MessageDialog";
 import ConfirmDelistAddinDialog from "./dialogs/ConfirmDelistAddinDialog";
-import { useAuthStore } from "@/lib/auth/useAuthStore";
 import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
+
 
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
@@ -27,14 +23,6 @@ interface AddinWithTreePath extends AddinModel {
 }
 
 export default function LibraryPage() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const adminStatus = await useAuthStore.getState().amIAnAdmin();
-      setIsAdmin(adminStatus === "admin" || adminStatus === "super");
-    };
-    checkAdmin();
-  }, []);
   const { addins, installAddins, refreshRegistry, delistAddin } =
     useAddinRegistryStore();
   const root = useMemo(() => {
@@ -136,13 +124,15 @@ export default function LibraryPage() {
     }
     const fullPath = addin.pathToAddinDllFolder.replace(/\\/g, "/");
     return blockedAddinPaths.some((blockedPath) =>
-      fullPath.includes(blockedPath.replace(/\\/g, "/"))
+      fullPath.includes(blockedPath.replace(/\\/g, "/")),
     );
   };
 
   const fileTreeRules: FileTreeRules = {
     hideFoldersWithName: ["AddinPackages", "DevResources"],
   };
+
+
 
   return (
     <PageWrapper>
