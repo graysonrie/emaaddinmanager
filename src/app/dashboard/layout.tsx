@@ -1,13 +1,10 @@
 "use client";
 
 import Sidebar from "@/app/dashboard/components/sidebar";
-import { PageTransition } from "@/components/PageTransition";
 import { useSidebarStore } from "./components/sidebar/store";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useConfigValueOrDefault } from "@/lib/persistence/config/useConfigValue";
-import UpdaterPopup from "./components/updater-popup";
 import InstallingAddinsOverlay from "./components/installing-addins-overlay";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
@@ -22,7 +19,7 @@ export default function DashboardLayout({
 }) {
   const { isOpen } = useSidebarStore();
   const router = useRouter();
-  const updater = useUserStatsUpdater();
+  useUserStatsUpdater();
 
   const config = useConfig();
   useAddinUpdater({
@@ -49,9 +46,13 @@ export default function DashboardLayout({
           notification.updateType === "statusChanged" ||
           notification.updateType === "newTicket"
         ) {
-          toast.info(notification.title, { description: notification.description });
+          toast.info(notification.title, {
+            description: notification.description,
+          });
         } else {
-          toast.success(notification.title, { description: notification.description });
+          toast.success(notification.title, {
+            description: notification.description,
+          });
         }
       });
     },
