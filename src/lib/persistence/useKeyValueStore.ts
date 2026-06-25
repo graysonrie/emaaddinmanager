@@ -48,7 +48,7 @@ export const useKeyValueStore = create<KeyValueState>((set) => ({
     const lastData: ConfigKeys[K] | undefined = model.lastData;
 
     set((state) => ({
-      values: { ...state.values, [key]: lastData },
+      values: { ...state.values, [key]: lastData ?? undefined },
       loadingStates: { ...state.loadingStates, [key]: false },
     }));
 

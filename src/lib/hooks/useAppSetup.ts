@@ -32,6 +32,8 @@ export function useAppSetup() {
   const isAddinOperationInProgress =
     Object.keys(activeAddinOperations).length > 0;
 
+  const shouldWaitForPasswordCheck = isComplete;
+
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
 
@@ -73,7 +75,7 @@ export function useAppSetup() {
     if (
       !isInitialized ||
       isUserLoading ||
-      isCheckingPasswordSet ||
+      (shouldWaitForPasswordCheck && isCheckingPasswordSet) ||
       isAddinOperationInProgress
     )
       return; // Don't make routing decisions until core checks and addin operations are ready
@@ -107,6 +109,7 @@ export function useAppSetup() {
     setIsOpen,
     user,
     isUserLoading,
+    shouldWaitForPasswordCheck,
     isCheckingPasswordSet,
     isAddinOperationInProgress,
     isPasswordSetForSelf,
@@ -125,7 +128,7 @@ export function useAppSetup() {
   if (
     !isInitialized ||
     isUserLoading ||
-    isCheckingPasswordSet ||
+    (shouldWaitForPasswordCheck && isCheckingPasswordSet) ||
     isAddinOperationInProgress
   ) {
     return {

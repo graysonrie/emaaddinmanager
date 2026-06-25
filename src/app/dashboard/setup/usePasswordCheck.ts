@@ -38,8 +38,8 @@ export default function usePasswordCheck() {
 
   const isCheckingPasswordSet =
     isChecking ||
-    (!hasCachedPasswordCheck(userEmail, cachedEmail, isPasswordSetForSelf) &&
-      userEmail !== undefined);
+    (Boolean(userEmail) &&
+      !hasCachedPasswordCheck(userEmail, cachedEmail, isPasswordSetForSelf));
 
   const checkPasswordSetForSelf = async (force = false) => {
     if (

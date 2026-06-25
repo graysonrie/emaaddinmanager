@@ -1,6 +1,6 @@
 import { useKeyValueSubscription } from "../useKeyValueSubscription";
 import { ConfigKeys } from "./config-keys";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import useConfig from "./useConfig";
 
 /**
@@ -21,7 +21,7 @@ export function useConfigValue<K extends keyof ConfigKeys>(key: K) {
  */
 export function useConfigValueWithFallback<K extends keyof ConfigKeys>(
   key: K,
-  defaultValue: ConfigKeys[K]
+  defaultValue: ConfigKeys[K],
 ) {
   const subscription = useKeyValueSubscription(key);
 
@@ -39,7 +39,7 @@ export function useConfigValueWithFallback<K extends keyof ConfigKeys>(
  */
 export function useConfigValueOrDefault<K extends keyof ConfigKeys>(
   key: K,
-  defaultValue: ConfigKeys[K]
+  defaultValue: ConfigKeys[K],
 ) {
   const { readOrSet } = useConfig();
   const [hasSetDefault, setHasSetDefault] = useState(false);
