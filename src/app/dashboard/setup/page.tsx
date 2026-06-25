@@ -24,8 +24,8 @@ export default function SetupPage() {
     isTempPassword,
     checkIsPasswordIsSet,
   } = usePasswordCheck();
-  const userEmail = useKeyValueSubscription<string>("userEmail");
-  const userName = useKeyValueSubscription<string>("userName");
+  const userEmail = useKeyValueSubscription("userEmail");
+  const userName = useKeyValueSubscription("userName");
   const { isOpen, setIsOpen } = useSidebarStore();
   const { forcePasswordChange, setForcePasswordChange } = useSetupStore();
   const [step, setStep] = useState<

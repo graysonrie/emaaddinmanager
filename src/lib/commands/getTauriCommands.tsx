@@ -24,9 +24,15 @@ import { HelpTicketModel } from "../models/help-tickets/help-ticket.model";
 import { AddHelpTicketMessageRequestModel } from "../models/help-tickets/add-help-ticket-message-request.model";
 import { HelpTicketStatus } from "../models/help-tickets/help-ticket-status";
 import { HelpTicketUpdateNotificationModel } from "../models/help-tickets/help-ticket-update-notification.model";
+import { ConfigKeys } from "../persistence/config/config-keys";
+
+type ConfigKey = keyof ConfigKeys;
 
 interface TauriCommands {
-  kvStoreSet: (key: string, value: any) => Promise<void>;
+  kvStoreSet: <K extends ConfigKey>(
+    key: K,
+    value: ConfigKeys[K],
+  ) => Promise<void>;
   kvStoreGet: <T>(key: string) => Promise<T | undefined>;
   kvStoreSubscribeToKey<T>(key: string): Promise<KvSubscriptionModel<T>>;
   getAddins: (path: string) => Promise<AddinModel[]>;
@@ -147,7 +153,10 @@ interface TauriCommands {
 }
 
 export default function getTauriCommands(): TauriCommands {
-  const kvStoreSet = async (key: string, value: any) => {
+  const kvStoreSet = async <K extends ConfigKey>(
+    key: K,
+    value: ConfigKeys[K],
+  ) => {
     await invoke<void>("kv_store_set", {
       key,
       value,

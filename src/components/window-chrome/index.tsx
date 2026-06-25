@@ -5,14 +5,13 @@ import { Button } from "../ui/button";
 import { Minus, X, Square } from "lucide-react";
 import { AppLogo } from "./AppLogo";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
-import { useMemo } from "react";
 import UserAvatar from "@/app/shared/UserAvatar";
 import { Label } from "../ui/label";
 import { getVersion } from "@tauri-apps/api/app";
 
 export function WindowChrome() {
-  const userName = useKeyValueSubscription<string>("userName");
-  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userName = useKeyValueSubscription("userName");
+  const userEmail = useKeyValueSubscription("userEmail");
 
   // const userFirstName = useMemo(() => {
   //   return userName?.split(" ")[0];

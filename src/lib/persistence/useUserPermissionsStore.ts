@@ -24,6 +24,12 @@ export const useUserPermissionsStore = create<UserPermissionsStore>()(
         return;
       }
 
+      const { user } = get();
+      if (user?.userEmail === userEmail) {
+        set({ isLoading: false });
+        return;
+      }
+
       set({ isLoading: true });
       try {
         const userData = await getTauriCommands().getUser(userEmail);
@@ -34,12 +40,8 @@ export const useUserPermissionsStore = create<UserPermissionsStore>()(
       }
     },
     registerAndAddAllowedAddinPaths: async (discipline: string) => {
-      const userEmail = useKeyValueStore.getState().values["userEmail"] as
-        | string
-        | undefined;
-      const userName = useKeyValueStore.getState().values["userName"] as
-        | string
-        | undefined;
+      const userEmail = useKeyValueStore.getState().values.userEmail;
+      const userName = useKeyValueStore.getState().values.userName;
 
       if (!userEmail) {
         throw new Error("User email is not set");

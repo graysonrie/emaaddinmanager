@@ -4,7 +4,7 @@ import { useUserPermissionsStore } from "./useUserPermissionsStore";
 import { useKeyValueStore } from "./useKeyValueStore";
 
 export default function useUserPermissions() {
-  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userEmail = useKeyValueSubscription("userEmail");
   const user = useUserPermissionsStore((state) => state.user);
   const isLoading = useUserPermissionsStore((state) => state.isLoading);
   const registerAndAddAllowedAddinPaths = useUserPermissionsStore(
@@ -16,7 +16,7 @@ export default function useUserPermissions() {
   useEffect(() => {
     // Ensure the key-value store is subscribed to userEmail
     const keyValueStore = useKeyValueStore.getState();
-    keyValueStore.subscribeToKey<string>("userEmail");
+    keyValueStore.subscribeToKey("userEmail");
 
     // Fetch user when userEmail changes
     fetchUser(userEmail);

@@ -13,7 +13,7 @@ export default function ChangeDisciplines() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
 
-  const currentDisciplines = useKeyValueSubscription<string[]>("userDisciplines");
+  const currentDisciplines = useKeyValueSubscription("userDisciplines");
 
   const handleUpdateDisciplines = async (disciplines: string[]) => {
     await update("userDisciplines", disciplines);
