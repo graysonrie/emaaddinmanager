@@ -9,7 +9,7 @@ import useConfig from "./useConfig";
  * @returns Object with data, loading, and error states
  */
 export function useConfigValue<K extends keyof ConfigKeys>(key: K) {
-  return useKeyValueSubscription<ConfigKeys[K]>(key);
+  return useKeyValueSubscription(key);
 }
 
 /**
@@ -23,7 +23,7 @@ export function useConfigValueWithFallback<K extends keyof ConfigKeys>(
   key: K,
   defaultValue: ConfigKeys[K]
 ) {
-  const subscription = useKeyValueSubscription<ConfigKeys[K]>(key);
+  const subscription = useKeyValueSubscription(key);
 
   return {
     data: subscription ?? defaultValue,
@@ -43,7 +43,7 @@ export function useConfigValueOrDefault<K extends keyof ConfigKeys>(
 ) {
   const { readOrSet } = useConfig();
   const [hasSetDefault, setHasSetDefault] = useState(false);
-  const subscription = useKeyValueSubscription<ConfigKeys[K]>(key);
+  const subscription = useKeyValueSubscription(key);
 
   // Only set default once when the component mounts and no value exists
   useEffect(() => {

@@ -1,99 +1,137 @@
 import getTauriCommands from "@/lib/commands/getTauriCommands";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { TEMP_PASSWORD } from "@/types/constants";
+import { usePasswordCheckStore } from "./passwordCheckStore";
+
+function hasCachedPasswordCheck(
+  userEmail: string | undefined,
+  cachedEmail: string | null,
+  isPasswordSetForSelf: boolean | null,
+): boolean {
+  return (
+    Boolean(userEmail) &&
+    userEmail === cachedEmail &&
+    isPasswordSetForSelf !== null
+  );
+}
 
 export default function usePasswordCheck() {
-  const [isPasswordSetForSelf, setIsPasswordSetForSelf] = useState<
-    boolean | null
-  >(null);
-  const [isTempPassword, setIsTempPassword] = useState<boolean | null>(null);
-  const [justSetPassword, setJustSetPassword] = useState(false);
-  const [isCheckingPasswordSet, setIsCheckingPasswordSet] = useState(true);
-  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userEmail = useKeyValueSubscription("userEmail");
+  const {
+    cachedEmail,
+    isPasswordSetForSelf,
+    isTempPassword,
+    isChecking,
+    justSetPassword,
+    setChecking,
+    setPasswordSetResult,
+    setTempPassword,
+    setJustSetPassword,
+    reset,
+  } = usePasswordCheckStore();
   const {
     loginCheckIfPasswordIsSetForSelf,
     loginSetPassword,
     loginVerifyPasswordForUser,
   } = getTauriCommands();
 
-  const checkPasswordSetForSelf = async () => {
-    setIsCheckingPasswordSet(true);
+  const isCheckingPasswordSet =
+    isChecking ||
+    (!hasCachedPasswordCheck(userEmail, cachedEmail, isPasswordSetForSelf) &&
+      userEmail !== undefined);
+
+  const checkPasswordSetForSelf = async (force = false) => {
+    if (
+      !force &&
+      hasCachedPasswordCheck(userEmail, cachedEmail, isPasswordSetForSelf)
+    ) {
+      return;
+    }
+
+    if (!force && usePasswordCheckStore.getState().isChecking) {
+      return;
+    }
+
+    setChecking(true);
     try {
       const result = await loginCheckIfPasswordIsSetForSelf();
-      setIsPasswordSetForSelf(result);
+      setPasswordSetResult(userEmail ?? null, result);
     } catch (error) {
       console.error("Failed to check if password is set for self:", error);
-      setIsPasswordSetForSelf(false);
-    } finally {
-      setIsCheckingPasswordSet(false);
+      setPasswordSetResult(userEmail ?? null, false);
     }
   };
 
   useEffect(() => {
-    checkPasswordSetForSelf();
-  }, []);
-
-  // Also check password status when email becomes available (for users logging in with temp password)
-  useEffect(() => {
-    if (userEmail) {
-      checkPasswordSetForSelf();
+    if (!userEmail) {
+      reset();
+      return;
     }
+
+    if (userEmail !== cachedEmail) {
+      setPasswordSetResult(userEmail, null);
+      setTempPassword(null);
+    }
+
+    checkPasswordSetForSelf();
+    // Only re-run when the signed-in user changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail]);
 
-  // Check if current password is the temp password
   useEffect(() => {
-    // Skip the check if we just set a password (we already know it's not temp)
     if (justSetPassword) {
       return;
     }
 
     const checkTempPassword = async () => {
       if (!userEmail || !isPasswordSetForSelf) {
-        setIsTempPassword(null);
+        setTempPassword(null);
+        return;
+      }
+
+      if (
+        userEmail === cachedEmail &&
+        isTempPassword !== null &&
+        isPasswordSetForSelf === true
+      ) {
         return;
       }
 
       try {
         const isTemp = await loginVerifyPasswordForUser(
           userEmail,
-          TEMP_PASSWORD
+          TEMP_PASSWORD,
         );
-        setIsTempPassword(isTemp);
+        setTempPassword(isTemp);
       } catch (err) {
         console.error("Failed to check if password is temp:", err);
-        setIsTempPassword(false);
+        setTempPassword(false);
       }
     };
 
     if (isPasswordSetForSelf === true && userEmail) {
       checkTempPassword();
     } else {
-      setIsTempPassword(null);
+      setTempPassword(null);
     }
     // loginVerifyPasswordForUser is stable from getTauriCommands, so we don't need it in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userEmail, isPasswordSetForSelf, justSetPassword]);
+  }, [userEmail, isPasswordSetForSelf, justSetPassword, cachedEmail]);
 
   async function setPassword(password: string) {
     await loginSetPassword(password);
-    // Set flag to prevent temp password check from running immediately
     setJustSetPassword(true);
-    // Automatically refresh the state after setting password
     const result = await loginCheckIfPasswordIsSetForSelf();
-    setIsPasswordSetForSelf(result);
-    setIsCheckingPasswordSet(false);
-    // Since the form validation prevents using TEMP_PASSWORD, we know the new password is NOT temp
-    // Set it to false immediately so the UI can proceed without waiting for async check
-    setIsTempPassword(false);
-    // Clear the flag after a short delay to allow normal checks to resume
+    setPasswordSetResult(userEmail ?? null, result);
+    setTempPassword(false);
     setTimeout(() => {
       setJustSetPassword(false);
     }, 1000);
   }
 
   async function checkIsPasswordIsSet() {
-    await checkPasswordSetForSelf();
+    await checkPasswordSetForSelf(true);
   }
 
   return {

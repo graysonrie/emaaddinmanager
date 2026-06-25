@@ -25,7 +25,7 @@ impl LocalUserStatsService {
         db: Arc<LocalDbService>,
         addins_registry: Arc<LocalAddinsRegistryService>,
     ) -> Result<Self, String> {
-        let stats_db = LocalStatsDbHandler::new_async().await?;
+        let stats_db = LocalStatsDbHandler::new_async(db.clone()).await?;
         Ok(Self {
             local_db: db,
             addins_registry,

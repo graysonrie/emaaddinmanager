@@ -7,8 +7,6 @@ import AddinGroupCard from "./AddinGroupCard";
 import FailedToInstallAddinDialog from "@/app/shared/FailedToUninstallAddinDialog";
 import { useInstalledAddinsStore } from "./store";
 import PageWrapper from "@/components/PageWrapper";
-import { useAppSetup } from "@/lib/hooks/useAppSetup";
-import { Loader2 } from "lucide-react";
 
 /** Page for the user's locally installed addins
  *
@@ -23,16 +21,6 @@ export default function InstalledPage() {
   const groupedAddins = useMemo(() => {
     return groupAddinsByRevitVersions(addins);
   }, [addins]);
-
-  const { loading } = useAppSetup();
-
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-full font-sans w-full">
-        <Loader2 className="w-4 h-4 animate-spin" />
-      </div>
-    );
-  }
 
   if (error) {
     return (

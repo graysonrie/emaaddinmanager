@@ -16,7 +16,7 @@ export default function ChangeEmail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
 
-  const currentEmail = useKeyValueSubscription<string>("userEmail");
+  const currentEmail = useKeyValueSubscription("userEmail");
 
   const handleUpdateEmail = async (email: string) => {
     await changeUserStatsEmail(email);

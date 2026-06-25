@@ -1,13 +1,17 @@
+import type { KvStoreKeys } from "../kv-store-keys";
+
+type ConfigKey =
+  | "isFirstUse"
+  | "userEmail"
+  | "userName"
+  | "userDisciplines"
+  | "localAddinRegistryPath";
+
 /**
- * These items lazily exist in the local db's KV Store
+ * User-facing config keys stored in the local DB KV store.
  *
- * This interface should never be constructed
+ * This type should never be constructed directly.
  */
-export interface ConfigKeys{
-  /** `true` if it is the user's first time opening the app */
-  isFirstUse: boolean;
-  userEmail: string;
-  userName: string;
-  userDisciplines:string[];
-  localAddinRegistryPath:string;
-}
+export type ConfigKeys = {
+  [K in ConfigKey]: KvStoreKeys[K];
+};

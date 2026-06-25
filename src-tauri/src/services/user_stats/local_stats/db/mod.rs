@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde_json::json;
 
 pub mod client;
@@ -10,7 +12,7 @@ use user_addins::UserAddinsTable;
 use user_metadata::UserMetadataTable;
 use user_stats::UserStatsTable;
 
-use crate::services::user_stats::db::login_info::LoginInfoTable;
+use crate::services::{local_db::service::LocalDbService, user_stats::db::login_info::LoginInfoTable};
 
 pub struct LocalStatsDbHandler {
     user_stats_table: UserStatsTable,
@@ -25,8 +27,8 @@ impl LocalStatsDbHandler {
     ///
     /// The server base URL and API key are read from configuration
     /// (`STATS_SERVER_URL` / `STATS_SERVER_API_KEY`).
-    pub async fn new_async() -> Result<Self, String> {
-        let client = StatsApiClient::new();
+    pub async fn new_async(local_db:Arc<LocalDbService>) -> Result<Self, String> {
+        let client = StatsApiClient::new(local_db);
         let user_stats_table = UserStatsTable::new(client.clone());
         let user_addins_table = UserAddinsTable::new(client.clone());
         let user_metadata_table = UserMetadataTable::new(client.clone());

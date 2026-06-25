@@ -1,20 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { listen } from "@tauri-apps/api/event";
-import useTauriCommands from "../commands/getTauriCommands";
+import { useEffect } from "react";
 import { useKeyValueStore } from "./useKeyValueStore";
+import type { KvStoreKeys } from "./kv-store-keys";
 
-// Global subscription cache to prevent duplicates
-const subscriptionCache = new Map<
-  string,
-  {
-    data: any;
-    loading: boolean;
-    error: Error | null;
-    listeners: Set<(data: any) => void>;
-  }
->();
-
-export function useKeyValueSubscription<T>(key: string) {
+export function useKeyValueSubscription<K extends keyof KvStoreKeys>(
+  key: K,
+): KvStoreKeys[K] | undefined {
   const value = useKeyValueStore((state) => state.values[key]);
   const subscribeToKey = useKeyValueStore((state) => state.subscribeToKey);
   const unsubscribeFromKey = useKeyValueStore(
@@ -22,17 +12,19 @@ export function useKeyValueSubscription<T>(key: string) {
   );
 
   useEffect(() => {
-    subscribeToKey<T>(key);
+    subscribeToKey(key);
     return () => {
       unsubscribeFromKey(key);
     };
   }, [key, subscribeToKey, unsubscribeFromKey]);
 
-  return value as T | undefined;
+  return value;
 }
 
-export function useKeyValueSubscriptionWithLoading<T>(key: string) {
-  const value = useKeyValueSubscription<T>(key);
+export function useKeyValueSubscriptionWithLoading<K extends keyof KvStoreKeys>(
+  key: K,
+) {
+  const value = useKeyValueSubscription(key);
   const loading = useKeyValueStore(
     (state) => state.loadingStates[key] ?? false
   );

@@ -17,7 +17,7 @@ export default function ChangeName() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
 
-  const currentName = useKeyValueSubscription<string>("userName");
+  const currentName = useKeyValueSubscription("userName");
 
   const handleUpdateName = async (name: string) => {
     await changeUserStatsName(name);

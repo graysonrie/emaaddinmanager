@@ -2,13 +2,14 @@ import { useCallback } from "react";
 import { useKeyValueSubscription } from "../useKeyValueSubscription";
 import { ConfigKeys } from "./config-keys";
 import { useKeyValueStore } from "../useKeyValueStore";
+import type { KvStoreKeys } from "../kv-store-keys";
 
 export default function useConfig() {
   const { set, get } = useKeyValueStore();
 
   /** Subscribe to changes for one certain field in the config */
   const observeKey = useCallback(<K extends keyof ConfigKeys>(key: K) => {
-    return useKeyValueSubscription<ConfigKeys[K]>(key);
+    return useKeyValueSubscription(key);
   }, []);
 
   /** Update a specific key in the config */
@@ -18,7 +19,7 @@ export default function useConfig() {
       value: ConfigKeys[K]
     ): Promise<void> => {
       // TODO: debounce the save operation if needed
-      await set(key, value);
+      await set(key, value as KvStoreKeys[K]);
     },
     [set]
   );
@@ -28,7 +29,7 @@ export default function useConfig() {
     async <K extends keyof ConfigKeys>(
       key: K
     ): Promise<ConfigKeys[K] | undefined> => {
-      const value = await get<ConfigKeys[K]>(key);
+      const value = await get(key);
       return value;
     },
     [get]

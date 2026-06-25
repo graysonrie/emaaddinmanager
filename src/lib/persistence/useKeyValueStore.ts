@@ -1,31 +1,37 @@
 import { create } from "zustand";
 import { listen } from "@tauri-apps/api/event";
-import useTauriCommands from "../commands/getTauriCommands";
+import getTauriCommands from "../commands/getTauriCommands";
+import { ConfigKeys } from "./config/config-keys";
 
 type KeyValueState = {
-  values: Record<string, any>;
-  loadingStates: Record<string, boolean>;
-  subscribeToKey: <T>(key: string) => void;
-  unsubscribeFromKey: (key: string) => void;
-  set: (key: string, value: any) => void;
-  get: <T>(key: string) => Promise<T | undefined>;
-  setLoading: (key: string, loading: boolean) => void;
+  values: Partial<ConfigKeys>;
+  loadingStates: Partial<Record<keyof ConfigKeys, boolean>>;
+  subscribeToKey: <K extends keyof ConfigKeys>(key: K) => Promise<void>;
+  unsubscribeFromKey: (key: keyof ConfigKeys) => void;
+  set: <K extends keyof ConfigKeys>(
+    key: K,
+    value: ConfigKeys[K],
+  ) => Promise<void>;
+  get: <K extends keyof ConfigKeys>(
+    key: K,
+  ) => Promise<ConfigKeys[K] | undefined>;
+  setLoading: (key: keyof ConfigKeys, loading: boolean) => void;
 };
 
 const subscriptions = new Map<
-  string,
+  keyof ConfigKeys,
   { unlisten: () => void; count: number }
 >();
 
-export const useKeyValueStore = create<KeyValueState>((set, get) => ({
+export const useKeyValueStore = create<KeyValueState>((set) => ({
   values: {},
   loadingStates: {},
-  setLoading: (key: string, loading: boolean) => {
+  setLoading: (key: keyof ConfigKeys, loading: boolean) => {
     set((state) => ({
       loadingStates: { ...state.loadingStates, [key]: loading },
     }));
   },
-  subscribeToKey: async <T>(key: string) => {
+  subscribeToKey: async <K extends keyof ConfigKeys>(key: K) => {
     if (subscriptions.has(key)) {
       subscriptions.get(key)!.count++;
       return;
@@ -36,17 +42,17 @@ export const useKeyValueStore = create<KeyValueState>((set, get) => ({
       loadingStates: { ...state.loadingStates, [key]: true },
     }));
 
-    const { kvStoreSubscribeToKey } = useTauriCommands();
-    const model = await kvStoreSubscribeToKey<T>(key);
+    const { kvStoreSubscribeToKey } = getTauriCommands();
+    const model = await kvStoreSubscribeToKey<ConfigKeys[K]>(key);
     const eventName: string = model.identifier;
-    const lastData: T | undefined = model.lastData;
+    const lastData: ConfigKeys[K] | undefined = model.lastData;
 
     set((state) => ({
       values: { ...state.values, [key]: lastData },
       loadingStates: { ...state.loadingStates, [key]: false },
     }));
 
-    const unlisten = await listen<T>(eventName, (event) => {
+    const unlisten = await listen<ConfigKeys[K]>(eventName, (event) => {
       set((state) => ({
         values: { ...state.values, [key]: event.payload },
       }));
@@ -54,7 +60,7 @@ export const useKeyValueStore = create<KeyValueState>((set, get) => ({
 
     subscriptions.set(key, { unlisten, count: 1 });
   },
-  unsubscribeFromKey: (key: string) => {
+  unsubscribeFromKey: (key: keyof ConfigKeys) => {
     const sub = subscriptions.get(key);
     if (!sub) return;
     sub.count--;
@@ -63,12 +69,12 @@ export const useKeyValueStore = create<KeyValueState>((set, get) => ({
       subscriptions.delete(key);
     }
   },
-  set: async (key: string, value: any) => {
-    const { kvStoreSet } = useTauriCommands();
+  set: async <K extends keyof ConfigKeys>(key: K, value: ConfigKeys[K]) => {
+    const { kvStoreSet } = getTauriCommands();
     await kvStoreSet(key, value);
   },
-  get: async <T>(key: string): Promise<T | undefined> => {
-    const { kvStoreGet } = useTauriCommands();
-    return await kvStoreGet<T>(key);
+  get: async <K extends keyof ConfigKeys>(key: K) => {
+    const { kvStoreGet } = getTauriCommands();
+    return await kvStoreGet<ConfigKeys[K]>(key);
   },
 }));

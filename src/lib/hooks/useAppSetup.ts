@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSidebarStore } from "@/app/dashboard/components/sidebar/store";
 import { useConfigInitialization } from "@/lib/persistence/useConfigInitialization";
 import useUserPermissions from "@/lib/persistence/useUserPermissions";
@@ -15,6 +15,8 @@ interface AddinInstallProgressEvent {
 }
 
 export function useAppSetup() {
+  const pathname = usePathname();
+  const isSetupPage = pathname === "/dashboard/setup";
   const { setIsOpen } = useSidebarStore();
   const { isInitialized, isComplete } = useConfigInitialization();
   const { user, isLoading: isUserLoading } = useUserPermissions();
@@ -66,6 +68,8 @@ export function useAppSetup() {
   }, []);
 
   useEffect(() => {
+    if (isSetupPage) return;
+
     if (
       !isInitialized ||
       isUserLoading ||
@@ -96,6 +100,7 @@ export function useAppSetup() {
       setIsOpen(true);
     }
   }, [
+    isSetupPage,
     isInitialized,
     isComplete,
     router,
@@ -108,6 +113,13 @@ export function useAppSetup() {
     isTempPassword,
     setForcePasswordChange,
   ]);
+
+  if (isSetupPage) {
+    return {
+      loading: false,
+      isComplete,
+    };
+  }
 
   // Show loading state while checking initialization or user
   if (

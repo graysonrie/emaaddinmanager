@@ -1,8 +1,12 @@
+use std::sync::Arc;
+
 use reqwest::{Client, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use crate::constants::{stats_server_api_key, stats_server_url};
+use crate::constants::stats_server_url;
+use crate::services::config::keys;
+use crate::services::local_db::service::LocalDbService;
 
 const API_KEY_HEADER: &str = "X-API-Key";
 
@@ -15,28 +19,48 @@ const API_KEY_HEADER: &str = "X-API-Key";
 pub struct StatsApiClient {
     http: Client,
     base_url: String,
-    api_key: String,
+    local_db: Arc<LocalDbService>,
 }
 
 impl StatsApiClient {
-    pub fn new() -> Self {
+    pub fn new(local_db: Arc<LocalDbService>) -> Self {
         Self {
             http: Client::new(),
             base_url: stats_server_url().trim_end_matches('/').to_string(),
-            api_key: stats_server_api_key(),
+            local_db,
         }
+    }
+
+    pub async fn get_api_key(&self) -> Result<String, String> {
+        keys::get_stats_api_key(self.local_db.clone()).await
     }
 
     fn url(&self, path: &str) -> String {
         format!("{}{}", self.base_url, path)
     }
 
-    /// Pings the server's unauthenticated `/health` endpoint to verify the
-    /// stats server is reachable.
-    pub async fn health(&self) -> Result<(), String> {
+    // Pings the server's unauthenticated `/health` endpoint to verify the
+    // stats server is reachable.
+    // pub async fn health(&self) -> Result<(), String> {
+    //     let resp = self
+    //         .http
+    //         .get(self.url("/health"))
+    //         .send()
+    //         .await
+    //         .map_err(|e| format!("Could not reach stats server at {}: {e}", self.base_url))?;
+    //     Self::error_for_status(resp).await?;
+    //     Ok(())
+    // }
+
+    /// Pings the server's authenticated `/ping` endpoint to verify the
+    /// stats server is reachable and that the user has an API key set up
+    pub async fn ping(&self) -> Result<(), String> {
+        let api_key = self.get_api_key().await?;
+
         let resp = self
             .http
-            .get(self.url("/health"))
+            .get(self.url("/ping"))
+            .header(API_KEY_HEADER, api_key)
             .send()
             .await
             .map_err(|e| format!("Could not reach stats server at {}: {e}", self.base_url))?;
@@ -46,10 +70,12 @@ impl StatsApiClient {
 
     /// GET a resource that may not exist. Returns `None` on `404`.
     pub async fn get_opt<T: DeserializeOwned>(&self, path: &str) -> Result<Option<T>, String> {
+        let api_key = self.get_api_key().await?;
+
         let resp = self
             .http
             .get(self.url(path))
-            .header(API_KEY_HEADER, &self.api_key)
+            .header(API_KEY_HEADER, api_key)
             .send()
             .await
             .map_err(|e| e.to_string())?;
@@ -64,10 +90,12 @@ impl StatsApiClient {
 
     /// GET a resource that is expected to exist.
     pub async fn get<T: DeserializeOwned>(&self, path: &str) -> Result<T, String> {
+        let api_key = self.get_api_key().await?;
+
         let resp = self
             .http
             .get(self.url(path))
-            .header(API_KEY_HEADER, &self.api_key)
+            .header(API_KEY_HEADER, api_key)
             .send()
             .await
             .map_err(|e| e.to_string())?;
@@ -81,10 +109,12 @@ impl StatsApiClient {
         path: &str,
         body: &B,
     ) -> Result<T, String> {
+        let api_key = self.get_api_key().await?;
+
         let resp = self
             .http
             .post(self.url(path))
-            .header(API_KEY_HEADER, &self.api_key)
+            .header(API_KEY_HEADER, api_key)
             .json(body)
             .send()
             .await
@@ -117,8 +147,10 @@ impl StatsApiClient {
     }
 
     async fn send_no_content(&self, builder: reqwest::RequestBuilder) -> Result<(), String> {
+        let api_key = self.get_api_key().await?;
+
         let resp = builder
-            .header(API_KEY_HEADER, &self.api_key)
+            .header(API_KEY_HEADER, api_key)
             .send()
             .await
             .map_err(|e| e.to_string())?;
@@ -135,11 +167,5 @@ impl StatsApiClient {
         }
         let body = resp.text().await.unwrap_or_default();
         Err(format!("Stats server returned {status}: {body}"))
-    }
-}
-
-impl Default for StatsApiClient {
-    fn default() -> Self {
-        Self::new()
     }
 }

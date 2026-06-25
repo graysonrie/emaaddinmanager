@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useKeyValueSubscription } from "./useKeyValueSubscription";
 
+let hasInitializedConfigGlobally = false;
+
 interface ConfigState {
   userEmail: string | undefined;
   userName: string | undefined;
@@ -13,11 +15,13 @@ interface UseConfigInitializationReturn {
 }
 
 export function useConfigInitialization(): UseConfigInitializationReturn {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [hasCheckedOnce, setHasCheckedOnce] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(hasInitializedConfigGlobally);
+  const [hasCheckedOnce, setHasCheckedOnce] = useState(
+    hasInitializedConfigGlobally,
+  );
 
-  const userEmail = useKeyValueSubscription<string>("userEmail");
-  const userName = useKeyValueSubscription<string>("userName");
+  const userEmail = useKeyValueSubscription("userEmail");
+  const userName = useKeyValueSubscription("userName");
 
   useEffect(() => {
     if (hasCheckedOnce) return;
@@ -34,6 +38,7 @@ export function useConfigInitialization(): UseConfigInitializationReturn {
     if (!hasCheckedOnce) return;
 
     // Mark as initialized once we've received any response (even undefined)
+    hasInitializedConfigGlobally = true;
     setIsInitialized(true);
   }, [userEmail, userName, hasCheckedOnce]);
 

@@ -31,7 +31,7 @@ export default function AddinInfoForm({
     });
   };
 
-  const userEmail = useKeyValueSubscription<string>("userEmail");
+  const userEmail = useKeyValueSubscription("userEmail");
 
   return (
     <Card className="w-full h-full">

@@ -20,9 +20,8 @@ export default function Home() {
   useEffect(() => {
     const checkConnectedToServer = async () => {
       try {
-        await ensureConnectedToServer();
-        // throw new Error("Failed to connect to server");
-        console.log("Connected to server");
+        const connected = await ensureConnectedToServer();
+        console.log("Connected to server", connected);
         // The app version does not change while the app is running, so send it
         // once on startup rather than on every stats poll.
         updateUserAppVersionMetadata().catch((error) =>
@@ -38,7 +37,7 @@ export default function Home() {
       }
     };
     checkConnectedToServer();
-  }, [router]);
+  }, [router, ensureConnectedToServer, updateUserAppVersionMetadata]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">

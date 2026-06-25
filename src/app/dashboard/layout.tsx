@@ -11,6 +11,8 @@ import { useAddinUpdater } from "@/lib/addins/addin-updater/useAddinUpdater";
 import { useHelpTicketNotifications } from "@/lib/help-tickets/useHelpTicketNotifications";
 import { toast, Toaster } from "sonner";
 import useUserStatsUpdater from "@/lib/user-stats/useUserStatsUpdater";
+import { useAppSetup } from "@/lib/hooks/useAppSetup";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +21,7 @@ export default function DashboardLayout({
 }) {
   const { isOpen } = useSidebarStore();
   const router = useRouter();
+  const { loading: isAppSetupLoading } = useAppSetup();
   useUserStatsUpdater();
 
   const config = useConfig();
@@ -80,9 +83,9 @@ export default function DashboardLayout({
     router.prefetch("/dashboard/publish");
 
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [config, router]);
 
-  const handleContextMenu = (e: any) => {
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     const isDev = process.env.NODE_ENV === "development";
     if (!isDev) {
       e.preventDefault();
@@ -103,7 +106,13 @@ export default function DashboardLayout({
         <Sidebar />
       </motion.div>
       <main className="flex-1 flex flex-col overflow-hidden rounded-tl-lg">
-        {children}
+        {isAppSetupLoading ? (
+          <div className="flex-1 flex items-center justify-center h-full font-sans w-full">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        ) : (
+          children
+        )}
       </main>
       <InstallingAddinsOverlay />
       <Toaster position="bottom-right" richColors />

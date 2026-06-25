@@ -6,6 +6,7 @@ pub const LOCAL_ADDIN_REGISTRY_PATH: &str = "localAddinRegistryPath";
 pub const USER_EMAIL: &str = "userEmail";
 pub const USER_NAME: &str = "userName";
 pub const USER_DISCIPLINES: &str = "userDisciplines";
+pub const STATS_SERVER_API_KEY: &str = "statsKey";
 // A list of all of the addins to install or update
 // pub const ADDINS_TO_INSTALL: &str = "addinsToInstall";
 // A list of all of the addins to uninstall
@@ -40,6 +41,13 @@ pub async fn get_user_disciplines(local_db: Arc<LocalDbService>) -> Result<Vec<S
             .get_data_updated()
             .await?;
     Ok(user_disciplines)
+}
+
+pub async fn get_stats_api_key(local_db: Arc<LocalDbService>) -> Result<String, String> {
+    let key = KvStoreValue::<String>::new_default(STATS_SERVER_API_KEY, local_db.clone())
+        .get_data_updated()
+        .await?;
+    Ok(key)
 }
 
 // pub async fn get_addins_to_install(
