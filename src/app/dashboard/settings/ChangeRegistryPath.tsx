@@ -1,17 +1,13 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import { Folder } from "lucide-react";
-import { useState } from "react";
 import useConfig from "@/lib/persistence/config/useConfig";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { useAsync } from "react-use";
 
 export default function ChangeRegistryPath() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { update } = useConfig();
+  useConfig();
 
   const { localRegistryPath, changeRegistryPath } = useAddinRegistryStore();
 

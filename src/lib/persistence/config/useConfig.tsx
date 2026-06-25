@@ -1,16 +1,11 @@
 import { useCallback } from "react";
-import { useKeyValueSubscription } from "../useKeyValueSubscription";
 import { ConfigKeys } from "./config-keys";
 import { useKeyValueStore } from "../useKeyValueStore";
-import type { KvStoreKeys } from "../kv-store-keys";
 
 export default function useConfig() {
   const { set, get } = useKeyValueStore();
 
-  /** Subscribe to changes for one certain field in the config */
-  const observeKey = useCallback(<K extends keyof ConfigKeys>(key: K) => {
-    return useKeyValueSubscription(key);
-  }, []);
+
 
   /** Update a specific key in the config */
   const update = useCallback(
@@ -19,7 +14,7 @@ export default function useConfig() {
       value: ConfigKeys[K]
     ): Promise<void> => {
       // TODO: debounce the save operation if needed
-      await set(key, value as KvStoreKeys[K]);
+      await set(key, value as ConfigKeys[K]);
     },
     [set]
   );
@@ -60,7 +55,6 @@ export default function useConfig() {
   );
 
   return {
-    observeKey,
     update,
     read,
     readOrSet,
