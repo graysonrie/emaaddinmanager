@@ -10,7 +10,6 @@ import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscripti
 
 export default function ChangeDisciplines() {
   const [isEditing, setIsEditing] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { update } = useConfig();
 
   const currentDisciplines = useKeyValueSubscription("userDisciplines");
@@ -39,11 +38,7 @@ export default function ChangeDisciplines() {
               showLabel={false}
               initialDisciplines={currentDisciplines || []}
             />
-            <Button
-              variant="ghost"
-              onClick={() => setIsEditing(false)}
-              disabled={isSubmitting}
-            >
+            <Button variant="ghost" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
           </div>
@@ -52,7 +47,14 @@ export default function ChangeDisciplines() {
             <div className="space-y-1">
               <div className="text-sm font-medium flex flex-wrap gap-2">
                 {currentDisciplines?.map((discipline) => {
-                  return <div key={discipline} className="bg-muted rounded-md px-2 py-1">{discipline}</div>;
+                  return (
+                    <div
+                      key={discipline}
+                      className="bg-muted rounded-md px-2 py-1"
+                    >
+                      {discipline}
+                    </div>
+                  );
                 })}
               </div>
               <p className="text-xs text-muted-foreground">

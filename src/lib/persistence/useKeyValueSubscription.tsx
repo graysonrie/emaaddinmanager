@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useKeyValueStore } from "./useKeyValueStore";
-import type { KvStoreKeys } from "./kv-store-keys";
+import { ConfigKeys } from "./config/config-keys";
 
-export function useKeyValueSubscription<K extends keyof KvStoreKeys>(
+export function useKeyValueSubscription<K extends keyof ConfigKeys>(
   key: K,
-): KvStoreKeys[K] | undefined {
+): ConfigKeys[K] | undefined {
   const value = useKeyValueStore((state) => state.values[key]);
   const subscribeToKey = useKeyValueStore((state) => state.subscribeToKey);
   const unsubscribeFromKey = useKeyValueStore(
@@ -21,7 +21,7 @@ export function useKeyValueSubscription<K extends keyof KvStoreKeys>(
   return value;
 }
 
-export function useKeyValueSubscriptionWithLoading<K extends keyof KvStoreKeys>(
+export function useKeyValueSubscriptionWithLoading<K extends keyof ConfigKeys>(
   key: K,
 ) {
   const value = useKeyValueSubscription(key);
