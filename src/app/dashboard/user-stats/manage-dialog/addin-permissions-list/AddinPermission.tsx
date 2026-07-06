@@ -1,7 +1,7 @@
 import { useManageDialogStore } from "../store";
 import { Switch } from "@/components/ui/switch";
 import { AddinPermissionModel } from "../../../../../lib/addins/addin-management/types";
-import { Blocks, Loader2, Lock, ShieldOffIcon, Unlock } from "lucide-react";
+import { Loader2, Lock, ShieldOffIcon, Unlock } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
