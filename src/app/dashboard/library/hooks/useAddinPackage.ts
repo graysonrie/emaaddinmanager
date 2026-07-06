@@ -19,10 +19,10 @@ export default function useAddinPackage({ addin }: useAddinPackageProps) {
 
   const { getPackageInfoForRegistryAddin } = getTauriCommands();
 
-  const checkIfCanPackage = async () => {
+  const checkIfCanPackage = useCallback(async () => {
     const adminStatus = await amIAnAdmin();
     setCanPackage(adminStatus === "super");
-  };
+  }, [amIAnAdmin]);
 
   const getPackageInfo = useCallback(async () => {
     if (!addin) {
@@ -40,7 +40,7 @@ export default function useAddinPackage({ addin }: useAddinPackageProps) {
   useEffect(() => {
     getPackageInfo();
     checkIfCanPackage();
-  }, [addin, getPackageInfo]);
+  }, [addin, getPackageInfo, checkIfCanPackage]);
 
   return { packageInfo, canPackage, refreshPackageInfo };
 }

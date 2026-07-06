@@ -99,7 +99,7 @@ export default function LibraryPage() {
 
   useEffect(() => {
     refreshRegistry();
-  }, []);
+  }, [refreshRegistry]);
 
   const userEmail = useConfigValue("userEmail");
   const [blockedAddinPaths, setBlockedAddinPaths] = useState<string[]>([]);

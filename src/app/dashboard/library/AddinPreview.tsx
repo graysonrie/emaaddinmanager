@@ -125,7 +125,7 @@ export default function AddinPreview({
     </div>
   );
 
-  const createPackageButton = (selectedAddin: AddinModel) => {
+  const createPackageButton = () => {
     if (!canPackage) {
       return null;
     }
@@ -214,7 +214,7 @@ export default function AddinPreview({
                 {installButton(selectedAddin)}
                 {uninstallButton(selectedAddin)}
                 {delistButton(selectedAddin)}
-                {createPackageButton(selectedAddin)}
+                {createPackageButton()}
               </>
             )}
           </div>
