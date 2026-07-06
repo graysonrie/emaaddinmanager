@@ -15,7 +15,6 @@ import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegis
 import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
 
-
 // Type-safe interface for addins with file tree path
 interface AddinWithTreePath extends AddinModel {
   fileTreePath: string;
@@ -129,10 +128,8 @@ export default function LibraryPage() {
   };
 
   const fileTreeRules: FileTreeRules = {
-    hideFoldersWithName: ["AddinPackages", "DevResources"],
+    hideFoldersWithName: ["AddinPackages", "DevResources", "HelpTickets"],
   };
-
-
 
   return (
     <PageWrapper>

@@ -1,7 +1,7 @@
 import { useManageDialogStore } from "../store";
 import { Switch } from "@/components/ui/switch";
 import { AddinPermissionModel } from "../../../../../lib/addins/addin-management/types";
-import { Blocks, Loader2, Lock, Unlock } from "lucide-react";
+import { Blocks, Loader2, Lock, ShieldOffIcon, Unlock } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -52,7 +52,7 @@ export default function AddinPermission({ permission }: AddinPermissionProps) {
     try {
       await getTauriCommands().unblockAddinPathForAllUsers(addinPath);
       setTempBlockedAddinPaths(
-        tempBlockedAddinPaths.filter((path) => path !== addinPath)
+        tempBlockedAddinPaths.filter((path) => path !== addinPath),
       );
     } catch (error) {
       console.error("Failed to unblock addin for all users:", error);
@@ -72,14 +72,14 @@ export default function AddinPermission({ permission }: AddinPermissionProps) {
             {isBulkUpdating ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Blocks className="w-4 h-4" />
+              <ShieldOffIcon className="w-4 h-4" />
             )}
             <p className="text-sm font-sans">{addinName}</p>
           </div>
           <Switch
             checked={isBlocked}
             onCheckedChange={handleToggle}
-            className="pointer-events-none"
+            className="pointer-events-none data-[state=checked]:!bg-destructive"
           />
         </div>
       </ContextMenuTrigger>
