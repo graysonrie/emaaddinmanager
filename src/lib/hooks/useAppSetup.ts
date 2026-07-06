@@ -128,8 +128,7 @@ export function useAppSetup() {
   if (
     !isInitialized ||
     isUserLoading ||
-    (shouldWaitForPasswordCheck && isCheckingPasswordSet) ||
-    isAddinOperationInProgress
+    (shouldWaitForPasswordCheck && isCheckingPasswordSet)
   ) {
     return {
       loading: true,
