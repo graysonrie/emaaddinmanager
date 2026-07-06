@@ -4,7 +4,6 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -43,8 +42,7 @@ export default function UpdaterPopup() {
       }
     };
     checkForUpdates();
-  }, []);
-  
+  }, [setIsVisible]);
 
   const handleUpdate = async () => {
     if (!update) return;
@@ -60,21 +58,21 @@ export default function UpdaterPopup() {
           case "Started":
             setContentLength(event.data.contentLength || 0);
             console.log(
-              `started downloading ${event.data.contentLength} bytes`
+              `started downloading ${event.data.contentLength} bytes`,
             );
             break;
           case "Progress":
             setDownloaded((prev) => prev + event.data.chunkLength);
             if (contentLength > 0) {
               const progressPercent = Math.round(
-                ((downloaded + event.data.chunkLength) / contentLength) * 100
+                ((downloaded + event.data.chunkLength) / contentLength) * 100,
               );
               setProgress(progressPercent);
             }
             console.log(
               `downloaded ${
                 downloaded + event.data.chunkLength
-              } from ${contentLength}`
+              } from ${contentLength}`,
             );
             break;
           case "Finished":

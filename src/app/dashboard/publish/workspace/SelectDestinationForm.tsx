@@ -30,7 +30,7 @@ export default function SelectDestinationForm({ categories }: Props) {
       (category) => ({
         ...category,
         fileTreePath: category.fullPath,
-      })
+      }),
     );
     return buildTree(categoriesWithTreePath, root ?? "");
   }, [categories, root]);
@@ -50,7 +50,11 @@ export default function SelectDestinationForm({ categories }: Props) {
               }}
               nodeName="Category"
               rules={{
-                hideFoldersWithName: ["AddinPackages", "DevResources"],
+                hideFoldersWithName: [
+                  "AddinPackages",
+                  "DevResources",
+                  "HelpTickets",
+                ],
                 onlyFolders: true,
                 rootPath: registryPath,
                 autoSelectPath: destinationCategory?.fullPath,
