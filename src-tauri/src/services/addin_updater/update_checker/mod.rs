@@ -14,6 +14,7 @@ pub use types::*;
 use crate::services::{
     addin_updater::models::UpdateNotificationModel,
     addins_registry::{models::addin_model::AddinModel, services::AsyncAddinsRegistryServiceType},
+    admin::addin_exporter::replacement_dlls,
     local_addins::service::LocalAddinsService,
     user_stats::sync_user_stats_from_app,
 };
@@ -159,10 +160,19 @@ impl AddinUpdateChecker {
                     helpers::get_addin_dll_folder_name(addin).unwrap_or_else(|_| String::new());
                 registry_addin_dll_name == current_local_addin_dll_name
             }) {
-                let registry_addin_dll_modification_time = helpers::get_addin_modification_time(
-                    corresponding_registry_addin,
-                )
-                .map_err(|e| format!("Failed to get registry addin modification time: {}", e))?;
+                let local_dll_folder =
+                    std::path::Path::new(&current_local_addin.path_to_addin_dll_folder);
+                let registry_addin_dll_modification_time =
+                    match replacement_dlls::revit_year_from_local_dll_folder(local_dll_folder) {
+                        Some(year) => helpers::get_registry_addin_modification_time_for_year(
+                            corresponding_registry_addin,
+                            &year,
+                        ),
+                        None => helpers::get_addin_modification_time(corresponding_registry_addin),
+                    }
+                    .map_err(|e| {
+                        format!("Failed to get registry addin modification time: {}", e)
+                    })?;
                 let current_local_addin_dll_modification_time =
                     helpers::get_addin_modification_time(current_local_addin).map_err(|e| {
                         format!("Failed to get local addin modification time: {}", e)

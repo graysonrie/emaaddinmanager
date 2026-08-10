@@ -57,6 +57,10 @@ pub fn run() {
             get_addin_file_info,
             get_all_project_dlls,
             build_addin,
+            list_addin_replacement_years,
+            set_addin_replacement_dlls,
+            remove_addin_replacement_dlls,
+            remove_addin_replacement_dll_file,
             // User Stats
             create_user_stats,
             does_user_exist,

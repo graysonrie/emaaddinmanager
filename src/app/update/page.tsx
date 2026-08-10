@@ -12,7 +12,6 @@ import {
   Download,
   Loader2,
   MessageCircleWarningIcon,
-  PackageOpen,
 } from "lucide-react";
 
 export default function UpdatePage() {

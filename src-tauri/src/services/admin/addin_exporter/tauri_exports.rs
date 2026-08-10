@@ -1,7 +1,9 @@
 use revitcli::ErrorList;
 
 use crate::services::admin::addin_exporter::models::dll_model::DllModel;
+use crate::services::admin::addin_exporter::models::replacement_year_model::ReplacementYearModel;
 use crate::services::admin::addin_exporter::models::simplified_addin_info_model::SimplifiedAddinInfoModel;
+use crate::services::admin::addin_exporter::replacement_dlls;
 use crate::services::admin::addin_exporter::service::AddinExporterService;
 use crate::services::admin::addin_exporter::usage_tracker;
 
@@ -55,4 +57,41 @@ pub fn get_all_project_dlls(project_dir: &str) -> Result<Vec<DllModel>, String> 
 #[tauri::command]
 pub async fn build_addin(project_dir: &str) -> Result<String, String> {
     AddinExporterService::build_addin(project_dir).await
+}
+
+#[tauri::command]
+pub fn list_addin_replacement_years(
+    destination: &str,
+    addin_name: &str,
+) -> Result<Vec<ReplacementYearModel>, String> {
+    replacement_dlls::list_replacement_years(destination, addin_name)
+}
+
+#[tauri::command]
+pub fn set_addin_replacement_dlls(
+    destination: &str,
+    addin_name: &str,
+    year: &str,
+    source_paths: Vec<String>,
+) -> Result<(), String> {
+    replacement_dlls::set_replacement_dlls(destination, addin_name, year, &source_paths)
+}
+
+#[tauri::command]
+pub fn remove_addin_replacement_dlls(
+    destination: &str,
+    addin_name: &str,
+    year: &str,
+) -> Result<(), String> {
+    replacement_dlls::remove_replacement_dlls(destination, addin_name, year)
+}
+
+#[tauri::command]
+pub fn remove_addin_replacement_dll_file(
+    destination: &str,
+    addin_name: &str,
+    year: &str,
+    file_name: &str,
+) -> Result<(), String> {
+    replacement_dlls::remove_replacement_dll_file(destination, addin_name, year, file_name)
 }

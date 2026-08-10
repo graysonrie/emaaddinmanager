@@ -5,6 +5,7 @@ import useTauriCommands from "@/lib/commands/getTauriCommands";
 import { getEmptySimplifiedAddinInfo } from "@/lib/models/simplified-addin-info.model";
 import { ErrorList } from "@/types/error-list";
 import { usePublishDestinationStore } from "./usePublishDestinationStore";
+import { useReplacementDllsStore } from "../replacement-dlls/useReplacementDllsStore";
 
 interface LocalAddinExporterState {
   projectDir: string | null;
@@ -116,6 +117,7 @@ export const useLocalAddinExporterStore = create<LocalAddinExporterState>(
     },
     reset: () => {
       usePublishDestinationStore.getState().setDestinationCategory(null);
+      useReplacementDllsStore.getState().reset();
       set({ projectDir: null, addinFileInfo: null, dlls: [] });
     },
     handleProjectSelected: async (projectDir: string | null) => {
