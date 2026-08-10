@@ -4,28 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import AddinInfoForm from "./AddinInfoForm";
 import SelectDestinationForm from "./SelectDestinationForm";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAdvancedOptionsPopupStore } from "../advanced-options/useAdvancedOptionsPopupStore";
-import { CategoryModel } from "@/lib/models/category.model";
-import { usePublishActionsStore, usePublishStateStore } from "../stores";
+import { usePublishActionsStore } from "../stores";
 import { useLocalAddinExporterStore } from "../stores/useLocalAddinExporterStore";
 import { useAddinValidationStore } from "../stores/useAddinValidationStore";
-import { useFileSelectStore } from "../stores/useFileSelectStore";
 import { usePublishDestinationStore } from "../stores/usePublishDestinationStore";
 import { useAddinRegistryStore } from "@/lib/addins/addin-registry/useAddinRegistryStore";
 import { useAsync } from "react-use";
 import AdvancedOptionsPopup from "../advanced-options";
+import ReplacementDllsSection from "../replacement-dlls";
 
 export default function Workspace() {
-  const [pageTitle, setPageTitle] = useState("Publish Addin");
+  const [pageTitle] = useState("Publish Addin");
   const { categories } = useAddinRegistryStore();
   const { destinationCategory } = usePublishDestinationStore();
 
   const advancedOptionsPopupStore = useAdvancedOptionsPopupStore();
 
   // Zustand stores
-  const { addinFileInfo, setAddinFileInfo, projectDir } =
-    useLocalAddinExporterStore();
+  const { addinFileInfo, setAddinFileInfo } = useLocalAddinExporterStore();
   const addinValidation = useAddinValidationStore();
   const publishActions = usePublishActionsStore();
 
@@ -36,7 +34,7 @@ export default function Workspace() {
   const isTryingToPublishExistingAddin =
     useAsync(
       async () => await addinValidation.isTryingToPublishExistingAddin(),
-      [destinationCategory, addinFileInfo]
+      [destinationCategory, addinFileInfo],
     ).value ?? false;
 
   const isPublishButtonDisabled =
@@ -65,6 +63,10 @@ export default function Workspace() {
           />
         )}
         <SelectDestinationForm categories={categories} />
+        <ReplacementDllsSection
+          destinationPath={destinationCategory?.fullPath ?? null}
+          addinName={addinFileInfo?.csharpProjectName || null}
+        />
       </div>
       <label className="text-sm text-muted-foreground">
         {destinationCategory ? (

@@ -25,6 +25,7 @@ import { AddHelpTicketMessageRequestModel } from "../models/help-tickets/add-hel
 import { HelpTicketStatus } from "../models/help-tickets/help-ticket-status";
 import { HelpTicketUpdateNotificationModel } from "../models/help-tickets/help-ticket-update-notification.model";
 import { ConfigKeys } from "../persistence/config/config-keys";
+import { ReplacementYearModel } from "../models/replacement-year.model";
 
 type ConfigKey = keyof ConfigKeys;
 
@@ -53,6 +54,27 @@ interface TauriCommands {
   getAddinFileInfo: (projectDir: string) => Promise<SimplifiedAddinInfoModel>;
   getAllProjectDlls: (projectDir: string) => Promise<DllModel[]>;
   buildAddin: (projectDir: string) => Promise<string>;
+  listAddinReplacementYears: (
+    destination: string,
+    addinName: string,
+  ) => Promise<ReplacementYearModel[]>;
+  setAddinReplacementDlls: (
+    destination: string,
+    addinName: string,
+    year: string,
+    sourcePaths: string[],
+  ) => Promise<void>;
+  removeAddinReplacementDlls: (
+    destination: string,
+    addinName: string,
+    year: string,
+  ) => Promise<void>;
+  removeAddinReplacementDllFile: (
+    destination: string,
+    addinName: string,
+    year: string,
+    fileName: string,
+  ) => Promise<void>;
   createUserStats: () => Promise<UserStatsModel>;
   updateUserStats: () => Promise<UserStatsModel | undefined>;
   /** Uploads the current user's stats without fetching them back. Used by the background updater. */
@@ -275,6 +297,56 @@ export default function getTauriCommands(): TauriCommands {
 
   const buildAddin = async (projectDir: string) => {
     return await invoke<string>("build_addin", { projectDir });
+  };
+
+  const listAddinReplacementYears = async (
+    destination: string,
+    addinName: string,
+  ) => {
+    return await invoke<ReplacementYearModel[]>("list_addin_replacement_years", {
+      destination,
+      addinName,
+    });
+  };
+
+  const setAddinReplacementDlls = async (
+    destination: string,
+    addinName: string,
+    year: string,
+    sourcePaths: string[],
+  ) => {
+    return await invoke<void>("set_addin_replacement_dlls", {
+      destination,
+      addinName,
+      year,
+      sourcePaths,
+    });
+  };
+
+  const removeAddinReplacementDlls = async (
+    destination: string,
+    addinName: string,
+    year: string,
+  ) => {
+    return await invoke<void>("remove_addin_replacement_dlls", {
+      destination,
+      addinName,
+      year,
+    });
+  };
+
+  const removeAddinReplacementDllFile = async (
+    destination: string,
+    addinName: string,
+    year: string,
+    fileName: string,
+  ) => {
+    return await invoke<void>("remove_addin_replacement_dll_file", {
+      destination,
+      addinName,
+      year,
+      fileName,
+    });
   };
 
   const createUserStats = async () => {
@@ -589,6 +661,10 @@ export default function getTauriCommands(): TauriCommands {
     getAddinFileInfo,
     getAllProjectDlls,
     buildAddin,
+    listAddinReplacementYears,
+    setAddinReplacementDlls,
+    removeAddinReplacementDlls,
+    removeAddinReplacementDllFile,
     createUserStats,
     doesUserExist,
     updateUserStats,

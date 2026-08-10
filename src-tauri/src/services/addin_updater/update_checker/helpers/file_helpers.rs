@@ -3,7 +3,9 @@ use std::{fs, path::Path};
 use chrono::{DateTime, Utc};
 
 use crate::services::{
-    addin_updater::service::CheckForUpdatesError, addins_registry::models::addin_model::AddinModel,
+    addin_updater::service::CheckForUpdatesError,
+    addins_registry::models::addin_model::AddinModel,
+    admin::addin_exporter::replacement_dlls,
 };
 
 /// Helper function to ensure target directory exists
@@ -106,6 +108,11 @@ pub fn copy_all_files(
     // Copy all files from DLL folder (no filter - copy everything)
     copy_directory_contents(source_dll_folder, target_dll_folder, None)?;
 
+    if let Some(year) = replacement_dlls::revit_year_from_local_dll_folder(target_dll_folder) {
+        replacement_dlls::overlay_replacement_dlls(source_dll_folder, target_dll_folder, &year)
+            .map_err(CheckForUpdatesError::Update)?;
+    }
+
     Ok(())
 }
 
@@ -168,19 +175,69 @@ pub fn copy_xml_file(
     Ok(())
 }
 
-/// Gets the most recent modification time of any file in the addin's DLL folder
+/// Gets the most recent modification time of any file in the addin's DLL folder.
+/// Does not include sibling year-specific replacement folders — use
+/// [`get_registry_addin_modification_time_for_year`] when comparing a registry
+/// addin against a year-specific local install.
 pub fn get_addin_modification_time(
     addin: &AddinModel,
 ) -> Result<DateTime<Utc>, CheckForUpdatesError> {
-    let registry_addin_dll_folder_path = Path::new(&addin.path_to_addin_dll_folder);
+    let dll_folder_path = Path::new(&addin.path_to_addin_dll_folder);
 
-    // Recursively find the most recent modification time of any file
-    find_most_recent_file_time(registry_addin_dll_folder_path)?.ok_or_else(|| {
+    find_most_recent_file_time(dll_folder_path)?.ok_or_else(|| {
         CheckForUpdatesError::Update(format!(
             "No files found in directory {}",
-            registry_addin_dll_folder_path.display()
+            dll_folder_path.display()
         ))
     })
+}
+
+/// Registry-side mtime for update checks against a local install for `year`:
+/// max of the base DLL folder and that year's `{AddinName}_{year}` overrides only.
+pub fn get_registry_addin_modification_time_for_year(
+    registry_addin: &AddinModel,
+    year: &str,
+) -> Result<DateTime<Utc>, CheckForUpdatesError> {
+    let dll_folder_path = Path::new(&registry_addin.path_to_addin_dll_folder);
+
+    let base_time = find_most_recent_file_time(dll_folder_path)?;
+    let replacement_time = find_replacement_file_time_for_year(dll_folder_path, year)?;
+
+    match (base_time, replacement_time) {
+        (Some(base), Some(replacement)) => Ok(base.max(replacement)),
+        (Some(base), None) => Ok(base),
+        (None, Some(replacement)) => Ok(replacement),
+        (None, None) => Err(CheckForUpdatesError::Update(format!(
+            "No files found in directory {}",
+            dll_folder_path.display()
+        ))),
+    }
+}
+
+/// Newest mtime in the sibling `{AddinName}_{year}` override folder, if present.
+fn find_replacement_file_time_for_year(
+    base_dll_folder: &Path,
+    year: &str,
+) -> Result<Option<DateTime<Utc>>, CheckForUpdatesError> {
+    if !replacement_dlls::is_valid_year(year) {
+        return Ok(None);
+    }
+
+    let Some(replacement_dir) =
+        replacement_dlls::replacement_dir_for_base_folder(base_dll_folder, year)
+    else {
+        return Ok(None);
+    };
+
+    if !replacement_dir.is_dir() {
+        return Ok(None);
+    }
+
+    // Empty override folders should not fail the whole check
+    match find_most_recent_file_time(&replacement_dir) {
+        Ok(time) => Ok(time),
+        Err(_) => Ok(None),
+    }
 }
 
 /// Recursively finds the most recent modification time of any file in a directory tree

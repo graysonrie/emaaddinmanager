@@ -2,6 +2,7 @@ use tauri::AppHandle;
 
 use crate::services::addins_registry::models::addin_model::AddinModel;
 use crate::services::addins_registry::models::addin_xml_model::RevitAddIns;
+use crate::services::admin::addin_exporter::replacement_dlls;
 use crate::services::local_addins::events::AddinInstallProgressEvent;
 use crate::utils;
 use std::fs;
@@ -266,6 +267,7 @@ impl LocalAddinsService {
             // };
             if !accelerated {
                 utils::copy_dir_all(dll_src, &dll_dst).map_err(|e| e.to_string())?;
+                replacement_dlls::overlay_replacement_dlls(dll_src, &dll_dst, version)?;
             }
             Ok::<(), String>(())
         });
