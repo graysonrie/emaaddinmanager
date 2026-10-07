@@ -21,7 +21,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-stats}:${POSTGRES_PASSWORD:-stats}@db:5432/${POSTGRES_DB:-stats}
+      DATABASE_URL: postgres://${POSTGRES_USER:-stats}:${POSTGRES_PASSWORD:-stats}@db:5432/${POSTGRES_DB:-stats}
       API_KEY: ${API_KEY:-change-me}
     ports:
       - "${API_PORT:-8000}:8000"

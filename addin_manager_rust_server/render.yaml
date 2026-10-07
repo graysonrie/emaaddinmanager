@@ -1,8 +1,8 @@
 # Render Blueprint for the EMA Addin Manager stats server.
 #
 # This file must live at the ROOT of the repository Render is connected to.
-# When you split `python_server/` into its own repo, keep this file at the repo
-# root (i.e. alongside Dockerfile / app / assets).
+# When you split this directory into its own repo, keep this file at the repo
+# root (i.e. alongside Dockerfile / src / assets).
 #
 # It provisions:
 #   - a managed PostgreSQL database
@@ -17,6 +17,13 @@ databases:
     databaseName: stats
     user: stats
     region: oregon
+    # An empty allow list disables ALL public/external connections. Only
+    # services in this Render private network (i.e. the web API below) can
+    # reach the database, via its internal connection string. To grant a
+    # specific external IP access, add an entry, e.g.:
+    #   - source: 203.0.113.4/32
+    #     description: office VPN
+    ipAllowList: []
 
 services:
   - type: web
@@ -33,8 +40,8 @@ services:
     # Render uses this to gate traffic until the app is healthy.
     healthCheckPath: /health
     envVars:
-      # Wired automatically from the managed database above. Our config layer
-      # normalizes the scheme to the psycopg (v3) driver.
+      # Wired automatically from the managed database above. Render supplies a
+      # postgres:// connection string, which this server accepts directly.
       - key: DATABASE_URL
         fromDatabase:
           name: ema-stats-db
