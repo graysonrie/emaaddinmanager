@@ -1,0 +1,3 @@
+[submodule "addin_manager_rust_server"]
+	path = addin_manager_rust_server
+	url = https://github.com/graysonrie/addin_manager_rust_server
