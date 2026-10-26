@@ -1,31 +1,31 @@
 "use client";
 
-import { open } from "@tauri-apps/plugin-dialog";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Settings,
-  Mail,
-  User,
-  Shield,
-  Bell,
-  Folder,
-  HelpCircle,
-} from "lucide-react";
-import useConfig from "@/lib/persistence/config/useConfig";
-import { useConfigValue } from "@/lib/persistence/config/useConfigValue";
-import { EmailInputForm } from "@/components/EmailInputForm";
-import { EMA_DOMAIN } from "@/types/constants";
-import { Input } from "@/components/ui/input";
+import { User, HelpCircle, Loader2 } from "lucide-react";
 
 import { useKeyValueSubscription } from "@/lib/persistence/useKeyValueSubscription";
 import getTauriCommands from "@/lib/commands/getTauriCommands";
-import ChangeEmail from "./ChangeEmail";
 import ChangeName from "./ChangeName";
-import ChangeDisciplines from "./ChangeDisciplines";
 
 export function UserSettings() {
+  const router = useRouter();
+  const userEmail = useKeyValueSubscription("userEmail");
+  const { signOut } = getTauriCommands();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      router.replace("/");
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -45,9 +45,26 @@ export function UserSettings() {
             <h3 className="text-xl font-semibold">Profile Information</h3>
           </div>
 
-          <div className="bg-card border rounded-lg p-6 space-y-6">
-            {/* Email Setting */}
-            <ChangeEmail />
+          <div className="bg-card border rounded-lg p-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <p className="text-sm font-sans">{userEmail}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Signing out...
+                </>
+              ) : (
+                "Sign out"
+              )}
+            </Button>
           </div>
 
           <div className="bg-card border rounded-lg p-6 space-y-6">

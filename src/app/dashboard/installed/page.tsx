@@ -56,9 +56,6 @@ export default function InstalledPage() {
           <div className="flex flex-col h-full w-full max-w-screen-lg mx-auto ">
             <div className="px-8 pt-8 pb-4">
               <h2 className="text-2xl font-bold mb-1">Installed Addins</h2>
-              <p className="text-muted-foreground mb-4">
-                Your locally installed Revit addins, grouped by Revit versions.
-              </p>
             </div>
             <div className="flex-1 min-h-0 px-8 pb-8 overflow-auto thin-scrollbar font-sans">
               {groupedAddins.length === 0 ? (

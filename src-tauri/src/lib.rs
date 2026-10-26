@@ -7,7 +7,7 @@ use services::admin::tauri_exports::*;
 use services::dev_resources::tauri_exports::*;
 use services::local_addins::tauri_exports::*;
 use services::local_db::tables::app_kv_store::tauri_exports::*;
-use services::login_info::tauri_exports::*;
+use services::microsoft_auth::tauri_exports::*;
 use services::user_startup::tauri_exports::*;
 use services::user_stats::metadata::tauri_exports::*;
 use services::user_stats::tauri_exports::*;
@@ -105,16 +105,12 @@ pub fn run() {
             edit_dev_code_snippet,
             // User startup
             ensure_connected_to_server,
+            sign_in_with_microsoft,
+            sign_out,
             // Metadata:
             update_user_app_version_metadata,
             get_user_metadata,
             get_user_metadata_many,
-            // Login Info
-            login_check_if_password_is_set_for_self,
-            login_check_if_password_is_set_for_user,
-            login_set_password,
-            login_verify_password_for_user,
-            login_set_temp_password_for_user,
             get_user_stats_summary,
             get_user_stats,
             // Help Ticket Service

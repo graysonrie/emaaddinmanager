@@ -10,11 +10,6 @@ interface Store {
   unregisteringUser: string | undefined;
   setUnregisteringUser: (unregisteringUser: string | undefined) => void;
 
-  settingTempPassword: string | undefined;
-  setSettingTempPassword: (settingTempPassword: string | undefined) => void;
-  isConfirmingTempPassword: boolean;
-  setIsConfirmingTempPassword: (isConfirming: boolean) => void;
-
   // Temporary blocked addin paths state
   tempBlockedAddinPaths: string[];
   setTempBlockedAddinPaths: (paths: string[]) => void;
@@ -26,7 +21,7 @@ interface Store {
 export const useManageDialogStore = create<Store>((set, get) => ({
   isVisible: false,
   setIsVisible: (isVisible: boolean) =>
-    set({ isVisible, unregisteringUser: undefined, settingTempPassword: undefined, isConfirmingTempPassword: false }),
+    set({ isVisible, unregisteringUser: undefined }),
   userEmail: "",
   setUserEmailAndName: (userEmail: string, userName: string) =>
     set({ userEmail, userName }),
@@ -34,12 +29,6 @@ export const useManageDialogStore = create<Store>((set, get) => ({
   unregisteringUser: undefined,
   setUnregisteringUser: (unregisteringUser: string | undefined) =>
     set({ unregisteringUser }),
-  settingTempPassword: undefined,
-  setSettingTempPassword: (settingTempPassword: string | undefined) =>
-    set({ settingTempPassword, isConfirmingTempPassword: false }),
-  isConfirmingTempPassword: false,
-  setIsConfirmingTempPassword: (isConfirming: boolean) =>
-    set({ isConfirmingTempPassword: isConfirming }),
 
   // Temporary blocked addin paths state
   tempBlockedAddinPaths: [],

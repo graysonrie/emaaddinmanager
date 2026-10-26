@@ -145,17 +145,11 @@ interface TauriCommands {
   removeDevCodeSnippetGroup: (groupPath: string) => Promise<void>;
   /** Throws an error if the server is not connected */
   ensureConnectedToServer: () => Promise<void>;
+  signInWithMicrosoft: () => Promise<void>;
+  signOut: () => Promise<void>;
   updateUserAppVersionMetadata: () => Promise<void>;
   getUserMetadata: (userEmail: string) => Promise<UserMetadataModel>;
   getUserMetadataMany: (userEmails: string[]) => Promise<UserMetadataModel[]>;
-  loginCheckIfPasswordIsSetForSelf: () => Promise<boolean>;
-  loginCheckIfPasswordIsSetForUser: (userEmail: string) => Promise<boolean>;
-  loginSetPassword: (password: string) => Promise<void>;
-  loginVerifyPasswordForUser: (
-    userEmail: string,
-    password: string,
-  ) => Promise<boolean>;
-  loginSetTempPasswordForUser: (userEmail: string) => Promise<void>;
   createHelpTicket: (request: CreateHelpTicketRequestModel) => Promise<string>;
   getHelpTicketPreviews: () => Promise<HelpTicketPreviewModel[]>;
   getHelpTicketWithId: (id: string) => Promise<HelpTicketModel>;
@@ -550,6 +544,14 @@ export default function getTauriCommands(): TauriCommands {
     return await invoke<void>("ensure_connected_to_server");
   };
 
+  const signInWithMicrosoft = async () => {
+    return await invoke<void>("sign_in_with_microsoft");
+  };
+
+  const signOut = async () => {
+    return await invoke<void>("sign_out");
+  };
+
   const updateUserAppVersionMetadata = async () => {
     return await invoke<void>("update_user_app_version_metadata");
   };
@@ -561,37 +563,6 @@ export default function getTauriCommands(): TauriCommands {
   const getUserMetadataMany = async (userEmails: string[]) => {
     return await invoke<UserMetadataModel[]>("get_user_metadata_many", {
       userEmails,
-    });
-  };
-
-  const loginCheckIfPasswordIsSetForSelf = async () => {
-    return await invoke<boolean>("login_check_if_password_is_set_for_self");
-  };
-
-  const loginCheckIfPasswordIsSetForUser = async (userEmail: string) => {
-    return await invoke<boolean>("login_check_if_password_is_set_for_user", {
-      userEmail,
-    });
-  };
-
-  const loginSetPassword = async (password: string) => {
-    return await invoke<void>("login_set_password", { password });
-  };
-
-  const loginVerifyPasswordForUser = async (
-    userEmail: string,
-    password: string,
-  ) => {
-    return await invoke<boolean>("login_verify_password_for_user", {
-      userEmail,
-      password,
-    });
-  };
-
-  /// Should only be used by admins
-  const loginSetTempPasswordForUser = async (userEmail: string) => {
-    return await invoke<void>("login_set_temp_password_for_user", {
-      userEmail,
     });
   };
 
@@ -703,14 +674,11 @@ export default function getTauriCommands(): TauriCommands {
     editDevCodeSnippet,
     removeDevCodeSnippetGroup,
     ensureConnectedToServer,
+    signInWithMicrosoft,
+    signOut,
     updateUserAppVersionMetadata,
     getUserMetadata,
     getUserMetadataMany,
-    loginCheckIfPasswordIsSetForSelf,
-    loginCheckIfPasswordIsSetForUser,
-    loginSetPassword,
-    loginVerifyPasswordForUser,
-    loginSetTempPasswordForUser,
     regenerateZipFilesInRegistry,
     createHelpTicket,
     getHelpTicketPreviews,

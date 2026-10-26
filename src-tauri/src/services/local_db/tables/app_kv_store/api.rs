@@ -70,6 +70,51 @@ impl AppKvStoreTable {
         Ok(())
     }
 
+    /// Writes a secret without printing it or sending it to the webview.
+    pub async fn set_secret<T>(&self, key: &str, value: &T) -> Result<(), String>
+    where
+        T: Serialize,
+    {
+        let value = serde_json::to_value(value).map_err(|err| err.to_string())?;
+        let query = r#"
+            INSERT INTO kv (key, value)
+            VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value
+        "#;
+        sqlx::query(query)
+            .bind(key)
+            .bind(&value)
+            .execute(self.db.get_sqlite_connection_pool())
+            .await
+            .map_err(|err| err.to_string())?;
+        Ok(())
+    }
+
+    pub async fn get_secret<T>(&self, key: &str) -> Result<Option<T>, String>
+    where
+        T: DeserializeOwned,
+    {
+        let Some(value) = self.get_db(key).await? else {
+            return Ok(None);
+        };
+        if value.is_null() {
+            return Ok(None);
+        }
+        serde_json::from_value(value)
+            .map(Some)
+            .map_err(|err| err.to_string())
+    }
+
+    pub async fn delete_secret(&self, key: &str) -> Result<(), String> {
+        sqlx::query("DELETE FROM kv WHERE key = ?")
+            .bind(key)
+            .execute(self.db.get_sqlite_connection_pool())
+            .await
+            .map_err(|err| err.to_string())?;
+        Ok(())
+    }
+
     /// Retrieve the value with the certain key in the store
     async fn get_db(&self, key: &str) -> Result<Option<serde_json::Value>, String> {
         Ok(kv_pair::Entity::find()

@@ -16,7 +16,6 @@ use crate::{
         dev_resources::DevResourcesService,
         local_addins::service::LocalAddinsService,
         local_db::service::LocalDbService,
-        login_info::service::LoginInfoService,
         user_stats::{metadata::service::UserMetadataService, LocalUserStatsService},
     },
 };
@@ -61,9 +60,6 @@ async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
         Arc::clone(&user_stats_service),
     );
 
-    let login_info_service =
-        initialize_login_info_service(local_db_service.clone(), user_stats_service.clone());
-
     let help_ticket_service = initialize_help_ticket_service(ADDINS_REGISTRY_PATH);
 
     handle.manage(Arc::clone(&local_db_service));
@@ -76,7 +72,6 @@ async fn initialize_app_inner(handle: AppHandle) -> Result<(), String> {
     handle.manage(Arc::clone(&packages_service));
     handle.manage(Arc::clone(&dev_resources_service));
     handle.manage(Arc::clone(&user_metadata_service));
-    handle.manage(Arc::clone(&login_info_service));
     handle.manage(Arc::clone(&help_ticket_service));
     Ok(())
 }
@@ -147,13 +142,6 @@ fn initialize_user_metadata_service(
     user_stats: Arc<LocalUserStatsService>,
 ) -> Arc<UserMetadataService> {
     Arc::new(UserMetadataService::new(local_db, user_stats))
-}
-
-fn initialize_login_info_service(
-    local_db: Arc<LocalDbService>,
-    local_stats: Arc<LocalUserStatsService>,
-) -> Arc<LoginInfoService> {
-    Arc::new(LoginInfoService::new(local_db, local_stats))
 }
 
 fn initialize_help_ticket_service(addins_registry_path: &str) -> Arc<HelpTicketService> {
